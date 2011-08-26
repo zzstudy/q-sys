@@ -296,8 +296,8 @@ ARM Macro Assembler    Page 5
   196 0000002A         
   197 0000002A                 END
 Command Line: --debug --xref --device=DARMSTM --apcs=interwork -o.\Output\cpu_a
-.o -I"D:\Program Files\Keil3\ARM\INC\ST\STM32F10x" --list=.\cpu_a.lst G:\MyDoc\
-Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.asm
+.o -I"D:\Program Files\Keil3\ARM\INC\ST\STM32F10x" --list=.\cpu_a.lst ..\..\uCo
+s\Cpu\cpu_a.asm
 
 
 
@@ -308,8 +308,7 @@ Relocatable symbols
 
 Symbol: .text
    Definitions
-      At line 60 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.a
-sm
+      At line 60 in file ..\..\uCos\Cpu\cpu_a.asm
    Uses
       None
 Comment: .text unused
@@ -317,87 +316,71 @@ CPU_CntLeadZeros 00000016
 
 Symbol: CPU_CntLeadZeros
    Definitions
-      At line 141 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.
-asm
+      At line 141 in file ..\..\uCos\Cpu\cpu_a.asm
    Uses
-      At line 49 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.a
-sm
+      At line 49 in file ..\..\uCos\Cpu\cpu_a.asm
 Comment: CPU_CntLeadZeros used once
 CPU_IntDis 00000000
 
 Symbol: CPU_IntDis
    Definitions
-      At line 76 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.a
-sm
+      At line 76 in file ..\..\uCos\Cpu\cpu_a.asm
    Uses
-      At line 43 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.a
-sm
+      At line 43 in file ..\..\uCos\Cpu\cpu_a.asm
 Comment: CPU_IntDis used once
 CPU_IntEn 00000004
 
 Symbol: CPU_IntEn
    Definitions
-      At line 81 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.a
-sm
+      At line 81 in file ..\..\uCos\Cpu\cpu_a.asm
    Uses
-      At line 44 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.a
-sm
+      At line 44 in file ..\..\uCos\Cpu\cpu_a.asm
 Comment: CPU_IntEn used once
 CPU_RevBits 0000001C
 
 Symbol: CPU_RevBits
    Definitions
-      At line 156 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.
-asm
+      At line 156 in file ..\..\uCos\Cpu\cpu_a.asm
    Uses
-      At line 50 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.a
-sm
+      At line 50 in file ..\..\uCos\Cpu\cpu_a.asm
 Comment: CPU_RevBits used once
 CPU_SR_Restore 00000010
 
 Symbol: CPU_SR_Restore
    Definitions
-      At line 124 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.
-asm
+      At line 124 in file ..\..\uCos\Cpu\cpu_a.asm
    Uses
-      At line 47 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.a
-sm
+      At line 47 in file ..\..\uCos\Cpu\cpu_a.asm
 Comment: CPU_SR_Restore used once
+CPU_SR_Save 00000008
+
+Symbol: CPU_SR_Save
+   Definitions
+      At line 118 in file ..\..\uCos\Cpu\cpu_a.asm
+   Uses
+      At line 46 in file ..\..\uCos\Cpu\cpu_a.asm
+Comment: CPU_SR_Save used once
+CPU_WaitForExcept 00000026
+
+Symbol: CPU_WaitForExcept
 
 
 
 ARM Macro Assembler    Page 2 Alphabetic symbol ordering
 Relocatable symbols
 
-CPU_SR_Save 00000008
-
-Symbol: CPU_SR_Save
    Definitions
-      At line 118 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.
-asm
+      At line 187 in file ..\..\uCos\Cpu\cpu_a.asm
    Uses
-      At line 46 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.a
-sm
-Comment: CPU_SR_Save used once
-CPU_WaitForExcept 00000026
-
-Symbol: CPU_WaitForExcept
-   Definitions
-      At line 187 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.
-asm
-   Uses
-      At line 53 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.a
-sm
+      At line 53 in file ..\..\uCos\Cpu\cpu_a.asm
 Comment: CPU_WaitForExcept used once
 CPU_WaitForInt 00000022
 
 Symbol: CPU_WaitForInt
    Definitions
-      At line 172 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.
-asm
+      At line 172 in file ..\..\uCos\Cpu\cpu_a.asm
    Uses
-      At line 52 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Cpu\cpu_a.a
-sm
+      At line 52 in file ..\..\uCos\Cpu\cpu_a.asm
 Comment: CPU_WaitForInt used once
 9 symbols
 328 symbols in table

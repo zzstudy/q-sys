@@ -425,8 +425,8 @@ ARM Macro Assembler    Page 7
               00000000 
               00000000 
 Command Line: --debug --xref --device=DARMSTM --apcs=interwork -o.\Output\os_cp
-u_a.o -I"D:\Program Files\Keil3\ARM\INC\ST\STM32F10x" --list=.\os_cpu_a.lst G:\
-MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cpu_a.asm
+u_a.o -I"D:\Program Files\Keil3\ARM\INC\ST\STM32F10x" --list=.\os_cpu_a.lst ..\
+..\uCos\Ports\os_cpu_a.asm
 
 
 
@@ -437,8 +437,7 @@ Relocatable symbols
 
 Symbol: .text
    Definitions
-      At line 56 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 56 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
       None
 Comment: .text unused
@@ -446,87 +445,71 @@ OSCtxSw 0000002E
 
 Symbol: OSCtxSw
    Definitions
-      At line 147 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
+      At line 147 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
-      At line 39 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 39 in file ..\..\uCos\Ports\os_cpu_a.asm
 Comment: OSCtxSw used once
 OSIntCtxSw 00000038
 
 Symbol: OSIntCtxSw
    Definitions
-      At line 162 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
+      At line 162 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
-      At line 40 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 40 in file ..\..\uCos\Ports\os_cpu_a.asm
 Comment: OSIntCtxSw used once
 OSStartHang 0000002C
 
 Symbol: OSStartHang
    Definitions
-      At line 135 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
+      At line 135 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
-      At line 136 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
+      At line 136 in file ..\..\uCos\Ports\os_cpu_a.asm
 Comment: OSStartHang used once
 OSStartHighRdy 0000000E
 
 Symbol: OSStartHighRdy
    Definitions
-      At line 117 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
+      At line 117 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
-      At line 38 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 38 in file ..\..\uCos\Ports\os_cpu_a.asm
 Comment: OSStartHighRdy used once
 OS_CPU_PendSVHandler 00000042
 
 Symbol: OS_CPU_PendSVHandler
    Definitions
-      At line 203 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
+      At line 203 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
-      At line 41 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 41 in file ..\..\uCos\Ports\os_cpu_a.asm
 Comment: OS_CPU_PendSVHandler used once
+OS_CPU_PendSVHandler_nosave 00000056
+
+Symbol: OS_CPU_PendSVHandler_nosave
+   Definitions
+      At line 216 in file ..\..\uCos\Ports\os_cpu_a.asm
+   Uses
+      At line 206 in file ..\..\uCos\Ports\os_cpu_a.asm
+Comment: OS_CPU_PendSVHandler_nosave used once
+OS_CPU_SR_Restore 00000008
+
+Symbol: OS_CPU_SR_Restore
 
 
 
 ARM Macro Assembler    Page 2 Alphabetic symbol ordering
 Relocatable symbols
 
-OS_CPU_PendSVHandler_nosave 00000056
-
-Symbol: OS_CPU_PendSVHandler_nosave
    Definitions
-      At line 216 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
+      At line 98 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
-      At line 206 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
-Comment: OS_CPU_PendSVHandler_nosave used once
-OS_CPU_SR_Restore 00000008
-
-Symbol: OS_CPU_SR_Restore
-   Definitions
-      At line 98 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
-   Uses
-      At line 37 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 37 in file ..\..\uCos\Ports\os_cpu_a.asm
 Comment: OS_CPU_SR_Restore used once
 OS_CPU_SR_Save 00000000
 
 Symbol: OS_CPU_SR_Save
    Definitions
-      At line 93 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 93 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
-      At line 36 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 36 in file ..\..\uCos\Ports\os_cpu_a.asm
 Comment: OS_CPU_SR_Save used once
 9 symbols
 
@@ -539,49 +522,37 @@ NVIC_INT_CTRL E000ED04
 
 Symbol: NVIC_INT_CTRL
    Definitions
-      At line 47 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 47 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
-      At line 129 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
-      At line 148 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
-      At line 163 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
+      At line 129 in file ..\..\uCos\Ports\os_cpu_a.asm
+      At line 148 in file ..\..\uCos\Ports\os_cpu_a.asm
+      At line 163 in file ..\..\uCos\Ports\os_cpu_a.asm
 
 NVIC_PENDSVSET 10000000
 
 Symbol: NVIC_PENDSVSET
    Definitions
-      At line 50 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 50 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
-      At line 130 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
-      At line 149 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
-      At line 164 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
+      At line 130 in file ..\..\uCos\Ports\os_cpu_a.asm
+      At line 149 in file ..\..\uCos\Ports\os_cpu_a.asm
+      At line 164 in file ..\..\uCos\Ports\os_cpu_a.asm
 
 NVIC_PENDSV_PRI 000000FF
 
 Symbol: NVIC_PENDSV_PRI
    Definitions
-      At line 49 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 49 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
-      At line 119 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
+      At line 119 in file ..\..\uCos\Ports\os_cpu_a.asm
 Comment: NVIC_PENDSV_PRI used once
 NVIC_SYSPRI14 E000ED22
 
 Symbol: NVIC_SYSPRI14
    Definitions
-      At line 48 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 48 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
-      At line 118 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
+      At line 118 in file ..\..\uCos\Ports\os_cpu_a.asm
 Comment: NVIC_SYSPRI14 used once
 4 symbols
 
@@ -594,8 +565,7 @@ OSIntExit 00000000
 
 Symbol: OSIntExit
    Definitions
-      At line 32 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 32 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
       None
 Comment: OSIntExit unused
@@ -603,8 +573,7 @@ OSIntNesting 00000000
 
 Symbol: OSIntNesting
    Definitions
-      At line 31 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 31 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
       None
 Comment: OSIntNesting unused
@@ -612,59 +581,42 @@ OSPrioCur 00000000
 
 Symbol: OSPrioCur
    Definitions
-      At line 27 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 27 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
-      At line 222 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
+      At line 222 in file ..\..\uCos\Ports\os_cpu_a.asm
 Comment: OSPrioCur used once
 OSPrioHighRdy 00000000
 
 Symbol: OSPrioHighRdy
    Definitions
-      At line 28 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 28 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
-      At line 223 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
+      At line 223 in file ..\..\uCos\Ports\os_cpu_a.asm
 Comment: OSPrioHighRdy used once
 OSRunning 00000000
 
 Symbol: OSRunning
    Definitions
-      At line 26 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 26 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
-      At line 125 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
+      At line 125 in file ..\..\uCos\Ports\os_cpu_a.asm
 Comment: OSRunning used once
 OSTCBCur 00000000
 
 Symbol: OSTCBCur
    Definitions
-      At line 29 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 29 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
-      At line 211 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
-      At line 227 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
-
-
-
-ARM Macro Assembler    Page 2 Alphabetic symbol ordering
-External symbols
-
+      At line 211 in file ..\..\uCos\Ports\os_cpu_a.asm
+      At line 227 in file ..\..\uCos\Ports\os_cpu_a.asm
 
 OSTCBHighRdy 00000000
 
 Symbol: OSTCBHighRdy
    Definitions
-      At line 30 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_cp
-u_a.asm
+      At line 30 in file ..\..\uCos\Ports\os_cpu_a.asm
    Uses
-      At line 228 in file G:\MyDoc\Desktop\STM_SRC\SUMMER\Q-SYS\uCos\Ports\os_c
-pu_a.asm
+      At line 228 in file ..\..\uCos\Ports\os_cpu_a.asm
 Comment: OSTCBHighRdy used once
 7 symbols
 341 symbols in table
