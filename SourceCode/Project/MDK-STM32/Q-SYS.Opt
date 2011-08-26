@@ -88,7 +88,7 @@ OPTFFF 6,63,1,0,0,0,0,0,<..\..\Q_Sys_Core\SyncHandler.c><SyncHandler.c>
 OPTFFF 6,64,1,0,0,0,0,0,<..\..\Q_Sys_Core\SystemInit.c><SystemInit.c> 
 OPTFFF 6,65,1,0,0,0,0,0,<..\..\Q_Sys_Core\Theme.c><Theme.c> 
 OPTFFF 6,66,1,0,0,0,0,0,<..\..\Q_Sys_Core\TouchHandler.c><TouchHandler.c> 
-OPTFFF 6,67,1,0,0,0,0,0,<..\..\Q_Sys_Core\UserApi.c><UserApi.c> 
+OPTFFF 6,67,1,0,0,370,370,0,<..\..\Q_Sys_Core\UserApi.c><UserApi.c> { 44,0,0,0,0,0,0,0,1,0,0,0,255,255,255,255,255,255,255,255,248,255,255,255,226,255,255,255,50,0,0,0,50,0,0,0,78,3,0,0,61,1,0,0 }
 OPTFFF 6,68,1,0,0,0,0,0,<..\..\Q_Sys_Core\CtrlObj\ControlObj.c><ControlObj.c> 
 OPTFFF 6,69,1,0,0,0,0,0,<..\..\Q_Sys_Core\Q_Gui\Q_Gui.c><Q_Gui.c> 
 OPTFFF 6,70,1,0,0,0,0,0,<..\..\Q_Sys_Core\Q_Heap\Q_Heap.c><Q_Heap.c> 
@@ -102,7 +102,7 @@ OPTFFF 7,77,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\MusicPage.c><MusicPage.c>
 OPTFFF 7,78,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\PicturePage.c><PicturePage.c> 
 OPTFFF 7,79,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\PinYinForKeyBoardPage.c><PinYinForKeyBoardPage.c> 
 OPTFFF 7,80,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\QWebPage.c><QWebPage.c> 
-OPTFFF 7,81,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\SettingsPage.c><SettingsPage.c> 
+OPTFFF 7,81,1,2,0,1109,1130,0,<..\..\Q_Sys_Core\Pages\SettingsPage.c><SettingsPage.c> { 44,0,0,0,2,0,0,0,3,0,0,0,255,255,255,255,255,255,255,255,248,255,255,255,226,255,255,255,25,0,0,0,25,0,0,0,53,3,0,0,36,1,0,0 }
 OPTFFF 7,82,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\SnakePage.c><SnakePage.c> 
 OPTFFF 7,83,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\TestPage.c><TestPage.c> 
 OPTFFF 7,84,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\TouchCheckPage.c><TouchCheckPage.c> 
@@ -123,8 +123,6 @@ OPTFFF 10,98,1,0,0,0,0,0,<..\..\Q_Sys_Core\Q_Web\QWebSession.c><QWebSession.c>
 OPTFFF 10,99,1,0,0,0,0,0,<..\..\Q_Sys_Core\Q_Web\QWebPacket.c><QWebPacket.c> 
 OPTFFF 10,100,1,0,0,0,0,0,<..\..\Q_Sys_Core\Q_Web\QWebTransmission.c><QWebTransmission.c> 
 
-ExtF <G:\MyDoc\Desktop\STM_SRC\SVN\q-sys\Q_Sys_Core\System.h> 1,1,0,{ 44,0,0,0,0,0,0,0,1,0,0,0,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,100,0,0,0,100,0,0,0,79,3,0,0,104,1,0,0 }
-ExtF <G:\MyDoc\Desktop\STM_SRC\SVN\q-sys\Drivers\Drivers.h> 13,16,0,{ 44,0,0,0,2,0,0,0,3,0,0,0,255,255,255,255,255,255,255,255,248,255,255,255,226,255,255,255,125,0,0,0,125,0,0,0,104,3,0,0,129,1,0,0 }
 
 TARGOPT 1, (Q-SYS)
  ADSCLK=8000000
