@@ -17,7 +17,7 @@ GRPOPT 3,(uCos),0,0,0
 GRPOPT 4,(FatFs),0,0,0
 GRPOPT 5,(Drivers),0,0,0
 GRPOPT 6,(System),0,0,0
-GRPOPT 7,(Pages),0,0,0
+GRPOPT 7,(Pages),1,0,0
 GRPOPT 8,(Resources),0,0,0
 GRPOPT 9,(UsbLib),0,0,0
 GRPOPT 10,(Q_Web),0,0,0
@@ -79,7 +79,7 @@ OPTFFF 5,54,1,0,0,0,0,0,<..\..\Drivers\Usb\src\usb_istr.c><usb_istr.c>
 OPTFFF 5,55,1,0,0,0,0,0,<..\..\Drivers\Usb\src\usb_prop.c><usb_prop.c> 
 OPTFFF 5,56,1,0,0,0,0,0,<..\..\Drivers\Usb\src\usb_pwr.c><usb_pwr.c> 
 OPTFFF 6,57,1,0,0,0,0,0,<..\..\Q_Sys_Core\DbSetting.c><DbSetting.c> 
-OPTFFF 6,58,1,0,0,187,187,0,<..\..\Q_Sys_Core\InputHandler.c><InputHandler.c> { 44,0,0,0,0,0,0,0,1,0,0,0,255,255,255,255,255,255,255,255,248,255,255,255,226,255,255,255,100,0,0,0,100,0,0,0,83,3,0,0,108,1,0,0 }
+OPTFFF 6,58,1,0,0,0,0,0,<..\..\Q_Sys_Core\InputHandler.c><InputHandler.c> 
 OPTFFF 6,59,1,0,0,0,0,0,<..\..\Q_Sys_Core\MiscHandler.c><MiscHandler.c> 
 OPTFFF 6,60,1,0,0,0,0,0,<..\..\Q_Sys_Core\KeyHandler.c><KeyHandler.c> 
 OPTFFF 6,61,1,0,0,0,0,0,<..\..\Q_Sys_Core\MusicHandler.c><MusicHandler.c> 
@@ -88,7 +88,7 @@ OPTFFF 6,63,1,0,0,0,0,0,<..\..\Q_Sys_Core\SyncHandler.c><SyncHandler.c>
 OPTFFF 6,64,1,0,0,0,0,0,<..\..\Q_Sys_Core\SystemInit.c><SystemInit.c> 
 OPTFFF 6,65,1,0,0,0,0,0,<..\..\Q_Sys_Core\Theme.c><Theme.c> 
 OPTFFF 6,66,1,0,0,0,0,0,<..\..\Q_Sys_Core\TouchHandler.c><TouchHandler.c> 
-OPTFFF 6,67,1,2,0,1,1,0,<..\..\Q_Sys_Core\UserApi.c><UserApi.c> { 44,0,0,0,2,0,0,0,3,0,0,0,255,255,255,255,255,255,255,255,248,255,255,255,226,255,255,255,0,0,0,0,0,0,0,0,28,3,0,0,11,1,0,0 }
+OPTFFF 6,67,1,0,0,370,370,0,<..\..\Q_Sys_Core\UserApi.c><UserApi.c> { 44,0,0,0,0,0,0,0,1,0,0,0,255,255,255,255,255,255,255,255,248,255,255,255,226,255,255,255,50,0,0,0,50,0,0,0,78,3,0,0,61,1,0,0 }
 OPTFFF 6,68,1,0,0,0,0,0,<..\..\Q_Sys_Core\CtrlObj\ControlObj.c><ControlObj.c> 
 OPTFFF 6,69,1,0,0,0,0,0,<..\..\Q_Sys_Core\Q_Gui\Q_Gui.c><Q_Gui.c> 
 OPTFFF 6,70,1,0,0,0,0,0,<..\..\Q_Sys_Core\Q_Heap\Q_Heap.c><Q_Heap.c> 
@@ -102,7 +102,7 @@ OPTFFF 7,77,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\MusicPage.c><MusicPage.c>
 OPTFFF 7,78,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\PicturePage.c><PicturePage.c> 
 OPTFFF 7,79,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\PinYinForKeyBoardPage.c><PinYinForKeyBoardPage.c> 
 OPTFFF 7,80,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\QWebPage.c><QWebPage.c> 
-OPTFFF 7,81,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\SettingsPage.c><SettingsPage.c> 
+OPTFFF 7,81,1,2,0,1149,1156,0,<..\..\Q_Sys_Core\Pages\SettingsPage.c><SettingsPage.c> { 44,0,0,0,2,0,0,0,3,0,0,0,255,255,255,255,255,255,255,255,248,255,255,255,226,255,255,255,25,0,0,0,25,0,0,0,53,3,0,0,36,1,0,0 }
 OPTFFF 7,82,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\SnakePage.c><SnakePage.c> 
 OPTFFF 7,83,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\TestPage.c><TestPage.c> 
 OPTFFF 7,84,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\TouchCheckPage.c><TouchCheckPage.c> 
@@ -123,8 +123,6 @@ OPTFFF 10,98,1,0,0,0,0,0,<..\..\Q_Sys_Core\Q_Web\QWebSession.c><QWebSession.c>
 OPTFFF 10,99,1,0,0,0,0,0,<..\..\Q_Sys_Core\Q_Web\QWebPacket.c><QWebPacket.c> 
 OPTFFF 10,100,1,0,0,0,0,0,<..\..\Q_Sys_Core\Q_Web\QWebTransmission.c><QWebTransmission.c> 
 
-ExtF <G:\MyDoc\Desktop\STM_SRC\SVN\q-sys\Q_Sys_Core\PageDataHandler.c> 1,3,0,{ 44,0,0,0,0,0,0,0,1,0,0,0,255,255,255,255,255,255,255,255,248,255,255,255,226,255,255,255,75,0,0,0,75,0,0,0,54,3,0,0,79,1,0,0 }
-ExtF <G:\MyDoc\Desktop\STM_SRC\SVN\q-sys\Q_Sys_Core\User.h> 1,1,0,{ 44,0,0,0,0,0,0,0,1,0,0,0,255,255,255,255,255,255,255,255,248,255,255,255,226,255,255,255,125,0,0,0,125,0,0,0,108,3,0,0,133,1,0,0 }
 
 TARGOPT 1, (Q-SYS)
  ADSCLK=8000000
@@ -142,6 +140,7 @@ TARGOPT 1, (Q-SYS)
   OPTKEY 0,(ARMDBGFLAGS)()
   OPTKEY 0,(DLGUARM)((105=-1,-1,-1,-1,0)(106=-1,-1,-1,-1,0)(107=-1,-1,-1,-1,0))
   OPTKEY 0,(JL2CM3)(-U20100214 -O462 -S8 -C0 -JU1 -JI127.0.0.1 -JP0 -N00("ARM CoreSight SW-DP") -D00(00000000) -L00(0) -TO18 -TC10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO15 -FD20000000 -FC800 -FN1 -FF0STM32F10x_512 -FS08000000 -FL080000)
+  OPTBB 0,0,1130,1,134354298,0,0,0,0,1,<SettingsPage.c>()()
   OPTDF 0x84
   OPTLE <>
   OPTLC <>
