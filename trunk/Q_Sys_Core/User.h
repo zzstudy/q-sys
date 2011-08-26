@@ -313,7 +313,7 @@ typedef enum{//大部分页面只用了一个定时器，Q_TIM1，所以移植时可以只移植1个定时器
 //1													函数声明																			
 //2										酷系统函数											
 
-#if HEAP_TRACK_DEBUG ==1
+#if Q_HEAP_TRACK_DEBUG ==1
 #define Q_PageMallco(n) _Q_PageMallco(n,(void *)__func__,__LINE__)
 #define Q_PageFree(p) _Q_PageFree(p,(void *)__func__,__LINE__)
 void *_Q_PageMallco(u16 Size,u8 *pFuncName,u32 Lines);

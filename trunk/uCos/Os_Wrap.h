@@ -100,7 +100,7 @@ u32 OS_GetCurrentSysMs(void)	;
 
 #define OS_DebugHeap DebugHeap
 #define OS_HeapMonitor QS_MonitorFragment
-#if HEAP_TRACK_DEBUG ==1
+#if Q_HEAP_TRACK_DEBUG ==1
 #define OS_Mallco(n) QS_Mallco(n,(void *)__func__,__LINE__)
 #define OS_Free(p) QS_Free(p,(void *)__func__,__LINE__)
 #else

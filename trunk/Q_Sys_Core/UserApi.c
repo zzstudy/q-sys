@@ -19,14 +19,14 @@ extern SYS_MSG FindPage(u8 *,u32,u8 *);
 
 //用户可用的系统函数开始
 //页面使用的内存分配函数
-#if HEAP_TRACK_DEBUG ==1
+#if Q_HEAP_TRACK_DEBUG ==1
 void *_Q_PageMallco(u16 Size,u8 *pFuncName,u32 Lines)
 #else
 void *_Q_PageMallco(u16 Size)
 #endif
 {
 	gHeapLayer++;
-#if HEAP_TRACK_DEBUG ==1
+#if Q_HEAP_TRACK_DEBUG ==1
 	return QS_Mallco(Size,pFuncName,Lines);
 #else
 	return QS_Mallco(Size);
@@ -34,14 +34,14 @@ void *_Q_PageMallco(u16 Size)
 }
 
 //页面使用的内存释放函数
-#if HEAP_TRACK_DEBUG ==1
+#if Q_HEAP_TRACK_DEBUG ==1
 void _Q_PageFree(void *Ptr,u8 *pFuncName,u32 Lines)
 #else
 void _Q_PageFree(void *Ptr)
 #endif
 {
 	gHeapLayer--;
-#if HEAP_TRACK_DEBUG ==1
+#if Q_HEAP_TRACK_DEBUG ==1
 	QS_Free(Ptr,pFuncName,Lines);
 #else
 	QS_Free(Ptr);
