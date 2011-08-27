@@ -993,7 +993,7 @@ bool Q_SetDynamicImgTch(u8 Idx,IMG_TCH_OBJ *pTchReg)
 {
 	IMG_TCH_OBJ **pDynImgTchCon=(void *)gCtrlObjPtrBuf; //动态图片按键集合
 
-	if(Idx>gpCtrlObjNum->DynImgTchNum) return FALSE;
+	if((Idx==0)||(Idx>gpCtrlObjNum->DynImgTchNum)) return FALSE;
 	Idx--;
 
 	pDynImgTchCon[Idx]=pTchReg;
@@ -1025,7 +1025,7 @@ bool Q_SetDynamicCharTch(u8 Idx,CHAR_TCH_OBJ *pTchReg)
 {
 	CHAR_TCH_OBJ **pDynCharTchCon=(void *)&gCtrlObjPtrBuf[gpCtrlObjNum->DynImgTchNum];//动态文字按键集合
 		
-	if(Idx>gpCtrlObjNum->DynCharTchNum) return FALSE;
+	if((Idx==0)||(Idx>gpCtrlObjNum->DynCharTchNum)) return FALSE;
 	Idx--;
 
 	pDynCharTchCon[Idx]=pTchReg;
