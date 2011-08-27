@@ -102,7 +102,7 @@ OPTFFF 7,77,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\MusicPage.c><MusicPage.c>
 OPTFFF 7,78,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\PicturePage.c><PicturePage.c> 
 OPTFFF 7,79,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\PinYinForKeyBoardPage.c><PinYinForKeyBoardPage.c> 
 OPTFFF 7,80,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\QWebPage.c><QWebPage.c> 
-OPTFFF 7,81,1,2,0,1109,1130,0,<..\..\Q_Sys_Core\Pages\SettingsPage.c><SettingsPage.c> { 44,0,0,0,2,0,0,0,3,0,0,0,255,255,255,255,255,255,255,255,248,255,255,255,226,255,255,255,25,0,0,0,25,0,0,0,53,3,0,0,36,1,0,0 }
+OPTFFF 7,81,1,134217730,0,1103,1116,0,<..\..\Q_Sys_Core\Pages\SettingsPage.c><SettingsPage.c> { 44,0,0,0,2,0,0,0,3,0,0,0,255,255,255,255,255,255,255,255,252,255,255,255,233,255,255,255,25,0,0,0,25,0,0,0,53,3,0,0,36,1,0,0 }
 OPTFFF 7,82,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\SnakePage.c><SnakePage.c> 
 OPTFFF 7,83,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\TestPage.c><TestPage.c> 
 OPTFFF 7,84,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\TouchCheckPage.c><TouchCheckPage.c> 

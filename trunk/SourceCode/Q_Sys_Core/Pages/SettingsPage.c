@@ -1113,7 +1113,7 @@ static void DrawPage(OPS_HEADER *pOpsHeader,u8 PageIdx)
 
 	//清除所有动态按键
 	gOpsVars->DynImgTchIdx=1;
-	for(i=0;i<SETTINGS_PAGE_MAX_PAGE_OPTION_NUM;i++)
+	for(i=1;i<SETTINGS_PAGE_MAX_PAGE_OPTION_NUM;i++)
 	{
 		Q_SetDynamicImgTch(i,NULL);
 	}
