@@ -1343,7 +1343,7 @@ GUI_RESULT Gui_ReadBmpInfo(const u8 * pBmpPath,u16 *Width,u16 *Hight)
 	bfOffBits = *((u16 *)(ptemp+10));
 	bfOffBits |= ((*((u16 *)(ptemp+12)))<<16);
 	
-	if(bfOffBits!=sizeof(BMP_INFO))
+	if(bfOffBits!=0x36)//modify by karlno
 	{
 		Gui_Debug("Bmp info is error!\n\r");
 		Ret=Gui_False;
@@ -1410,6 +1410,8 @@ GUI_RESULT Gui_Draw24Bmp(const u8 * pBmpPath,const GUI_REGION *pBmpRegion)
 	u16 BmpRgb;	//保存转换字节的变量
 	COLOR_TYPE TransColor;
 	FS_FILE *fp;	
+	u8 SaveData[2];//for align 4 bytes.
+	
 	//open bmp file
 	if ((fp=FS_FOpen((void *)pBmpPath, FA_OPEN_EXISTING | FA_READ)) == 0 ) 
 	{
@@ -1437,7 +1439,7 @@ GUI_RESULT Gui_Draw24Bmp(const u8 * pBmpPath,const GUI_REGION *pBmpRegion)
 	bfOffBits = *((u16 *)(ptemp+10));
 	bfOffBits |= ((*((u16 *)(ptemp+12)))<<16);
 	
-	if(bfOffBits!=sizeof(BMP_INFO))
+	if(bfOffBits!=0x36)//modify by karlno
 	{
 		Gui_Debug("Bmp info is error!\n\r");
 		Ret=Gui_False;
@@ -1463,7 +1465,10 @@ GUI_RESULT Gui_Draw24Bmp(const u8 * pBmpPath,const GUI_REGION *pBmpRegion)
 	}
 	//check bmp info success
 
-	if(FS_FSeek(fp,sizeof(BMP_INFO),FS_SEEK_SET)==-1)//移到位图色彩表
+	SaveData[0]=pBmpInfo->Data[0];
+	SaveData[1]=pBmpInfo->Data[1];
+
+	if(FS_FSeek(fp,0x38,FS_SEEK_SET)==-1)//移到位图色彩表+2
 	{
 		Gui_Debug("Bmp fseek err!\r\n");
 		Ret=Gui_False;
@@ -1515,20 +1520,28 @@ GUI_RESULT Gui_Draw24Bmp(const u8 * pBmpPath,const GUI_REGION *pBmpRegion)
 		NeedTrans=TRUE;
 	}
 
-	gBmpColorTableBuf=OS_Mallco(GUI_BMP_COLOR_TABLE_BUF_SIZE);//分配缓存
+	gBmpColorTableBuf=OS_Mallco(GUI_BMP_COLOR_TABLE_BUF_SIZE+8);//分配缓存
 	
 	LCD_BlukWriteDataStart();
-	
 	while(1)
-	{					
-  	    ReadByte = FS_FRead(gBmpColorTableBuf, OnceReadByte, 1,fp);
+	{				
+		gBmpColorTableBuf[2]=SaveData[0];
+	  	gBmpColorTableBuf[3]=SaveData[1];
+  	    ReadByte = FS_FRead(&gBmpColorTableBuf[4],OnceReadByte, 1,fp);
 
-  	    if (  ReadByte == 0) // error or eof
+  	    if (ReadByte == 0)break;// error or eof
+  	    else if(ReadByte==OnceReadByte)
   	    {
-  	    	break;
-  	    }		 
+	  	    SaveData[0]=gBmpColorTableBuf[OnceReadByte+2];
+	  	    SaveData[1]=gBmpColorTableBuf[OnceReadByte+3];  	    
+  	    }
+  	    else
+  	    {
+	  	    ReadByte+=2;
+  	    }
+				
   	    ReadRow=ReadByte/BmpWidthByte;
-  	    pBmpRgb=gBmpColorTableBuf;
+  	    pBmpRgb=&gBmpColorTableBuf[2];
 
 		if(NeedTrans) //需要透明色
 		{

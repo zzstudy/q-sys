@@ -129,6 +129,7 @@ typedef __packed struct
         BMP_FILE_HEADER bmfHeader;	// 1.文件头信息块
         BMP_INFO_HEADER bmiHeader;	// 2.图像描述信息块
         //RGB_QUAD bmiColors[1];  			// 3.颜色表
+        u8 Data[2];//add by karlno for align 4.
 }BMP_INFO;
 #endif //bmp info define end
 
