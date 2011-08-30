@@ -113,8 +113,19 @@ typedef struct{
 }CHAT_PAGE_STRUCT;
 static CHAT_PAGE_STRUCT *gpVar;
 //-----------------------本页自定义函数-----------------------
+static u8 CalculateRowByteNums(u8 *pStr,u8 MaxByteNums)
+{
+	u8 i=0;
 
-//-----------------------本页系统函数----------------------
+	while((i!=MaxByteNums)&&(i!=(MaxByteNums-1)))
+	{
+		if(pStr[i]>0x7f)
+			i+=2;
+		else
+			i++;
+	}
+}
+
 static u16 DispOneRecord(u16 StartY,u8 DispIdx)//显示一条聊天记录
 {
 	GUI_REGION DrawRegion;
@@ -187,8 +198,7 @@ static void InsertOneRecord(u8 *pStr,bool IsMy)
 		
 		if(CopyLen>CHAT_LIST_ROW_BYTE)
 		{
-			CopyLen=CHAT_LIST_ROW_BYTE;
-			if(pStr[CopyLen-1]>0x7f) CopyLen--;//最后一个汉字处理
+			CopyLen=CalculateRowByteNums(pStr,CHAT_LIST_ROW_BYTE);
 		}
 		
 		MemCpy(gpVar->ChatList[gpVar->ChatListDispIdx],pStr,CopyLen);
@@ -213,6 +223,8 @@ static SYS_MSG RecvQwebData(const PAGE_ATTRIBUTE *pPage,int IntParam, void *pPar
 	return 0;
 }
 
+
+//-----------------------本页系统函数----------------------
 //发生某些事件时，会触发的函数
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam)
 {
