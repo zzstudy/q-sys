@@ -361,10 +361,26 @@ extern "C" {
 //void *pvPortMalloc( size_t xSize ) PRIVILEGED_FUNCTION;
 //void vPortFree( void *pv ) PRIVILEGED_FUNCTION;
 #include "stm32f10x.h" 
+
+#if Q_HEAP_TRACK_DEBUG ==1
+
+void *QS_Mallco(u16 Size,u8 *pFuncName,u32 Lines);
+bool QS_Free(void *Ptr,u8 *pFuncName,u32 Lines);
+#define FreeRTOS_Mallco(n) QS_Mallco(n,(void *)__func__,__LINE__)
+#define FreeRTOS_Free(p) QS_Free(p,(void *)__func__,__LINE__)
+
+#else
+
 void *QS_Mallco(u16 Size);
 bool QS_Free(void *Ptr);
-#define pvPortMalloc QS_Mallco
-#define vPortFree QS_Free
+#define FreeRTOS_Mallco QS_Mallco
+#define FreeRTOS_Free QS_Free
+
+#endif
+
+
+#define pvPortMalloc FreeRTOS_Mallco
+#define vPortFree FreeRTOS_Free
 void vPortInitialiseBlocks( void ) PRIVILEGED_FUNCTION;
 size_t xPortGetFreeHeapSize( void ) PRIVILEGED_FUNCTION;
 

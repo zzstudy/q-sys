@@ -2517,7 +2517,10 @@ void vTaskExitCritical( void )
 
 #endif
 /*-----------------------------------------------------------*/
-
+signed char *pcGetCurTaskName(void) //add by cy
+{
+	return (pxCurrentTCB->pcTaskName);	
+}
 #endif
 
 

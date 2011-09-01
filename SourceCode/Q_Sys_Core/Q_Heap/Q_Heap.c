@@ -44,7 +44,7 @@
 //占用2个字节，所以内存前后被冲毁而不能察觉的概率为65535分之1
 #define Q_HEAP_UNIT_REWRITE_ID 0xa55a
 
-#define Q_HEAP_SIZE_BYTE (32*1024)//堆栈总大小，因为只用16bit表示内存块索引，所以实际大小必须小于(0xffff*内存单元大小)
+#define Q_HEAP_SIZE_BYTE (24*1024)//堆栈总大小，因为只用16bit表示内存块索引，所以实际大小必须小于(0xffff*内存单元大小)
 
 static struct
 {

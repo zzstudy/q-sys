@@ -47,7 +47,7 @@ __heap_limit
 
 
 ; Vector Table Mapped to Address 0 at Reset
-
+				EXTERN  vPortSVCHandler[WEAK]
                 AREA    RESET, DATA, READONLY
                 EXPORT  __Vectors
 

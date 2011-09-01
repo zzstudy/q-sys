@@ -53,6 +53,7 @@ void NMIException(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
+signed char *pcGetCurTaskName(void);
 void HardFaultException(unsigned int * hardfault_args,unsigned int *sp) 
 { 
 	unsigned int stacked_r0; 
@@ -87,7 +88,12 @@ void HardFaultException(unsigned int * hardfault_args,unsigned int *sp)
 	Debug ("HFSR = 0x%08x\n\r", (*((volatile unsigned long *)(0xE000ED2C)))); 
 	Debug ("DFSR = 0x%08x\n\r", (*((volatile unsigned long *)(0xE000ED30)))); 
 	Debug ("AFSR = 0x%08x\n\r", (*((volatile unsigned long *)(0xE000ED3C)))); 
-	//Debug ("Now Task : %s\n\r",OSTCBPrioTbl[OSTCBCur->OSTCBPrio]->OSTCBTaskName);
+	#if OS_USE_UCOS
+	Debug ("Now Task : %s\n\r",OSTCBPrioTbl[OSTCBCur->OSTCBPrio]->OSTCBTaskName);
+	#elif OS_USE_FREERTOS
+	Debug ("Now Task : %s\n\r",pcGetCurTaskName());
+	#endif
+
 	OS_TaskStkCheck(TRUE);
 	OS_DebugHeap();	
 	Q_ErrorStopScreen("HardFaultException");
@@ -148,16 +154,14 @@ void DebugMonitor(void)
 {}
 
 /*******************************************************************************
-* Function Name  : vPortSVCHandler
+* Function Name  : SVCHandler
 * Description    : This function handles SVCall exception.
 * Input          : None
 * Output         : None
 * Return         : None
 *******************************************************************************/
-#if OS_USE_UCOS
-void vPortSVCHandler(void)
+void SVCHandler(void)
 {}
-#endif
 
 /*******************************************************************************
 * Function Name  : PendSVC
@@ -728,7 +732,8 @@ void SPI2_IRQHandler(void)
 * Output         : None
 * Return         : None
 *******************************************************************************/
-
+void QS_MonitorFragment(void);
+void OS_TaskStkCheck(bool Display);
 void USART1_IRQHandler(void)
 {
 	INPUT_EVENT IE;
@@ -740,7 +745,8 @@ void USART1_IRQHandler(void)
 	OS_IntEnter();
 	
 	It_Debug("--U1--\n\r");
-	
+	//QS_MonitorFragment();//add by cy for debug
+	//OS_TaskStkCheck(TRUE);
 	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
 	{ 
 		IE.Num=USART_ReceiveData(USART1);
