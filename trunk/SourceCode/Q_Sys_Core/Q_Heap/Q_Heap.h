@@ -6,7 +6,7 @@
 void DebugHeap(void);
 void QS_HeapInit(void);
 void QS_MonitorFragment(void);
-#if HEAP_TRACK_DEBUG == 1
+#if Q_HEAP_TRACK_DEBUG == 1
 void *QS_Mallco(u16 Size,u8 *pFuncName,u32 Lines);
 bool QS_Free(void *Ptr,u8 *pFuncName,u32 Lines);
 #else

@@ -146,7 +146,7 @@ while(1);
 	Debug("* Q-SYS %s               *\n\r",QSYS_VERSION);
 	Debug("* Start up our dreams!             *\n\r");
 #if OS_USE_FREERTOS
-	Debug("* Base on FreeRTOS            *\n\r");
+	Debug("* Base on FreeRTOS                 *\n\r");
 #elif OS_USE_UCOS
 	Debug("* Base on uC/OS                    *\n\r");
 #endif
