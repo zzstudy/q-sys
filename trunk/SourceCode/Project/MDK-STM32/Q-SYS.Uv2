@@ -13,6 +13,8 @@ Group (Pages)
 Group (Resources)
 Group (UsbLib)
 Group (Q_Web)
+Group (FreeRTOS)
+Group (OS_Wrap)
 
 File 1,1,<..\..\Start\main.c><main.c>
 File 1,2,<..\..\Start\STM32F10x.s><STM32F10x.s>
@@ -42,7 +44,6 @@ File 3,1,<..\..\uCos\os_q.c><os_q.c>
 File 3,1,<..\..\uCos\os_sem.c><os_sem.c>
 File 3,1,<..\..\uCos\os_task.c><os_task.c>
 File 3,1,<..\..\uCos\os_time.c><os_time.c>
-File 3,1,<..\..\uCos\Os_Wrap.c><Os_Wrap.c>
 File 3,1,<..\..\uCos\os_tmr.c><os_tmr.c>
 File 3,1,<..\..\uCos\Ports\os_cpu_c.c><os_cpu_c.c>
 File 3,2,<..\..\uCos\Cpu\cpu_a.asm><cpu_a.asm>
@@ -114,6 +115,11 @@ File 10,1,<..\..\Q_Sys_Core\Q_Web\QWebName.c><QWebName.c>
 File 10,1,<..\..\Q_Sys_Core\Q_Web\QWebSession.c><QWebSession.c>
 File 10,1,<..\..\Q_Sys_Core\Q_Web\QWebPacket.c><QWebPacket.c>
 File 10,1,<..\..\Q_Sys_Core\Q_Web\QWebTransmission.c><QWebTransmission.c>
+File 11,1,<..\..\FreeRTOS\list.c><list.c>
+File 11,1,<..\..\FreeRTOS\queue.c><queue.c>
+File 11,1,<..\..\FreeRTOS\tasks.c><tasks.c>
+File 11,1,<..\..\FreeRTOS\portable\port.c><port.c>
+File 12,1,<..\..\Os_Wrap\Os_Wrap.c><Os_Wrap.c>
 
 
 Options 1,0,0  // Target 'Q-SYS'
@@ -174,7 +180,7 @@ Options 1,0,0  // Target 'Q-SYS'
  ADSCMISC ()
  ADSCDEFN (USE_STDPERIPH_DRIVER,STM32F10X_HD)
  ADSCUDEF ()
- ADSCINCD (..\..\Drivers\Lib;..\..\Drivers\Lib\inc;..\..\Q_Sys_Core;..\..\Drivers;..\..\Q_Sys_Core\Pages;..\..\Q_Sys_Core\Resources;..\..\FatFS;..\..\uCos;..\..\uCos\Cpu;..\..\uCos\Ports;..\..\uCos\Lib;..\..\Q_Sys_Core\Q_Gui;..\..\Q_Sys_Core\Q_Heap;..\..\Drivers\UsbLib\inc;..\..\Drivers\Usb\inc;..\..\Q_Sys_Core\Q_Web;..\..\Q_Sys_Core\CtrlObj)
+ ADSCINCD (..\..\Drivers\Lib;..\..\Drivers\Lib\inc;..\..\Q_Sys_Core;..\..\Drivers;..\..\Q_Sys_Core\Pages;..\..\Q_Sys_Core\Resources;..\..\FatFS;..\..\uCos;..\..\uCos\Cpu;..\..\uCos\Ports;..\..\uCos\Lib;..\..\Q_Sys_Core\Q_Gui;..\..\Q_Sys_Core\Q_Heap;..\..\Drivers\UsbLib\inc;..\..\Drivers\Usb\inc;..\..\Q_Sys_Core\Q_Web;..\..\Q_Sys_Core\CtrlObj;..\..\Os_Wrap;..\..\FreeRTOS\include;..\..\FreeRTOS\portable)
  ADSASFLG { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
  ADSAMISC ()
  ADSADEFN ()

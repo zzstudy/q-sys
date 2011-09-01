@@ -21,7 +21,8 @@
 *             Keil uVision
 *********************************************************************************************************
 */
-
+#include "Os_Select.h"
+#if OS_USE_UCOS
 #define  OS_CPU_GLOBALS
 
 #include  "Os_Wrap.h"
@@ -375,3 +376,4 @@ void  OS_CPU_SysTickInit (void)
 	OS_CPU_CM3_NVIC_ST_CTRL = OS_CPU_CM3_NVIC_ST_CTRL_CLK_SRC | OS_CPU_CM3_NVIC_ST_CTRL_ENABLE | OS_CPU_CM3_NVIC_ST_CTRL_INTEN;
 #endif
 }
+#endif

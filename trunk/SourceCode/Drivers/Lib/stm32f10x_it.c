@@ -87,7 +87,7 @@ void HardFaultException(unsigned int * hardfault_args,unsigned int *sp)
 	Debug ("HFSR = 0x%08x\n\r", (*((volatile unsigned long *)(0xE000ED2C)))); 
 	Debug ("DFSR = 0x%08x\n\r", (*((volatile unsigned long *)(0xE000ED30)))); 
 	Debug ("AFSR = 0x%08x\n\r", (*((volatile unsigned long *)(0xE000ED3C)))); 
-	Debug ("Now Task : %s\n\r",OSTCBPrioTbl[OSTCBCur->OSTCBPrio]->OSTCBTaskName);
+	//Debug ("Now Task : %s\n\r",OSTCBPrioTbl[OSTCBCur->OSTCBPrio]->OSTCBTaskName);
 	OS_TaskStkCheck(TRUE);
 	OS_DebugHeap();	
 	Q_ErrorStopScreen("HardFaultException");
@@ -148,14 +148,16 @@ void DebugMonitor(void)
 {}
 
 /*******************************************************************************
-* Function Name  : SVCHandler
+* Function Name  : vPortSVCHandler
 * Description    : This function handles SVCall exception.
 * Input          : None
 * Output         : None
 * Return         : None
 *******************************************************************************/
-void SVCHandler(void)
+#if OS_USE_UCOS
+void vPortSVCHandler(void)
 {}
+#endif
 
 /*******************************************************************************
 * Function Name  : PendSVC
@@ -287,7 +289,7 @@ void RTC_IRQHandler(void)
 		OS_MsgBoxSend(gInputHandler_Queue,&EventParam,OS_NO_DELAY,FALSE);
 	}
 	
-    OSIntExit();                                                /* Tell uC/OS-II that we are leaving the ISR            */
+    OS_IntExit();                                                /* Tell uC/OS-II that we are leaving the ISR            */
 }
 
 /*******************************************************************************
@@ -347,7 +349,7 @@ void EXTI2_IRQHandler(void)
 		
 		EXTI_ClearITPendingBit(EXTI_Line2);
 	}
-	OSIntExit(); 
+	OS_IntExit(); 
 }
 
 /*******************************************************************************
@@ -365,12 +367,12 @@ void EXTI3_IRQHandler(void)
 	
 	if(EXTI_GetITStatus(EXTI_Line3) != RESET)
 	{
-		if(!gRfRecvHandler_Sem->OSEventCnt)
-			OS_SemaphoreGive(gRfRecvHandler_Sem);//告诉qweb线程有数据
+		//if(!gRfRecvHandler_Sem->OSEventCnt)
+		OS_SemaphoreGive(gRfRecvHandler_Sem);//告诉qweb线程有数据
 
 		EXTI_ClearITPendingBit(EXTI_Line3);
 	}
-	OSIntExit(); 
+	OS_IntExit(); 
 #endif
 }
 
@@ -390,8 +392,8 @@ void EXTI4_IRQHandler(void)
 	{		
 		if(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_4))
 		{
-			if(!gVsDreq_Sem->OSEventCnt)
-				OS_SemaphoreGive(gVsDreq_Sem);
+			//if(!gVsDreq_Sem->OSEventCnt)
+			OS_SemaphoreGive(gVsDreq_Sem);
 		}
 		
 		EXTI_ClearITPendingBit(EXTI_Line4);
@@ -502,7 +504,7 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 {
 	OS_IntEnter();
 	USB_Istr();
-	OSIntExit(); 
+	OS_IntExit(); 
 }
 
 /*******************************************************************************
@@ -540,12 +542,12 @@ void EXTI9_5_IRQHandler(void)
 	
 	if(EXTI_GetITStatus(EXTI_Line6) != RESET)
 	{
-		if(!gRfRecvHandler_Sem->OSEventCnt)
-			OS_SemaphoreGive(gRfRecvHandler_Sem);//告诉qweb线程有数据
+		//if(!gRfRecvHandler_Sem->OSEventCnt)
+		OS_SemaphoreGive(gRfRecvHandler_Sem);//告诉qweb线程有数据
 
 		EXTI_ClearITPendingBit(EXTI_Line6);
 	}
-	OSIntExit(); 
+	OS_IntExit(); 
 #endif
 }
 
@@ -617,7 +619,7 @@ void TIM2_IRQHandler(void)
 			OS_MsgBoxSend(gInputHandler_Queue,&EventParam,OS_NO_DELAY,TRUE);
 		}
 	}
-	OSIntExit(); 
+	OS_IntExit(); 
 }
 
 /*******************************************************************************
@@ -656,7 +658,7 @@ void TIM4_IRQHandler(void)
 			OS_MsgBoxSend(gInputHandler_Queue,&EventParam,OS_NO_DELAY,TRUE);
 		}
 	}
-	OSIntExit(); 
+	OS_IntExit(); 
 }
 
 /*******************************************************************************
@@ -959,8 +961,8 @@ void EXTI15_10_IRQHandler(void)
 			{
 				LCD_Light_Counter=0;
 				//Debug("T\n\r");
-				if(!gTouchHandler_Sem->OSEventCnt)
-					OS_SemaphoreGive(gTouchHandler_Sem);//告诉touch线程有触摸点击
+				//if(!gTouchHandler_Sem->OSEventCnt)
+				OS_SemaphoreGive(gTouchHandler_Sem);//告诉touch线程有触摸点击
 				//OS_TaskResume(TOUCH_TASK_PRIORITY);
 			}
 		}
@@ -1100,7 +1102,7 @@ void TIM5_IRQHandler(void)
 			OS_MsgBoxSend(gInputHandler_Queue,&EventParam,OS_NO_DELAY,TRUE);
 		}
 	}
-	OSIntExit(); 
+	OS_IntExit(); 
 }
 
 /*******************************************************************************

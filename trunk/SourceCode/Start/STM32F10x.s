@@ -40,7 +40,7 @@ __heap_limit
 		        IMPORT	BusFaultException
 		        IMPORT	UsageFaultException
 		        IMPORT	DebugMonitor
-		        IMPORT	SVCHandler
+		        IMPORT	vPortSVCHandler
 		        
                 PRESERVE8
                 THUMB
@@ -62,7 +62,7 @@ __Vectors       DCD     __initial_sp              ; Top of Stack
                 DCD     0                         ; Reserved
                 DCD     0                         ; Reserved
                 DCD     0                         ; Reserved
-                DCD     SVCHandler           ; SVCall Handler
+                DCD     vPortSVCHandler           ; SVCall Handler
                 DCD     DebugMonitor          ; Debug Monitor Handler
                 DCD     0                         ; Reserved
                 DCD     OS_CPU_PendSVHandler        ; PendSV Handler
@@ -272,6 +272,7 @@ Default_Handler PROC
                 EXPORT  DMA2_Channel2_IRQHandler   [WEAK]
                 EXPORT  DMA2_Channel3_IRQHandler   [WEAK]
                 EXPORT  DMA2_Channel4_5_IRQHandler [WEAK]
+				EXPORT  
 
 WWDG_IRQHandler
 PVD_IRQHandler

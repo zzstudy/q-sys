@@ -25,8 +25,8 @@ TOUCH_REGION *GetTouchInfoByIdx(u8 Idx)
 //和Wait_Touch_Allow_Input一起，主要起到的作用是防止主线程未处理完事件响应前又来了新的触摸事件
 void Allow_Touch_Input(void)
 {
-	if(!gAllowTchHandler_Sem->OSEventCnt)
-		OS_SemaphoreGive(gAllowTchHandler_Sem);
+	//if(!gAllowTchHandler_Sem->OSEventCnt)
+	OS_SemaphoreGive(gAllowTchHandler_Sem);
 }
 
 //等待中断信号

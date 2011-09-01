@@ -21,7 +21,8 @@
 * licensing fee.
 ************************************************************************************************************************
 */
-
+#include "Os_Select.h"
+#if OS_USE_UCOS
 //#include <ucos_ii.h>
 #include  "ucos_ii.h"
 
@@ -1114,4 +1115,6 @@ static  void  OSTmr_Task (void *p_arg)
         OSTmr_Unlock();
     }
 }
+#endif
+
 #endif

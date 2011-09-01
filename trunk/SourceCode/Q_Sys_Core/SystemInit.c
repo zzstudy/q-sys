@@ -460,7 +460,10 @@ Erase:
 		if(++CurSecItem==MaxSecItem) return;//下一个扇区项
 	}
 }
-
+void *MusicHandler_Task_Handle=NULL;
+void *TouchHandler_Task_Handle=NULL;
+void *KeysHandler_Task_Handle=NULL;
+void *QWebHandler_Task_Handle=NULL;
 void QSYS_Init(void)
 {	
 	u8 *ptr1;
@@ -468,8 +471,10 @@ void QSYS_Init(void)
 //	FIL *ptr3;
 	
 	OS_CPU_SysTickInit();//Initialize the SysTick.
+	#if OS_USE_UCOS
 	CPU_IntSrcPrioSet(CPU_INT_PENDSV,15);
 	CPU_IntSrcPrioSet(CPU_INT_SYSTICK,15);
+	#endif
 	SetupHardware();
 
 	Debug("sizeof(INPUT_EVENT)=%d\n\r",sizeof(INPUT_EVENT));//for debug by karlno
@@ -477,7 +482,7 @@ void QSYS_Init(void)
 	Debug("sizeof(IMG_TCH_OBJ)=%d\n\r",sizeof(IMG_TCH_OBJ));//for debug by karlno
 	Debug("sizeof(CHAR_TCH_OBJ)=%d\n\r",sizeof(CHAR_TCH_OBJ));//for debug by karlno
 	Debug("sizeof(MUSIC_EVENT)=%d\n\r",sizeof(MUSIC_EVENT));//for debug by karlno
-	Debug("sizeof(QSYS_MSG_BOX)=%d\n\r",sizeof(QSYS_MSG_BOX));//for debug by karlno
+	//Debug("sizeof(QSYS_MSG_BOX)=%d\n\r",sizeof(QSYS_MSG_BOX));//for debug by karlno
 
 	if(SysEvt_MaxNum>32) 
 	{
@@ -525,11 +530,11 @@ void QSYS_Init(void)
 	Gui_Init();	//图像库初始化
 	Gui_SetBgLight(Q_DB_GetValue(Setting_BgLightScale,NULL));//设置背光亮度
 
-	OS_TaskCreate(MusicHandler_Task,"Music",OS_MINIMAL_STACK_SIZE*8,NULL,MUSIC_TASK_PRIORITY);
-	OS_TaskCreate(TouchHandler_Task,"Touch",OS_MINIMAL_STACK_SIZE*3,NULL,TOUCH_TASK_PRIORITY);
-	OS_TaskCreate(KeysHandler_Task,"Keys",OS_MINIMAL_STACK_SIZE*2,NULL,KEYS_TASK_PRIORITY);
-	OS_TaskCreate(QWebHandler_Task,"QWeb",OS_MINIMAL_STACK_SIZE*8,NULL,RF_DATA_TASK_PRIORITY);
-	OS_TaskSuspend(RF_DATA_TASK_PRIORITY);//暂停Q web
+	OS_TaskCreate(MusicHandler_Task,"Music",OS_MINIMAL_STACK_SIZE*8,NULL,MUSIC_TASK_PRIORITY,&MusicHandler_Task_Handle);
+	OS_TaskCreate(TouchHandler_Task,"Touch",OS_MINIMAL_STACK_SIZE*3,NULL,TOUCH_TASK_PRIORITY,&TouchHandler_Task_Handle);
+	OS_TaskCreate(KeysHandler_Task,"Keys",OS_MINIMAL_STACK_SIZE*2,NULL,KEYS_TASK_PRIORITY,&KeysHandler_Task_Handle);
+	OS_TaskCreate(QWebHandler_Task,"QWeb",OS_MINIMAL_STACK_SIZE*8,NULL,RF_DATA_TASK_PRIORITY,&QWebHandler_Task_Handle);
+	OS_TaskSuspend(QWebHandler_Task_Handle);//暂停Q web
 	
 	OS_TaskDelay(100);
 	OS_TaskStkCheck(FALSE);

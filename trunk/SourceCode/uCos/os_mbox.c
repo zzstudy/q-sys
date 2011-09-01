@@ -20,7 +20,8 @@
 * licensing fee.
 *********************************************************************************************************
 */
-
+#include "Os_Select.h"
+#if OS_USE_UCOS
 #ifndef  OS_MASTER_FILE
 //#include <ucos_ii.h>
 #include  "ucos_ii.h"
@@ -628,3 +629,5 @@ INT8U  OSMboxQuery (OS_EVENT *pevent, OS_MBOX_DATA *p_mbox_data)
 }
 #endif                                                     /* OS_MBOX_QUERY_EN                         */
 #endif                                                     /* OS_MBOX_EN                               */
+
+#endif

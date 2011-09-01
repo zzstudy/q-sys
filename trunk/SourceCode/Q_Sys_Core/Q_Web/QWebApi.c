@@ -21,18 +21,18 @@ static bool gQWebState=FALSE;
 
 bool gQWebApiFlag=FALSE;
 QWEB_DATA_STRUCT gQWebUserData;
-
+extern void *QWebHandler_Task_Handle;
 //停止q网
 void QWA_StopQWeb(void)
 {
-	OS_TaskSuspend(RF_DATA_TASK_PRIORITY);
+	OS_TaskSuspend(QWebHandler_Task_Handle);
 	gQWebState=FALSE;
 }
 
 //打开q网
 void QWA_StartQWeb(void)
 {
-	OS_TaskResume(RF_DATA_TASK_PRIORITY);
+	OS_TaskResume(QWebHandler_Task_Handle);
 	gQWebState=TRUE;
 }
 
@@ -81,11 +81,12 @@ QW_RESULT QWA_QueryName(u8 Addr)
 			gQWebApiFlag=TRUE;
 			OS_ExitCritical();
 			
-			if(!gRfRecvHandler_Sem->OSEventCnt)
-				if(OS_SemaphoreGive(gRfRecvHandler_Sem)!=OS_ERR_NONE)//告诉q网线程有数据要传递
-					return QWR_FAILED;
-				else
-					return QWR_SUCCESS;
+			//if(!gRfRecvHandler_Sem->OSEventCnt)
+			//	if(OS_SemaphoreGive(gRfRecvHandler_Sem)!=OS_ERR_NONE)//告诉q网线程有数据要传递
+			//		return QWR_FAILED;
+			//	else
+			//		return QWR_SUCCESS;
+			return (QW_RESULT)OS_SemaphoreGive(gRfRecvHandler_Sem);
 		}
 
 		return QWR_FAILED;
@@ -133,11 +134,12 @@ QW_RESULT QWA_SendData(u8 Addr,u32 DataLen,u8 *pData)
 
 		Debug("QW Send Data @ %d\n\r",QW_GetNowTimeMs());
 		
-		if(!gRfRecvHandler_Sem->OSEventCnt)
-			if(OS_SemaphoreGive(gRfRecvHandler_Sem)!=OS_ERR_NONE)//告诉q网线程有数据要传递
-				return QWR_FAILED;
-			else
-				return QWR_SUCCESS;
+		//if(!gRfRecvHandler_Sem->OSEventCnt)
+		//	if(OS_SemaphoreGive(gRfRecvHandler_Sem)!=OS_ERR_NONE)//告诉q网线程有数据要传递
+		//		return QWR_FAILED;
+		//	else
+		//		return QWR_SUCCESS;
+		return (QW_RESULT)OS_SemaphoreGive(gRfRecvHandler_Sem);
 	}
 
 	return QWR_FAILED;

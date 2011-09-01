@@ -313,6 +313,7 @@ extern void QSYS_Init(void);
 //所以，其他函数请不要调用这些函数
 //如果一定要用，请用如下方式间接调用
 //向gInputHandler_Queue队列发虚拟事件(虚拟键要先注册)
+extern void *KeysHandler_Task_Handle;
 void InputHandler_Task( void *Task_Parameters )
 {
 	INPUT_EVENT InEventParam;
@@ -507,8 +508,8 @@ void InputHandler_Task( void *Task_Parameters )
 		//系统信息处理
 		if((SysMsg&SM_TouchOff)||(TchMsg&TM_TouchOff)) Disable_Touch_Inperrupt();
 		if((SysMsg&SM_TouchOn)||(TchMsg&TM_TouchOn)) Enable_Touch_Inperrupt();
-
-		if((SysMsg&SM_ExtiKeyOff)||(TchMsg&TM_ExtiKeyOff)) OS_TaskSuspend(KEYS_TASK_PRIORITY);//挂起按键监控线程
-		if((SysMsg&SM_ExtiKeyOn)||(TchMsg&TM_ExtiKeyOn)) OS_TaskResume(KEYS_TASK_PRIORITY);//恢复按键监控线程
+		
+		if((SysMsg&SM_ExtiKeyOff)||(TchMsg&TM_ExtiKeyOff)) OS_TaskSuspend(KeysHandler_Task_Handle);//挂起按键监控线程
+		if((SysMsg&SM_ExtiKeyOn)||(TchMsg&TM_ExtiKeyOn)) OS_TaskResume(KeysHandler_Task_Handle);//恢复按键监控线程
 	}
 }

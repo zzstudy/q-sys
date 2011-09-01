@@ -111,6 +111,7 @@
 
 
 //2											全局线程优先级										
+#if OS_USE_UCOS										
 //对于ucos而言，数字越小优先级越高
 typedef enum{
 	SYSTEM_TASK_PRIORITY=OS_HIGHEST_PRIORITIES,
@@ -121,6 +122,18 @@ typedef enum{
 	RF_DATA_TASK_PRIORITY,
 	KEYS_TASK_PRIORITY,
 }TASK_PRIORITY;
+#endif
+#if OS_USE_FREERTOS
+//对于ucos而言，数字越大优先级越高
+#define SYSTEM_TASK_PRIORITY   22
+#define SYS_MUTEX_MAX_PRIORITY 21
+#define MUSIC_TASK_PRIORITY    20
+#define TOUCH_TASK_PRIORITY	   19
+#define INPUT_TASK_PRIORITY	   18
+#define RF_DATA_TASK_PRIORITY  17
+#define KEYS_TASK_PRIORITY	   16
+
+#endif
 //2									全局线程优先级	结束									
 //1														宏定义 结束                              
 

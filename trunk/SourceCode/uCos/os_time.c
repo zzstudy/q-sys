@@ -20,7 +20,8 @@
 * licensing fee.
 *********************************************************************************************************
 */
-
+#include "Os_Select.h"
+#if OS_USE_UCOS
 #ifndef  OS_MASTER_FILE
 //#include <ucos_ii.h>
 #include  "ucos_ii.h"
@@ -266,4 +267,6 @@ void  OSTimeSet (INT32U ticks)
     OSTime = ticks;
     OS_EXIT_CRITICAL();
 }
+#endif
+
 #endif

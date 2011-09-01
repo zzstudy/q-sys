@@ -20,7 +20,8 @@
 * licensing fee.
 *********************************************************************************************************
 */
-
+#include "Os_Select.h"
+#if OS_USE_UCOS
 #ifndef  OS_MASTER_FILE
 #define  OS_GLOBALS
 //#include <ucos_ii.h>
@@ -2035,3 +2036,5 @@ INT8U  OS_TCBInit (INT8U prio, OS_STK *ptos, OS_STK *pbos, INT16U id, INT32U stk
     OS_EXIT_CRITICAL();
     return (OS_ERR_TASK_NO_MORE_TCB);
 }
+
+#endif
