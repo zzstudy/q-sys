@@ -33,7 +33,7 @@
 #include "MusicHandler.h"
 
 //------------------------------酷系统信息-----------------------------------
-#define QSYS_VERSION 	"V2.31-110828"
+#define QSYS_VERSION 	"V2.32-110901"
 
 
 #endif

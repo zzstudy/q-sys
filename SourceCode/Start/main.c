@@ -66,9 +66,9 @@ void RCC_Config(void)
 		}
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);//打开GPIOD和AFIO时钟
 }
-
+void *InputHandler_Task_Handle=NULL;
 int main(void)
-{     
+{   
 	RCC_Config();
 
 	COM1_Init(); //串口
@@ -78,9 +78,8 @@ int main(void)
 
 	//UndefinedInstruction();
 	//BadAlignedLDM();
-	
-	OS_TaskCreate(InputHandler_Task,"Input",OS_MINIMAL_STACK_SIZE*8,NULL,INPUT_TASK_PRIORITY);
 
+	OS_TaskCreate(InputHandler_Task,"Input",OS_MINIMAL_STACK_SIZE*8,NULL,INPUT_TASK_PRIORITY,&InputHandler_Task_Handle);
 	OS_StartRun();
 	
 	return (0);

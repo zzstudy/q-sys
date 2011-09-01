@@ -47,19 +47,19 @@ void _Q_PageFree(void *Ptr)
 	QS_Free(Ptr);
 #endif
 }
-
+extern void *KeysHandler_Task_Handle;
 //开启触摸屏输入，外部按键输入
 void Q_EnableInput(void)
 {
 	Enable_Touch_Inperrupt();
-	OS_TaskResume(KEYS_TASK_PRIORITY);//恢复按键监控线程
+	OS_TaskResume(KeysHandler_Task_Handle);//恢复按键监控线程
 }
 
 //关闭触摸屏输入，外部按键输入
 void Q_DisableInput(void)
 {
 	Disable_Touch_Inperrupt();
-	OS_TaskSuspend(KEYS_TASK_PRIORITY);//挂起按键监控线程
+	OS_TaskSuspend(KeysHandler_Task_Handle);//挂起按键监控线程
 }
 
 //获取页面总数

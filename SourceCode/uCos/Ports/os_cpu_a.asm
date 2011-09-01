@@ -23,13 +23,13 @@
 ;                                           PUBLIC FUNCTIONS
 ;********************************************************************************************************
 
-    EXTERN  OSRunning                                           ; External references
-    EXTERN  OSPrioCur
-    EXTERN  OSPrioHighRdy
-    EXTERN  OSTCBCur
-    EXTERN  OSTCBHighRdy
-    EXTERN  OSIntNesting
-    EXTERN  OSIntExit
+    EXTERN  OSRunning     [WEAK]                                    ; External references
+    EXTERN  OSPrioCur 	  [WEAK]
+    EXTERN  OSPrioHighRdy  [WEAK]
+    EXTERN  OSTCBCur 	   [WEAK]
+    EXTERN  OSTCBHighRdy   [WEAK]
+    EXTERN  OSIntNesting  
+    EXTERN  OSIntExit	  
     ;EXTERN  OSTaskSwHook //delete by karlno
 
 
@@ -38,7 +38,7 @@
     EXPORT  OSStartHighRdy
     EXPORT  OSCtxSw
     EXPORT  OSIntCtxSw
-    EXPORT  OS_CPU_PendSVHandler
+    EXPORT  OS_CPU_PendSVHandler	 [WEAK]
 
 ;********************************************************************************************************
 ;                                                EQUATES
@@ -48,6 +48,7 @@ NVIC_INT_CTRL   EQU     0xE000ED04                              ; Interrupt cont
 NVIC_SYSPRI14   EQU     0xE000ED22                              ; System priority register (priority 14).
 NVIC_PENDSV_PRI EQU           0xFF                              ; PendSV priority value (lowest).
 NVIC_PENDSVSET  EQU     0x10000000                              ; Value to trigger PendSV exception.
+
 
 ;********************************************************************************************************
 ;                                      CODE GENERATION DIRECTIVES
@@ -238,4 +239,5 @@ OS_CPU_PendSVHandler_nosave
     BX      LR                                                  ; Exception return will restore remaining context
 	
 	ALIGN
+
     END

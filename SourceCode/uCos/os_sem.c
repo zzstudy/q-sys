@@ -20,7 +20,8 @@
 * licensing fee.
 *********************************************************************************************************
 */
-
+#include "Os_Select.h"
+#if OS_USE_UCOS
 #ifndef  OS_MASTER_FILE
 //#include <ucos_ii.h>
 #include  "ucos_ii.h"
@@ -608,3 +609,5 @@ void  OSSemSet (OS_EVENT *pevent, INT16U cnt, INT8U *perr)
 #endif
 
 #endif                                                /* OS_SEM_EN                                     */
+
+#endif

@@ -12,13 +12,10 @@
 #include "stm32f10x.h"
 #include "Q_Heap.h"
 
-//基于的操作系统定义
-#define OS_USE_UCOS 1
-#define OS_USE_FREERTOS 0
+#include "Os_Select.h"
 
 #if OS_USE_UCOS
 #include  "ucos_ii.h"
-
 typedef void (*TASK_FUNC)(void *);
 
 typedef struct{
@@ -28,16 +25,17 @@ typedef struct{
 	u8   QMBMemBlks;      //邮件数量
 	u8   QMBMemNFree;	  //空闲邮件数量
 }QSYS_MSG_BOX_MEM;//邮箱内存管理控制块
+
 typedef struct{
 	OS_EVENT *Queue;//消息队列
 	OS_EVENT *Sem;  //计数式信号量
 	QSYS_MSG_BOX_MEM *Mem;	//邮箱内存管理控制块
 	const u8 *Name;
 }QSYS_MSG_BOX;//酷系统邮箱控制块
-typedef OS_EVENT * OS_QueueHandle;
+typedef void * OS_QueueHandle;
 typedef QSYS_MSG_BOX * OS_MsgBoxHandle;
-typedef OS_EVENT * OS_SemaphoreHandle;
-typedef OS_EVENT * OS_MutexHandler;
+typedef void * OS_SemaphoreHandle;
+typedef void * OS_MutexHandler;
 
 //os config
 #define OS_MINIMAL_STACK_SIZE		128
@@ -50,15 +48,20 @@ typedef OS_EVENT * OS_MutexHandler;
 #define OS_RETURN_OK 	OS_ERR_NONE
 #define OS_Ms2Tick(M) (M/(1000/OS_TICKS_PER_SEC))
 
+//mem function
+void MemSet(void *Dst,u8 C,u16 Byte);
+void MemCpy(void *Dst,const void *Src,u16 Byte);
+
 //os api wrap
 void OS_WrapInit(void);
 void OS_StartRun(void);
-
-u8 OS_TaskCreate(TASK_FUNC TaskFunc, const u8 *TaskName, u16 StackSizeByte, void *pParam, u8 Priority);
+u8 OS_TaskCreate(TASK_FUNC TaskFunc, const u8 *TaskName, u16 StackSizeByte, void *pParam, u8 Priority,void **pTaskHandle);
 void OS_TaskStkCheck(bool Display);
-u8 OS_TaskDelete(u8 Prio);
-u8 OS_TaskSuspend(u8 Prio);
-u8 OS_TaskResume(u8 Prio);
+
+u8 OS_TaskDelete(void *TaskHandle);
+u8 OS_TaskSuspend(void *TaskHandle);
+u8 OS_TaskResume(void *TaskHandle);
+
 void OS_TaskDelay (u16 Ticks);
 void OS_TaskDelayMs(u16 Ms);
 
@@ -100,7 +103,7 @@ u32 OS_GetCurrentSysMs(void)	;
 
 #define OS_DebugHeap DebugHeap
 #define OS_HeapMonitor QS_MonitorFragment
-#if Q_HEAP_TRACK_DEBUG ==1
+#if HEAP_TRACK_DEBUG ==1
 #define OS_Mallco(n) QS_Mallco(n,(void *)__func__,__LINE__)
 #define OS_Free(p) QS_Free(p,(void *)__func__,__LINE__)
 #else
@@ -109,25 +112,70 @@ u32 OS_GetCurrentSysMs(void)	;
 #endif
 
 #elif OS_USE_FREERTOS
+typedef void (*TASK_FUNC)(void *);
+typedef void *OS_MsgBoxHandle;
+typedef void *OS_SemaphoreHandle;
+typedef void *OS_MutexHandler;
+//os config
 
+#define OS_MINIMAL_STACK_SIZE		128
+#define ISR_HIGHEST_PRIORITIES		1
+#define ISR_LOWEST_PRIORITIES		15
+#define OS_HIGHEST_PRIORITIES		64
+#define OS_TICK_RATE_HZ				500			
+#define OS_TICK_RATE_MS				(1000/OS_TICK_RATE_HZ)
+#define OS_MAX_DELAY				0
+#define OS_NO_DELAY					0xffff
+#define OS_RETURN_OK 				0
+#define OS_ERR_NONE                 0u
+#define OS_ERR_TIMEOUT              10u
+#define OS_Ms2Tick(M) (M/(1000/OS_TICK_RATE_HZ))
 
+//os api wrap
+void OS_WrapInit(void);
+void OS_StartRun(void);
+void OS_CPU_SysTickInit(void);
+u8 OS_TaskCreate(TASK_FUNC TaskFunc, const u8 *TaskName, u16 StackSizeByte, void *pParam, u8 Priority,void **pTaskHandle);
+void OS_TaskStkCheck(bool Display);
+u8 OS_TaskDelete(void *TaskHandle);
+u8 OS_TaskSuspend(void *TaskHandle);
+u8 OS_TaskResume(void *TaskHandle);
+void OS_TaskDelay (u16 Ticks);
+void OS_TaskDelayMs(u16 Ms);
 
+OS_MsgBoxHandle OS_MsgBoxCreate(const u8 *Name,u16 ItemSize,u8 ItemNum);
+u8 OS_MsgBoxSend(OS_MsgBoxHandle pMsgBox,void *Msg, u16 WaitTicks,bool IfPostFront);
+u8 OS_MsgBoxReceive(OS_MsgBoxHandle pMsgBox,void *Msg, u16 WaitTicks);
 
+OS_SemaphoreHandle OS_SemaphoreCreate(u8 Cnt);
+u8 OS_SemaphoreTake(OS_SemaphoreHandle Sem, u16 WaitTicks);
+u8 OS_SemaphoreGive(OS_SemaphoreHandle Sem);
 
+OS_MutexHandler OS_MutexCreate(void);
+u8 OS_MutexTake(OS_MutexHandler Mutex, u16 WaitTicks);
+u8 OS_MutexGive(OS_MutexHandler Mutex);
+u32 OS_GetCurrentTick(void);
+u32 OS_GetCurrentSysMs(void);
+//os marco	   
+extern void vPortEnterCritical( void );
+extern void vPortExitCritical( void );
+extern void OS_IntEnter(void);		
+extern void OS_IntExit(void);
+void OS_SchedLock(void);
+void OS_SchedUnlock(void);
+#define OS_EnterCritical 	vPortEnterCritical
+#define OS_ExitCritical 	vPortExitCritical
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+#define OS_DebugHeap DebugHeap
+#define OS_HeapMonitor QS_MonitorFragment
+#if HEAP_TRACK_DEBUG ==1
+#define OS_Mallco(n) QS_Mallco(n,(void *)__func__,__LINE__)
+#define OS_Free(p) QS_Free(p,(void *)__func__,__LINE__)
+#else
+#define OS_Mallco QS_Mallco
+#define OS_Free QS_Free
+#define CPU_SR u32
+#endif
 
 
 

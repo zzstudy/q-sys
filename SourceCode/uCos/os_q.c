@@ -20,7 +20,8 @@
 * licensing fee.
 *********************************************************************************************************
 */
-
+#include "Os_Select.h"
+#if OS_USE_UCOS
 #ifndef  OS_MASTER_FILE
 //#include <ucos_ii.h>
 #include  "ucos_ii.h"
@@ -867,3 +868,5 @@ void  OS_QInit (void)
 #endif
 }
 #endif                                               /* OS_Q_EN                                        */
+
+#endif

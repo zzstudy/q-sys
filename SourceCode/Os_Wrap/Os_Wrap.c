@@ -1,12 +1,14 @@
 #include "Os_Wrap.h"
 #include "User.h" //for debug
-#define OS_Debug(x,y...) //Debug
+#define OS_Debug //Debug
 
+#include "Os_Select.h"
 
 #if OS_USE_UCOS
 
 #define QS_TASK_RECORD 1//开启酷系统任务记录功能
 #define QS_TASK_RECORD_NUM	16 //最大记录任务数
+
 
 #if QS_TASK_RECORD
 //任务堆栈记录
@@ -33,7 +35,7 @@ void OS_StartRun(void)
 }
 
 //任务创建部分
-u8 OS_TaskCreate(TASK_FUNC TaskFunc, const u8 *TaskName, u16 StackSizeByte, void *pParam, u8 Priority)
+u8 OS_TaskCreate(TASK_FUNC TaskFunc, const u8 *TaskName, u16 StackSizeByte, void *pParam, u8 Priority,void **pTaskHandle)
 {
 	u8 error;
 	void *ptr=OS_Mallco(StackSizeByte+4);//从mallco出来一定是4byte align，我们需要8byte align，所以多分配4个
@@ -60,7 +62,8 @@ u8 OS_TaskCreate(TASK_FUNC TaskFunc, const u8 *TaskName, u16 StackSizeByte, void
 	QsTaskRecord[QsTaskTotalNum++].StkSize=StackSizeByte;	
 	OS_Debug("Create Task %s @ STK 0x%x-0x%x\n\r",TaskName,(u32)ptr,(u32)ptr+StackSizeByte);
 #endif
-
+	if(pTaskHandle!=NULL)
+		*pTaskHandle=(void *)Priority;
 	return error;
 }
 
@@ -104,9 +107,11 @@ void OS_TaskStkCheck(bool Display)
 #endif
 }
 
-u8 OS_TaskDelete(u8 Prio)
+u8 OS_TaskDelete(void *TaskHandle)
 {
-	return OSTaskDel(Prio);
+	if(TaskHandle==NULL)
+		return OS_ERR_TASK_NOT_EXIST;
+	return (OSTaskDel((u32)TaskHandle));
 }
 
 void OS_TaskDelay (u16 Ticks)
@@ -119,14 +124,18 @@ void OS_TaskDelayMs(u16 Ms)
 	OSTimeDly(Ms/OS_TICK_RATE_MS);
 }
 
-u8 OS_TaskSuspend(u8 Prio)
+u8 OS_TaskSuspend(void *TaskHandle)
 {
-	return OSTaskSuspend(Prio);
+	if(TaskHandle==NULL)
+		return OS_ERR_TASK_NOT_EXIST;
+	return (OSTaskSuspend((u32)TaskHandle));
 }
 
-u8 OS_TaskResume(u8 Prio)
+u8 OS_TaskResume(void *TaskHandle)
 {
-	return OSTaskResume(Prio);
+	if(TaskHandle==NULL)
+		return OS_ERR_TASK_NOT_EXIST;
+	return (OSTaskResume((u32)TaskHandle));
 }
 
 #if 0
@@ -181,7 +190,7 @@ u8 OS_QueueReceive(OS_QueueHandle pQueue, void *pItem,u8 ItemSize,u16 WaitTicks)
 *  		     失败：返回空指针
 *  可重入性  可重入
 *********************************************/
-static QSYS_MSG_BOX_MEM *QMBMemCreat(u16 blksize,u8 nblks)
+QSYS_MSG_BOX_MEM *QMBMemCreat(u16 blksize,u8 nblks)
 {
 	QSYS_MSG_BOX_MEM    *pmem;//用来暂存邮箱内存管理控制块地址
 	void   *addr;             //用来暂存邮箱内存地址
@@ -234,7 +243,7 @@ static QSYS_MSG_BOX_MEM *QMBMemCreat(u16 blksize,u8 nblks)
 *   		  失败：返回空指针
 *   可重入性  可重入
 *********************************************/
-static void *QMBMemGet(QSYS_MSG_BOX_MEM *pQMBMem)
+void *QMBMemGet(QSYS_MSG_BOX_MEM *pQMBMem)
 {
 	void      *pblk;
     OS_CPU_SR  cpu_sr = 0;
@@ -263,7 +272,7 @@ static void *QMBMemGet(QSYS_MSG_BOX_MEM *pQMBMem)
 *			 失败：返回0
 *	可重入性 可重入
 *********************************************/  
-static u8 QMBMemPut(QSYS_MSG_BOX_MEM *pQMBMem,void *pblk)
+u8 QMBMemPut(QSYS_MSG_BOX_MEM *pQMBMem,void *pblk)
 {
     OS_CPU_SR  cpu_sr = 0;
 	if(pQMBMem==NULL || pblk==NULL) return NULL;
@@ -346,6 +355,7 @@ OS_MsgBoxHandle OS_MsgBoxCreate(const u8 *Name,u16 ItemSize,u8 ItemNum)
 *	返回	  成功：OS_NO_ERR
 *			  失败：返回OS_ERR_MBOX_FULL
 *	可重入性  可重入
+*	注意      若在中断中调用此函数，WaitTicks必须为OS_NO_DELAY
 ****************************************************/
 u8 OS_MsgBoxSend(OS_MsgBoxHandle pMsgBox,void *Msg, u16 WaitTicks,bool IfPostFront)
 {
@@ -372,6 +382,11 @@ u8 OS_MsgBoxSend(OS_MsgBoxHandle pMsgBox,void *Msg, u16 WaitTicks,bool IfPostFro
 	}
 	else
 	{
+		if(OSIntNesting>0)
+		{
+			Debug("in ISR OS_MsgBoxSend's WaitTicks must be OS_NO_DELAY\r\n");
+			return 	OS_ERR_MBOX_FULL;
+		}
 		OSSemPend (pMsgBox->Sem, WaitTicks, &error);
 		if(error!=OS_ERR_NONE)
 		{
@@ -471,26 +486,74 @@ u8 OS_MsgBoxQueryIdleNum(OS_MsgBoxHandle pMsgBox)
 	}
 }
 #endif
-
+/******************************************************
+*   功能    建立酷系统信号量(初值为0或1的二值信号量)
+*   入参    Cnt	: 0   初值为0
+				  >0  初值为1
+*   返回    成功 : 酷系统信号量句柄
+*           失败 : NULL
+*******************************************************/
 OS_SemaphoreHandle OS_SemaphoreCreate(u8 Cnt)
 {
-
-	return OSSemCreate(Cnt);
+	if(Cnt==0)
+		return  OSMboxCreate(NULL);
+	else
+		return  OSMboxCreate((void *)1);
 }
-
+/******************************************************
+*   功能    获取酷系统信号量
+*   入参    Sem :酷系统信号量句柄
+*           WaitTicks :
+*                  OS_NO_DELAY  不等待 
+*				   OS_MAX_DELAY 一直等待
+*				   1-0xfffe     等待节拍数
+*   返回    成功 : 0
+*           失败 : !0
+*	注意    若在中断中调用此函数，WaitTicks必须为OS_NO_DELAY
+*******************************************************/
 u8 OS_SemaphoreTake(OS_SemaphoreHandle Sem, u16 WaitTicks)
 {
 	u8 error;
-	
-	OSSemPend(Sem,WaitTicks,&error);
-
-	if(error) OS_Debug("SemaphoreTake error:%d\n\r",error);
-	return error;
+	if(WaitTicks==OS_NO_DELAY)
+	{
+		if( OSMboxAccept(Sem)!=NULL )
+			return 0;
+		else
+		{
+			OS_Debug("SemaphoreTake error:%d\n\r",error);
+			return 1;
+		}
+	}
+	else if(WaitTicks==OS_MAX_DELAY)
+	{
+		if( OSMboxPend(Sem,0,&error)!=NULL )
+			return 0;
+		else
+		{
+			OS_Debug("SemaphoreTake error:%d\n\r",error);
+			return 1;
+		}
+	}
+	else
+	{
+		if( OSMboxPend(Sem,WaitTicks,&error)!=NULL )
+			return 0;
+		else
+		{
+			OS_Debug("SemaphoreTake error:%d\n\r",error);
+			return 1;
+		}
+	}
 }
-
+/******************************************************
+*   功能    释放酷系统信号量
+*   入参    Sem :酷系统信号量句柄
+*   返回    成功 : 0
+*           失败 : !0
+*******************************************************/
 u8 OS_SemaphoreGive(OS_SemaphoreHandle Sem)
 {
-	return OSSemPost(Sem);
+	return OSMboxPost( Sem,(void *)1 );
 }
 
 OS_MutexHandler OS_MutexCreate(void)
@@ -531,12 +594,444 @@ u32 OS_GetCurrentSysMs(void)
 }
 
 
-
-
-
-
-
 #elif OS_USE_FREERTOS
 
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "semphr.h"
+#define QS_TASK_RECORD 1//酷系统任务记录功能开关
+
+#define QS_TASK_RECORD_NUM	16 //最大记录任务数 注意此数必须大于等于当前任务数
+static u8 QsTaskTotalNum=0;
+static xTaskHandle QsTaskRecord[QS_TASK_RECORD_NUM];
+#if QS_TASK_RECORD
+signed char pcTaskInfoBuffer[QS_TASK_RECORD_NUM*40]={0};
+#endif
+
+void OS_WrapInit(void)
+{
+	QS_HeapInit();
+}
+
+void OS_StartRun(void)
+{
+	vTaskStartScheduler();
+}
+
+u8 OS_TaskCreate(TASK_FUNC TaskFunc, const u8 *TaskName, u16 StackSizeByte, void *pParam, u8 Priority,void **pTaskHandle)
+{
+	u32 error;
+	xTaskHandle xHandle;
+	error=xTaskCreate( TaskFunc, (const signed char *)TaskName, StackSizeByte, pParam, Priority, &xHandle );
+	if(QsTaskTotalNum<QS_TASK_RECORD_NUM)
+		QsTaskRecord[QsTaskTotalNum++]=xHandle;
+	if(pTaskHandle!=NULL)
+		(*pTaskHandle)=xHandle;	
+	return error;
+}
+
+void OS_TaskStkCheck(bool Display)
+{
+	#if QS_TASK_RECORD
+	u8 i;
+	if(Display)
+	{
+		Debug("----------------------Task Record----------------------");
+		//格式：任务名,任务状态,优先级，堆栈剩余量,TCB号
+		vTaskList(pcTaskInfoBuffer);
+		Debug("%s",pcTaskInfoBuffer);
+		Debug("----------------------Task Record----------------------\n\r");
+	}
+	else
+	{
+		for(i=0;i<QsTaskTotalNum;i++)
+		{
+			if(uxTaskGetStackHighWaterMark(QsTaskRecord[QsTaskTotalNum])<8) 
+			{
+				Debug("!!!Task stk is overflow\n\r");
+				vTaskSuspendAll();
+				Debug("----------------------Task Record----------------------");
+				//格式：任务名,任务状态,优先级，堆栈剩余量,TCB号
+				vTaskList(pcTaskInfoBuffer);
+				Debug("----------------------Task Record----------------------\n\r");
+				while(1);
+			}
+		}
+	}
+	#endif
+}
+u8 OS_TaskDelete(void *TaskHandle)
+{
+	vTaskDelete(TaskHandle);
+	return 0;
+}
+u8 OS_TaskSuspend(void *TaskHandle)
+{
+	vTaskSuspend(TaskHandle);
+	return 0;
+}
+u8 OS_TaskResume(void *TaskHandle)
+{
+	vTaskResume(TaskHandle);
+	return 0;
+}
+void OS_TaskDelay (u16 Ticks)
+{
+	vTaskDelay(Ticks); 
+}
+void OS_TaskDelayMs(u16 Ms)
+{
+	vTaskDelay(Ms/portTICK_RATE_MS); 
+}
+/********************************************* 
+*	功能	    创建酷系统邮箱
+*	入参	    Name：邮箱名 
+*			    ItemSize：邮箱中邮件的大小 
+*			    ItemNum：邮箱中邮件的数量
+*   返回	    成功：酷系统邮箱控制块指针
+*			    失败：返回空指针
+*	线程安全性   安全
+*********************************************/
+OS_MsgBoxHandle OS_MsgBoxCreate(const u8 *Name,u16 ItemSize,u8 ItemNum)
+{
+	return (xQueueCreate( ItemNum, ItemSize ));	
+}
+
+/*************************************************** 
+*	功能	    向酷系统邮箱发送邮件
+*	入参	    pMsgBox：酷系统邮箱控制块指针 
+*		        Msg：消息指针 
+*		        WaitTicks：
+*					OS_NO_DELAY  不等待 
+*					OS_MAX_DELAY 一直等待
+*					1-0xfffe     等待节拍数
+*			    IfPostFront:
+*					TRUE  发送至队头(适用于紧急事件)
+*					FALSE 发送至队尾(适用于一般事件)
+*	返回	    成功：0
+*			    失败：1
+*	线程安全性   安全
+*	注意        若在中断中调用此函数，WaitTicks必须为OS_NO_DELAY
+****************************************************/
+u8 OS_MsgBoxSend(OS_MsgBoxHandle pMsgBox,void *Msg, u16 WaitTicks,bool IfPostFront)
+{
+	portBASE_TYPE xHigherPriorityTaskWoken;
+	xHigherPriorityTaskWoken = pdFALSE; 
+	if(WaitTicks==OS_NO_DELAY)
+	{
+		if((*(u8 *)0xe000ed04)!=0)//判断是否在中断中
+		{
+			if(IfPostFront==FALSE)
+			{
+				if(xQueueSendToBackFromISR(pMsgBox,Msg,&xHigherPriorityTaskWoken)==pdTRUE)
+				{
+					if( xHigherPriorityTaskWoken )
+					{
+						taskYIELD();
+					}
+					return 0;
+				}
+				else
+				{
+					return 1;
+				}
+			}
+			else
+			{
+				if(xQueueSendToFrontFromISR(pMsgBox,Msg,&xHigherPriorityTaskWoken)==pdTRUE)
+				{
+					if( xHigherPriorityTaskWoken )
+					{
+						taskYIELD();
+					}
+					return 0;
+				}
+				else
+				{
+					return 1;
+				}
+			}
+		}
+		else
+		{
+			if(IfPostFront==FALSE)
+			{
+				if(xQueueSendToBack( pMsgBox, Msg, 0)==pdTRUE)
+					return 0;
+				else
+					return 1;
+			} 
+			else
+			{
+				if(xQueueSendToFront( pMsgBox, Msg, 0)==pdTRUE)
+					return 0;
+				else
+					return 1; 
+			}
+		}	
+	}
+	else if(WaitTicks==OS_MAX_DELAY)
+	{
+		if(IfPostFront==FALSE)
+		{
+			if(xQueueSendToBack( pMsgBox, Msg, portMAX_DELAY)==pdTRUE)
+				return 0;
+			else
+				return 1;
+		} 
+		else
+		{
+			if(xQueueSendToFront( pMsgBox, Msg, portMAX_DELAY)==pdTRUE)
+				return 0;
+			else
+				return 1; 
+		}	
+	}
+	else
+	{	 
+		if(IfPostFront==FALSE)
+		{
+			if(xQueueSendToBack( pMsgBox, Msg, WaitTicks)==pdTRUE)
+				return 0;
+			else
+				return 1;
+		} 
+		else
+		{
+			if(xQueueSendToFront( pMsgBox, Msg, WaitTicks)==pdTRUE)
+				return 0;
+			else
+				return 1; 
+		}
+	}
+}
+
+/************************************************** 
+*	功能	    从酷系统邮箱接收邮件
+*	入参	    pMsgBox：酷系统邮箱控制块指针 
+*		  	    Msg：接收消息的指针 
+*		  	    WaitTicks：
+*			  	   OS_NO_DELAY不等待 
+*				   OS_MAX_DELAY一直等待
+*				   1-0xfffe 等待节拍数
+*	返回	    成功：0
+*			    失败：1
+*	线程安全性   安全
+*	注意        若在中断中调用此函数，WaitTicks必须为OS_NO_DELAY
+**************************************************/
+u8 OS_MsgBoxReceive(OS_MsgBoxHandle pMsgBox,void *Msg, u16 WaitTicks)
+{
+	portBASE_TYPE xHigherPriorityTaskWoken;
+	xHigherPriorityTaskWoken = pdFALSE; 
+	if(WaitTicks==OS_NO_DELAY)
+	{
+		if((*(u8 *)0xe000ed04)!=0)//判断是否在中断中
+		{
+			if(xQueueReceiveFromISR(pMsgBox,Msg,&xHigherPriorityTaskWoken)==pdTRUE)
+			{
+				if( xHigherPriorityTaskWoken )
+				{
+					taskYIELD();
+				}
+				return 0;
+			}
+			else
+			{
+				return 1;
+			}
+		}
+		else
+		{
+			if(xQueueReceive( pMsgBox, Msg, 0)==pdTRUE)
+				return 0;
+			else
+				return 1;
+		}	
+	}
+	else if(WaitTicks==OS_MAX_DELAY)
+	{
+		if(xQueueReceive( pMsgBox, Msg, portMAX_DELAY)==pdTRUE)
+			return 0;
+		else
+			return 1;
+	}
+	else
+	{	 
+		if(xQueueReceive( pMsgBox, Msg, WaitTicks)==pdTRUE)
+			return 0;
+		else
+			return 1;
+	}
+
+}
+/******************************************************
+*   功能    建立酷系统信号量(初值为0或1的二值信号量)
+*   入参    Cnt	: 0   初值为0
+				  >0  初值为1
+*   返回    成功 : 酷系统信号量句柄
+*           失败 : NULL
+*******************************************************/
+OS_SemaphoreHandle OS_SemaphoreCreate(u8 Cnt)
+{
+	OS_SemaphoreHandle xSemaphore;
+	vSemaphoreCreateBinary( xSemaphore );
+	if(Cnt==0)
+		xSemaphoreTake( xSemaphore, 0 );
+	return xSemaphore;
+}
+/******************************************************
+*   功能    获取酷系统信号量
+*   入参    Sem :酷系统信号量句柄
+*           WaitTicks :
+*                  OS_NO_DELAY  不等待 
+*				   OS_MAX_DELAY 一直等待
+*				   1-0xfffe     等待节拍数
+*   返回    成功 : 0
+*           失败 : !0
+*	注意    若在中断中调用此函数，WaitTicks必须为OS_NO_DELAY
+*******************************************************/
+u8 OS_SemaphoreTake(OS_SemaphoreHandle Sem, u16 WaitTicks)
+{
+	if( WaitTicks==OS_NO_DELAY || (*(u8 *)0xe000ed04)!=0 )
+	{
+		if( xSemaphoreTake( Sem, 0 )==pdTRUE )
+			return 0;
+		else
+			return 1;
+	}
+	else if(WaitTicks==OS_MAX_DELAY)
+	{
+		if( xSemaphoreTake( Sem, portMAX_DELAY )==pdTRUE )
+			return 0;
+		else
+			return 1;
+	}
+	else
+	{
+		if( xSemaphoreTake( Sem, WaitTicks )==pdTRUE )
+			return 0;
+		else
+			return 1;	
+	}
+
+	
+}
+/******************************************************
+*   功能    释放酷系统信号量
+*   入参    Sem :酷系统信号量句柄
+*   返回    成功 : 0
+*           失败 : !0
+*******************************************************/
+u8 OS_SemaphoreGive(OS_SemaphoreHandle Sem)
+{
+	portBASE_TYPE xHigherPriorityTaskWoken;
+	xHigherPriorityTaskWoken = pdFALSE; 
+	if((*(u8 *)0xe000ed04)!=0)//判断是否在中断中	
+	{
+		if(xSemaphoreGiveFromISR( Sem, &xHigherPriorityTaskWoken )==pdTRUE)
+		{
+			if( xHigherPriorityTaskWoken )
+			{
+				taskYIELD();
+			}
+			return 0;	
+		}
+		else
+		{
+			return 1;
+		}
+	}
+	else
+	{
+		if(xSemaphoreGive( Sem )==pdTRUE)
+			return 0;
+		else
+			return 1;
+	}
+}
+/******************************************************
+*   功能    创建酷系统互斥量
+*   入参    无
+*   返回    成功 : 酷系统互斥量句柄
+*           失败 : NULL
+*******************************************************/
+OS_MutexHandler OS_MutexCreate(void)
+{
+	return xSemaphoreCreateMutex();
+}
+/******************************************************
+*   功能    获取酷系统互斥量
+*   入参    Mutex :酷系统互斥量句柄 
+*           WaitTicks :
+*                  OS_NO_DELAY  不等待 
+*				   OS_MAX_DELAY 一直等待
+*				   1-0xfffe     等待节拍数
+*   返回    成功 : 0
+*           失败 : !0
+*	注意    禁止在中断中调用此函数
+*******************************************************/
+u8 OS_MutexTake(OS_MutexHandler Mutex, u16 WaitTicks)
+{
+	if((*(u8 *)0xe000ed04)!=0)//判断是否在中断中	
+		return OS_ERR_TIMEOUT;
+	if( WaitTicks==OS_NO_DELAY )
+	{
+		if( xSemaphoreTake( Mutex, 0 )==pdTRUE )
+			return 0;
+		else
+			return OS_ERR_TIMEOUT;
+	}
+	else if(WaitTicks==OS_MAX_DELAY)
+	{
+		if( xSemaphoreTake( Mutex, portMAX_DELAY )==pdTRUE )
+			return 0;
+		else
+			return OS_ERR_TIMEOUT;
+	}
+	else
+	{
+		if( xSemaphoreTake( Mutex, WaitTicks )==pdTRUE )
+			return 0;
+		else
+			return OS_ERR_TIMEOUT;	
+	}	
+}
+/******************************************************
+*   功能    释放酷系统互斥量
+*   入参    Mutex :酷系统互斥量句柄 
+*   返回    成功 : 0
+*           失败 : !0
+*	注意    禁止在中断中调用此函数
+*******************************************************/
+u8 OS_MutexGive(OS_MutexHandler Mutex)
+{
+	if((*(u8 *)0xe000ed04)!=0)//判断是否在中断中	
+		return 1;
+	if(xSemaphoreGive( Mutex )==pdTRUE)
+			return 0;
+		else
+			return 1;
+}
+u32 OS_GetCurrentTick(void)
+{
+	return xTaskGetTickCount();
+}
+
+u32 OS_GetCurrentSysMs(void)	
+{
+	return (xTaskGetTickCount()*OS_TICK_RATE_MS);
+}
+void OS_SchedLock(void)
+{
+	vTaskSuspendAll(); 	
+}
+void OS_SchedUnlock(void)
+{
+	xTaskResumeAll();
+}
+void OS_IntEnter(void){}		
+void OS_IntExit(void){}
+void OS_CPU_SysTickInit(void){}
 #endif
 

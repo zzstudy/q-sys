@@ -467,7 +467,7 @@ void Lrc_Priv_GetLrcFile(void){//获得当前播放mp3对应的lrc文件路径
 
 bool Lrc_Priv_LrcParse(void){//解析lrc文件
 	FS_FILE* Fp_Lrc;
-	u32      CutPos=0,ReadByte,TempTime,index=0,repeat=0,TempOffset,i=0,j,k=0;
+	u32      CutPos=0,ReadByte,TempTime,index=0,repeat=0,TempOffset=0,i=0,j,k=0;
 	bool     ON=FALSE,IfTimeLabel=FALSE;
 	if (( Fp_Lrc = FS_FOpen((void *)_TEXT(gVars->LRC.LrcPath), FA_OPEN_EXISTING | FA_READ) )== 0 ){ 
 		Debug("打开歌词文件%s失败\n\r",gVars->LRC.LrcPath);

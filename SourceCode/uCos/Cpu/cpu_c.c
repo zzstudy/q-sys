@@ -45,7 +45,8 @@
 *                                              INCLUDE FILES
 *********************************************************************************************************
 */
-
+#include "Os_Select.h"
+#if OS_USE_UCOS
 //#include  <cpu.h>
 #include  "cpu.h"
 //#include  <lib_def.h>
@@ -680,3 +681,5 @@ CPU_INT16S  CPU_IntSrcPrioGet (CPU_INT08U  pos)
 
     return (prio);
 }
+
+#endif
