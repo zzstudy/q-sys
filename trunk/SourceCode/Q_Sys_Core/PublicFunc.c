@@ -210,7 +210,6 @@ bool PrtScreen(void)
 	num++;
 	sprintf((void *)Path,"Picture/Snapshot%d-%04x.bmp",num,Rand(0xffff));
 	Debug(" #Print screen to image file:%s\n\r #Please wait a moment...\n\r",Path);
-
 	
 	if(FS_FileCpy((void *)BlankPath,(void *)Path)==FALSE)
 	{
@@ -273,6 +272,8 @@ bool PrtScreenToBin(u8 *pNewFilePath,u16 x,u16 y,u16 w,u16 h)
 	u16 Rows,LastRows,Num;
 	bool Ret=TRUE;
 
+	Debug("Print Screen To Bin %s\n\r",pNewFilePath);
+	
 	if ((pDstFileObj=FS_FOpen((void *)pNewFilePath, FA_CREATE_ALWAYS | FA_WRITE) )== 0 ) 
 	{
 		Debug("Open Dst File error!\n\r");
@@ -280,7 +281,7 @@ bool PrtScreenToBin(u8 *pNewFilePath,u16 x,u16 y,u16 w,u16 h)
 		goto PrtEnd;
 	}
 
-	//¼ÆËãÃ¿´Î¶ÁÈ¡µuÄ¸ß¶È
+	//¼ÆËãÃ¿´Î¶ÁÈ¡ÇøÓò
 	Rows=(PRINT_SRC_BUF_LEN>>1)/w;
 	if(Rows>h)	Rows=h;
 	else if(Rows==0) //ÇøÓòÌ«´ó
@@ -330,6 +331,50 @@ PrtEnd:
 	if(pDstFileObj)
 		FS_FClose(pDstFileObj);
 	OS_Free(Buf);
+	if(Ret==TRUE) Debug("Finish!\n\r");
+	else Debug("Failed!\n\r");
+	return Ret;
+}
+
+#define SPI_FLASH_PAGE_SIZE 256
+bool ReadSpiFlashToBin(u8 *pNewFilePath,u32 StartPage,u32 EndPage)
+{
+	u8 *Buf=OS_Mallco(SPI_FLASH_PAGE_SIZE);
+	FS_FILE *pDstFileObj;
+	u16 Num;
+	bool Ret=TRUE;
+
+	Debug("Read Spi Flash To Bin %s\n\r",pNewFilePath);
+
+	if(StartPage>EndPage)
+	{
+		Ret=FALSE;
+		goto PrtEnd;
+	}
+	
+	if ((pDstFileObj=FS_FOpen((void *)pNewFilePath, FA_CREATE_ALWAYS | FA_WRITE) )== 0 ) 
+	{
+		Debug("Open Dst File error!\n\r");
+		Ret=FALSE;
+		goto PrtEnd;
+	}
+	
+	for(Num=StartPage;Num<=EndPage;Num++)
+	{
+		Q_SpiFlashSync(FlashRead,Num*SPI_FLASH_PAGE_SIZE,SPI_FLASH_PAGE_SIZE,Buf);
+		if((FS_FWrite((void *)Buf,SPI_FLASH_PAGE_SIZE,1,pDstFileObj))==0)
+		{
+			Ret=FALSE;
+			goto PrtEnd;
+		}
+	}
+
+PrtEnd:
+	if(pDstFileObj)
+		FS_FClose(pDstFileObj);
+	OS_Free(Buf);
+	if(Ret==TRUE) Debug("Finish!\n\r");
+	else Debug("Failed!\n\r");
 	return Ret;
 }
 

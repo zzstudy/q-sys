@@ -31,6 +31,9 @@ bool PrtScreen(void);
 //保存屏幕的指定区域色彩到文件
 bool PrtScreenToBin(u8 *pNewFilePath,u16 x,u16 y,u16 w,u16 h);
 
+//保存spi flash指定页为文件
+bool ReadSpiFlashToBin(u8 *pNewFilePath,u32 StartPage,u32 EndPage);
+
 //分析单个后缀名
 //suffix内容类似于".mp3"
 bool CheckSuffix(u8 *Str,u8 *Suffix,u8 SuffixLen);
