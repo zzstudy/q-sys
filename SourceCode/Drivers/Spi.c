@@ -130,7 +130,7 @@ void SPI3_Init(void)//¹©¸øspi flash
 
 u8 SPIv_WriteByte(u8 Byte)
 {
-	u8 i,Read;
+	u8 i,Read=0;
 	
 	for(i=8; i; i--)
 	{	
