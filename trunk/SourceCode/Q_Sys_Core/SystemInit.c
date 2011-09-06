@@ -471,10 +471,10 @@ void QSYS_Init(void)
 //	FIL *ptr3;
 	
 	OS_CPU_SysTickInit();//Initialize the SysTick.
-	#if OS_USE_UCOS
+#if OS_USE_UCOS
 	CPU_IntSrcPrioSet(CPU_INT_PENDSV,15);
 	CPU_IntSrcPrioSet(CPU_INT_SYSTICK,15);
-	#endif
+#endif
 	SetupHardware();
 
 	Debug("sizeof(INPUT_EVENT)=%d\n\r",sizeof(INPUT_EVENT));//for debug by karlno
