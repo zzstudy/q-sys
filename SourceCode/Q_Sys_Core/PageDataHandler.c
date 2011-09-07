@@ -34,7 +34,7 @@ u8 GetPageIdxByTrack(u8 Local)
 //插入一个页面索引到记录
 static void InsertPageTrack(u8 PageIdx)
 {
-	CPU_SR cpu_sr;
+	OS_DeclareCritical();
 	
 	OS_EnterCritical();
 	if(++gCurTrackIdx==sizeof(PageTracks)) gCurTrackIdx=0;
@@ -81,7 +81,7 @@ u8 GetPageIdxByLayer(u8 LayerNum)
 //新建一层
 static void InsertPageLayer(u8 PageIdx)
 {
-	CPU_SR cpu_sr;
+	OS_DeclareCritical();
 	
 	OS_EnterCritical();
 	if(++gCurLayerNum<=MAX_PAGE_LAYER_NUM)//判断存储空间够不够
@@ -96,7 +96,7 @@ static void InsertPageLayer(u8 PageIdx)
 //删除层
 static void DeletePageLayer(u8 Num)
 {
-	CPU_SR cpu_sr;
+	OS_DeclareCritical();
 	
 	OS_EnterCritical();
 

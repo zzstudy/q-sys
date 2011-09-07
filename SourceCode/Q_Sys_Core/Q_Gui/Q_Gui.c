@@ -1408,7 +1408,7 @@ GUI_RESULT Gui_Draw24Bmp(const u8 * pBmpPath,const GUI_REGION *pBmpRegion)
 	bool NeedTrans=FALSE;//是否需要透明色
 	u8 BmpMargin;  //  bmp中为保证4字节对齐的数据留空
 	u16 BmpRgb;	//保存转换字节的变量
-	COLOR_TYPE TransColor;
+	COLOR_TYPE TransColor=0;
 	FS_FILE *fp;	
 	u8 SaveData[2];//for align 4 bytes.
 	
@@ -1628,7 +1628,7 @@ GUI_RESULT Gui_DrawImgArray(const u8 * pImageBuf,const GUI_REGION *pRegion)
 {
 	u32 i;
 	u16 *pColor16=(u16 *)pImageBuf;
-	COLOR_TYPE TransColor;
+	COLOR_TYPE TransColor=0;
 	bool NeedTrans=FALSE;
 	
 	LCD_Lock();//独占屏幕
@@ -1687,7 +1687,7 @@ GUI_RESULT Gui_DrawImgBin(const u8 * pPath,const GUI_REGION *pRegion)
 	u32 i;
 	UINT ReadByte;//实际每次读取的byte和图片行
 	u16 *pColor16;
-	COLOR_TYPE TransColor;
+	COLOR_TYPE TransColor=0;
 	bool NeedTrans=FALSE;
 	FS_FILE *fp;
 	//open bin file
@@ -1775,7 +1775,7 @@ GUI_RESULT Gui_DrawImgFlashBin(u32 Page,const GUI_REGION *pRegion)
 	u32 ReadByte;
 	u16 *pColor16;
 	u32 sizeByte;
-	COLOR_TYPE TransColor;
+	COLOR_TYPE TransColor=0;
 	bool NeedTrans=FALSE;
 	
 	sizeByte=((pRegion->w*pRegion->h)<<1);
@@ -1864,9 +1864,9 @@ GUI_RESULT Gui_FillImgArray(const u8 * pImageBuf,u16 width,u16 hight,const GUI_R
 	u16 LastOneV;//最后一次的高度
 	u32 i,j,n,m;
 	u16 Hstart,Vstart;
-	u16 H,V;
+	u16 H=0,V;
 	bool NeedTrans=FALSE;
-	COLOR_TYPE TransColor;
+	COLOR_TYPE TransColor=0;
 
 	LCD_Lock();//独占屏幕
 	

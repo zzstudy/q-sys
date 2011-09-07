@@ -239,7 +239,7 @@ u32 Q_DB_GetValue(SETTING_NAME Name,void *Val)
 //写值到数据库缓存，只能使用pDB_Setting存储
 bool Q_DB_SetValue(SETTING_NAME Name,u32 IntParam,void *pParam,u8 ByteLen)
 {
-	CPU_SR cpu_sr;
+	OS_DeclareCritical();
 	
 	switch(Name)
 	{
@@ -278,7 +278,7 @@ u32 Q_DB_GetStatus(SETTING_NAME Name,void *Val)
 //写值到系统变量
 bool Q_DB_SetStatus(SETTING_NAME Name,u32 IntParam,void *pParam,u8 ByteLen)
 {
-	CPU_SR cpu_sr;
+	OS_DeclareCritical();
 	
 	switch(Name)
 	{

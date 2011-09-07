@@ -95,6 +95,7 @@ u32 OS_GetCurrentSysMs(void)	;
 #endif
 #define OS_IntExit()	    OSIntExit()	
 
+#define OS_DeclareCritical()	CPU_SR cpu_sr
 #define OS_EnterCritical 	OS_ENTER_CRITICAL
 #define OS_ExitCritical 	OS_EXIT_CRITICAL
 
@@ -163,6 +164,7 @@ extern void OS_IntEnter(void);
 extern void OS_IntExit(void);
 void OS_SchedLock(void);
 void OS_SchedUnlock(void);
+#define OS_DeclareCritical()	
 #define OS_EnterCritical 	vPortEnterCritical
 #define OS_ExitCritical 	vPortExitCritical
 

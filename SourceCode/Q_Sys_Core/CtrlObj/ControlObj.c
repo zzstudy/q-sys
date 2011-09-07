@@ -848,7 +848,7 @@ SYS_MSG CurrPageCtrlObjInit(INPUT_EVT_TYPE EventType,int IntParam,void *pInfoPar
 {
 	IMG_TCH_OBJ **pDynImgTchCon=(void *)gCtrlObjPtrBuf; //动态图片按键集合
 	CHAR_TCH_OBJ **pDynCharTchCon=(void *)&pDynImgTchCon[gpCtrlObjNum->DynImgTchNum];//动态文字按键集合
-	SYS_MSG SysMsg;
+	SYS_MSG SysMsg=SM_State_Faile;
 	u8 Index;
 	
 	CO_Debug("%s : %s\n\r",__FUNCTION__,gpCurrentPage->Name);
@@ -904,7 +904,7 @@ SYS_MSG CurrPageCtrlObjInit(INPUT_EVT_TYPE EventType,int IntParam,void *pInfoPar
 //如果Suffix=0，则恢复原始图标
 void Q_ChangeImgTchImg(u8 ObjID,u8 Suffix)
 {
-	CPU_SR cpu_sr;
+	OS_DeclareCritical();
 	
 	if((ObjID=FindImgTchIdx(ObjID))==0xff) return;
 	
@@ -940,7 +940,7 @@ u8 Q_ReadImgTchImg(u8 ObjID)
 //如果NewName=NULL，则恢复原始文字
 void Q_ChangeCharTchName(u8 ObjID,u8 *NewName)
 {
-	CPU_SR cpu_sr;
+	OS_DeclareCritical();
 	
 	if((ObjID=FindCharTchIdx(ObjID))==0xff) return;
 	

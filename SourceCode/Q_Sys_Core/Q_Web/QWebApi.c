@@ -72,7 +72,7 @@ QW_RESULT QWA_QueryName(u8 Addr)
 	{
 		if(gQWebApiFlag==FALSE)
 		{
-			CPU_SR cpu_sr;
+			OS_DeclareCritical();
 			OS_EnterCritical();
 			gQWebUserData.CMD=QWAC_QueryName;
 			gQWebUserData.DstAddr=Addr;
@@ -123,7 +123,7 @@ QW_RESULT QWA_SendData(u8 Addr,u32 DataLen,u8 *pData)
 	
 	if(gQWebApiFlag==FALSE)
 	{
-		CPU_SR cpu_sr;
+		OS_DeclareCritical();
 		OS_EnterCritical();
 		gQWebUserData.CMD=QWAC_SendData;
 		gQWebUserData.DstAddr=Addr;

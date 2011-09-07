@@ -204,7 +204,7 @@ bool PrtScreen(void)
 	u8 Buf[BUF_PIX_NUM*3];
 	u8 BlankPath[]="Picture/Blank.bmp";
 	u8 Path[40]="";
-	FS_FILE *pSnapBmpObj; 
+	FS_FILE *pSnapBmpObj=NULL; 
 	bool Ret=TRUE;
 	
 	num++;
@@ -267,7 +267,7 @@ bool PrtScreenToBin(u8 *pNewFilePath,u16 x,u16 y,u16 w,u16 h)
 {
 	unsigned int WrtByte;
 	u8 *Buf=OS_Mallco(PRINT_SRC_BUF_LEN);
-	FS_FILE *pDstFileObj;
+	FS_FILE *pDstFileObj=NULL;
 	GUI_REGION ReadRegion;
 	u16 Rows,LastRows,Num;
 	bool Ret=TRUE;
@@ -340,7 +340,7 @@ PrtEnd:
 bool ReadSpiFlashToBin(u8 *pNewFilePath,u32 StartPage,u32 EndPage)
 {
 	u8 *Buf=OS_Mallco(SPI_FLASH_PAGE_SIZE);
-	FS_FILE *pDstFileObj;
+	FS_FILE *pDstFileObj=NULL;
 	u16 Num;
 	bool Ret=TRUE;
 

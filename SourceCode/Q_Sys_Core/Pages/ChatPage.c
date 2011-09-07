@@ -113,7 +113,7 @@ typedef struct{
 }CHAT_PAGE_STRUCT;
 static CHAT_PAGE_STRUCT *gpVar;
 //-----------------------本页自定义函数-----------------------
-static u8 CalculateRowByteNums(u8 *pStr,u8 MaxByteNums)
+static u8 CalculateRowByteNums(u8 *pStr,u8 MaxByteNums)	//计算一行最大容纳字数
 {
 	u8 i=0;
 
@@ -124,6 +124,7 @@ static u8 CalculateRowByteNums(u8 *pStr,u8 MaxByteNums)
 		else
 			i++;
 	}
+	return i;
 }
 
 static u16 DispOneRecord(u16 StartY,u8 DispIdx)//显示一条聊天记录
