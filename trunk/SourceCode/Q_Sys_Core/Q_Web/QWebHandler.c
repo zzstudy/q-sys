@@ -211,7 +211,7 @@ void QWebHandler_Task(void *Task_Parameters)
 		{
 			if(gQWebApiFlag==TRUE)//应用层有数据要发送
 			{
-				CPU_SR cpu_sr;
+				OS_DeclareCritical();
 				OS_EnterCritical();
 				gQWebApiFlag=FALSE;//还原标志
 				OS_ExitCritical();

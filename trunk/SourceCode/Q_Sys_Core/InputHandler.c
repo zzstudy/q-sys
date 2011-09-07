@@ -87,7 +87,7 @@ SYS_MSG MyGobalPeripEvtHandler(PERIP_EVT PeripEvt,int intParam, void *pParam)
 //SubPage==TRUE表示即将进入的是子页面
 static SYS_MSG OldPageClean(INPUT_EVT_TYPE EventType,u8 NewPageIndex)
 {
-	SYS_MSG SysMsg;
+	SYS_MSG SysMsg=SM_State_Faile;
 	u8 LayerNum;
 	
 	Input_Debug("%s : Clean %s\n\r",__FUNCTION__,gpCurrentPage->Name);
@@ -121,7 +121,7 @@ static SYS_MSG OldPageClean(INPUT_EVT_TYPE EventType,u8 NewPageIndex)
 //激活新页面时先进行初始化
 static SYS_MSG CurrentPageInit(INPUT_EVT_TYPE EventType,int IntParam,void *pSysParam)
 {
-	SYS_MSG SysMsg;
+	SYS_MSG SysMsg=SM_State_Faile;
 	
 	Input_Debug("%s : %s\n\r",__FUNCTION__,gpCurrentPage->Name);
 
@@ -156,9 +156,7 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 	SYS_MSG SysMsg;
 	u32 TimeMsRecord;
 	u8 i;
-#if OS_USE_UCOS
-	CPU_SR cpu_sr;
-#endif
+	OS_DeclareCritical();
 
 	//关闭触摸和外部按键输入，保证在换页面或者程序的过程中忽略所有输入
 	Q_DisableInput();

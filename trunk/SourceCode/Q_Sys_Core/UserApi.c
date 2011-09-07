@@ -195,7 +195,7 @@ SYS_MSG Q_GotoPage(PAGE_ACTION PageAction, u8 *Name, int IntParam, void *pSysPar
 void Q_SetPeripEvt(u32 RegID,u32 PeripEvtCon)
 {
 	u8 PageIdx;
-	CPU_SR cpu_sr;
+	OS_DeclareCritical();
 
 	if(RegID)
 	{
@@ -218,7 +218,7 @@ void Q_SetPeripEvt(u32 RegID,u32 PeripEvtCon)
 void Q_ClrPeripEvt(u32 RegID,u32 PeripEvtCon)
 {
 	u8 PageIdx;
-	CPU_SR cpu_sr;
+	OS_DeclareCritical();
 
 	if(RegID)
 	{
@@ -238,7 +238,7 @@ void Q_ClrPeripEvt(u32 RegID,u32 PeripEvtCon)
 void Q_EnablePeripEvt(u32 RegID,PERIP_EVT PeripEvt)
 {
 	u8 PageIdx;
-	CPU_SR cpu_sr;
+	OS_DeclareCritical();
 
 	if(RegID)
 	{
@@ -258,7 +258,7 @@ void Q_EnablePeripEvt(u32 RegID,PERIP_EVT PeripEvt)
 void Q_DisablePeripEvt(u32 RegID,PERIP_EVT PeripEvt)
 {
 	u8 PageIdx;
-	CPU_SR cpu_sr;
+	OS_DeclareCritical();
 
 	if(RegID)
 	{

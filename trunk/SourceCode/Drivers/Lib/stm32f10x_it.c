@@ -1070,10 +1070,7 @@ void FSMC_IRQHandler(void)
 *******************************************************************************/
 void SDIO_IRQHandler(void)
 {
-#if OS_USE_UCOS
-	CPU_SR cpu_sr;
-#endif
-
+	OS_DeclareCritical();
 	OS_EnterCritical();
 	//OSIntNesting++;
 	SD_ProcessIRQSrc();

@@ -5,9 +5,8 @@
 bool Q_SpiFlashSync(FLASH_CMD cmd,u32 addr,u32 len,u8 *buf)
 {
 #if(QXW_PRODUCT_ID==114)
-#if OS_USE_UCOS
-	CPU_SR cpu_sr;
-#endif
+	OS_DeclareCritical();
+
 	OS_EnterCritical();
 #endif
 	

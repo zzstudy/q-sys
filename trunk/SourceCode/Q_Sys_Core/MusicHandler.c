@@ -395,7 +395,7 @@ bool Mp3InfoParse(u8 * Mp3Path,MUSIC_INFO *pMusicInfo)
 {
 //	FRESULT Res;
 	UINT ReadByte;
-	bool HasID3V1;
+	bool HasID3V1=FALSE;
 	u32 AudioOffset;			// 第一个音频帧在文件内偏移
 	u32 FrameSize;				// 帧大小
 	FRAME_HEADER FrameHeader;//帧头
@@ -412,7 +412,7 @@ bool Mp3InfoParse(u8 * Mp3Path,MUSIC_INFO *pMusicInfo)
 	u32 FrameNum;				// 帧总数
 	u32 FrameDuration;  //每一帧的持续时间
 
-	FS_FILE * fp;
+	FS_FILE * fp=NULL;
 	//解析ID3
 	AudioOffset=Mp3Id3Parse((void *)Mp3Path);
 
@@ -696,14 +696,12 @@ void MusicHandler_Task(void *Task_Parameters)
 //	FRESULT Res;
 	UINT ReadByte=0;
 	u32 SendByte=0,i;
-	u8 *pBuf;
-	u32 TimeSnap;
+	u8 *pBuf=NULL;
+	u32 TimeSnap=0;
 #if(QXW_PRODUCT_ID==114)
-#if OS_USE_UCOS
-	CPU_SR cpu_sr;
+	OS_DeclareCritical();
 #endif
-#endif
-	FS_FILE *fp;
+	FS_FILE *fp=NULL;
 
 ////ZCL ad for fs test
 /*{

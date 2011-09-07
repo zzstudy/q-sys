@@ -36,7 +36,7 @@
 
 //为保证多线程下堆分配的原子操作，必须借助操作系统临界区
 //如果此机制不被用于多线程，则可以定义下面三个个宏为空白
-#define Q_HEAP_CRIT_SAVE_DATA_DEFINE CPU_SR cpu_sr
+#define Q_HEAP_CRIT_SAVE_DATA_DEFINE 	OS_DeclareCritical()
 #define Q_HEAP_ENTER_CRIT OS_EnterCritical()
 #define Q_HEAP_EXIT_CRIT OS_ExitCritical()
 
