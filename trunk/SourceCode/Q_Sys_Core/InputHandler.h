@@ -58,7 +58,7 @@ typedef struct {
 
 typedef struct{ 
 	PERIP_EVT PeripEvt;//事件类型，只对部分事件有效，如为0表示此项空
-	GobalPeripEvtHandlerFunc GobalPeripEvtHandler;//函数体
+	PeripheralsHandlerFunc GobalPeripEvtHandler;//函数体
 }GOBAL_PERIPEVT_RECORD;//记录全局事件的结构体
 
 //------------------------------变量声明----------------------------------

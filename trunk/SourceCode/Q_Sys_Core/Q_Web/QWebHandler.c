@@ -42,7 +42,7 @@ u8 gMyQwID=0;//q网id，由程序启动时生成随机码
 u8 gMyQwAddr=QW_ADDR_DEF;//本设备当前q网地址
 u8 gMyQwAddrReqPw=0;//记录请求地址时的密码
 u32 gMyQwStartTime=0;//q网启动的绝对时间，单位毫秒
-u32 gMyQwHostHwId=0;//从机用来记录q网主机硬件码
+u32 gMyQwHostHwId=0;//从机用来记录q网主机硬件码，借以主机断点重启后识别主机
 
 //----------------------function------------------------
 u32 QW_GetNowTimeMs(void)
@@ -148,6 +148,7 @@ u8 QW_WaitRecvSem(u16 WaitMs)
 	return Error;
 }
 
+extern void *QWebHandler_Task_Handle;
 void QWebHandler_Task(void *Task_Parameters)
 {
 	u8 RF_Buf[QW_MAX_PACKET_LEN],Len;
@@ -162,10 +163,18 @@ void QWebHandler_Task(void *Task_Parameters)
 		Debug("Read Rf chip id error!\n\r");
 		while(1) OS_TaskDelayMs(0xffff);
 	}
+
+QWebWaitStart:	
+	gMyQwAttributeStr[0]=0;//q网属性字符串
+	gMyQwID=0;//q网id，由程序启动时生成随机码
+	gMyQwAddr=QW_ADDR_DEF;//本设备当前q网地址
+	gMyQwAddrReqPw=Rand(0xff);//记录请求地址时的密码
+	gMyQwStartTime=0;//q网启动的绝对时间，单位毫秒
+	gMyQwHostHwId=0;//从机用来记录q网主机硬件码，借以主机断点重启后识别主机
 	QW_HostTableInit();
 	QW_SessionsInit();
-	gMyQwAddrReqPw=Rand(0xff);
-		
+	OS_TaskSuspend(QWebHandler_Task_Handle);//停止本线程
+
 #if 0//for debug
 	gMyQwID=1;
 	gMyQwAddr=QW_ADDR_HOST;
@@ -218,6 +227,8 @@ void QWebHandler_Task(void *Task_Parameters)
 							
 				switch(gQWebUserData.CMD)
 				{
+					case QWAC_Stop://停止q网，清空数据
+						goto QWebWaitStart;
 					case QWAC_SendData:
 						{
 							QW_SESSION *pSession;					

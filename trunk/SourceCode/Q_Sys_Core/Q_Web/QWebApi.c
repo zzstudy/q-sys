@@ -15,18 +15,29 @@ q网接口
 #include "QWebAddrMgt.h"
 #include "QWebApi.h"
 
+extern void *QWebHandler_Task_Handle;
 extern OS_SemaphoreHandle gRfRecvHandler_Sem;
 
 static bool gQWebState=FALSE;
-
 bool gQWebApiFlag=FALSE;
 QWEB_DATA_STRUCT gQWebUserData;
-extern void *QWebHandler_Task_Handle;
-//停止q网
+
+//停止q网，所有数据会被清空，q网线程也会挂起
 void QWA_StopQWeb(void)
 {
-	OS_TaskSuspend(QWebHandler_Task_Handle);
 	gQWebState=FALSE;
+	while(gQWebApiFlag==TRUE);
+	{
+		OS_DeclareCritical();
+		OS_EnterCritical();
+		gQWebUserData.CMD=QWAC_Stop;
+		gQWebUserData.DstAddr=0;
+		gQWebUserData.DataLen=0;
+		gQWebUserData.pData=NULL;
+		gQWebApiFlag=TRUE;
+		OS_ExitCritical();
+		OS_SemaphoreGive(gRfRecvHandler_Sem);
+	}
 }
 
 //打开q网
@@ -65,12 +76,12 @@ u8 QWA_QueryNextOnline(bool SetFrist)
 //等待同步返回查询名
 QW_RESULT QWA_QueryName(u8 Addr)
 {
-	if(Addr<QW_ADDR_MIN) return QWR_NO_SUCH_ADDR;
-	if(Addr>QW_ADDR_MAX) return QWR_NO_SUCH_ADDR;
+	if(((Addr<QW_ADDR_MIN)||(Addr>QW_ADDR_MAX))&&(Addr!=QW_ADDR_HOST))
+	return QWR_NO_SUCH_ADDR;
 	
 	if(QW_ReadMapBit(Addr))
 	{
-		if(gQWebApiFlag==FALSE)
+		while(gQWebApiFlag==TRUE);
 		{
 			OS_DeclareCritical();
 			OS_EnterCritical();
@@ -80,12 +91,6 @@ QW_RESULT QWA_QueryName(u8 Addr)
 			gQWebUserData.pData=NULL;
 			gQWebApiFlag=TRUE;
 			OS_ExitCritical();
-			
-			//if(!gRfRecvHandler_Sem->OSEventCnt)
-			//	if(OS_SemaphoreGive(gRfRecvHandler_Sem)!=OS_ERR_NONE)//告诉q网线程有数据要传递
-			//		return QWR_FAILED;
-			//	else
-			//		return QWR_SUCCESS;
 			return (QW_RESULT)OS_SemaphoreGive(gRfRecvHandler_Sem);
 		}
 
@@ -121,7 +126,7 @@ QW_RESULT QWA_SendData(u8 Addr,u32 DataLen,u8 *pData)
 {
 	if(DataLen>QW_MAX_MALLCO_BYTES) return QWR_BUF_UN_ENOUGH;
 	
-	if(gQWebApiFlag==FALSE)
+	while(gQWebApiFlag==TRUE);
 	{
 		OS_DeclareCritical();
 		OS_EnterCritical();
@@ -131,14 +136,7 @@ QW_RESULT QWA_SendData(u8 Addr,u32 DataLen,u8 *pData)
 		gQWebUserData.pData=pData;
 		gQWebApiFlag=TRUE;
 		OS_ExitCritical();
-
 		Debug("QW Send Data @ %d\n\r",QW_GetNowTimeMs());
-		
-		//if(!gRfRecvHandler_Sem->OSEventCnt)
-		//	if(OS_SemaphoreGive(gRfRecvHandler_Sem)!=OS_ERR_NONE)//告诉q网线程有数据要传递
-		//		return QWR_FAILED;
-		//	else
-		//		return QWR_SUCCESS;
 		return (QW_RESULT)OS_SemaphoreGive(gRfRecvHandler_Sem);
 	}
 

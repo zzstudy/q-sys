@@ -6,6 +6,7 @@
 //否则你就失去了你的页面的独立性，这是很忌讳的
 extern const PAGE_ATTRIBUTE QWebPage;
 
+u8 *QWP_GetNameByAddr(u8 Addr);
 
 
 #endif

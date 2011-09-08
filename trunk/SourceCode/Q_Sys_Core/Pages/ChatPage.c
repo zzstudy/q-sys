@@ -9,6 +9,7 @@
  
 #include "User.h"
 #include "Theme.h"
+#include "QWebPage.h"
 #include "ChatPage.h"
 
 //函数声明
@@ -165,30 +166,29 @@ static void DispChatList(void)//显示聊天记录
 }
 
 //插入一条记录到聊天列表
-static void InsertOneRecord(u8 *pStr,bool IsMy)
+static void InsertOneRecord(u8 *pStr,bool SrcAddr)
 {
 	u16 Len,CopyLen;
-	u8 NowRole=IsMy?1:2;
 	RTC_TIME NowTime;
 
-	if(gpCpVars->LastRecordRole!=NowRole)//如果上一条和这一条是同一个人发的，无需显示名字信息
+	if(gpCpVars->LastRecordRole!=SrcAddr)//如果上一条和这一条是同一个人发的，无需显示名字信息
 	{
 		//插入名字
 		RTC_GetTime(&NowTime);
-		if(IsMy)
+		if(QWA_GetMyAddr()==SrcAddr)//is my
 		{
 			sprintf(gpCpVars->ChatList[gpCpVars->ChatListDispIdx],"%s (%02d:%02d:%02d)",(void *)QWA_MyQWebName(NULL),NowTime.hour,NowTime.min,NowTime.sec);		
 			gpCpVars->ChatListColor[gpCpVars->ChatListDispIdx]=CHAT_MY_NAME_COLOR;
 		}
 		else
 		{
-			sprintf(gpCpVars->ChatList[gpCpVars->ChatListDispIdx],"%s (%02d:%02d:%02d)",(void *)gpCpVars->DstName,NowTime.hour,NowTime.min,NowTime.sec);		
+			sprintf(gpCpVars->ChatList[gpCpVars->ChatListDispIdx],"%s (%02d:%02d:%02d)",(void *)QWP_GetNameByAddr(SrcAddr),NowTime.hour,NowTime.min,NowTime.sec);		
 			gpCpVars->ChatListColor[gpCpVars->ChatListDispIdx]=CHAT_SHE_NAME_COLOR;
 		}
 		gpCpVars->ChatListDispIdx++;
 		if(gpCpVars->ChatListDispIdx==CHAT_LIST_COL_NUM) gpCpVars->ChatListDispIdx=0;
 
-		gpCpVars->LastRecordRole=NowRole;
+		gpCpVars->LastRecordRole=SrcAddr;
 	}
 
 	//插入内容
@@ -204,7 +204,7 @@ static void InsertOneRecord(u8 *pStr,bool IsMy)
 		
 		MemCpy(gpCpVars->ChatList[gpCpVars->ChatListDispIdx],pStr,CopyLen);
 		gpCpVars->ChatList[gpCpVars->ChatListDispIdx][CopyLen]=0;
-		if(IsMy) gpCpVars->ChatListColor[gpCpVars->ChatListDispIdx]=CHAT_MY_TXT_COLOR;
+		if(QWA_GetMyAddr()==SrcAddr) gpCpVars->ChatListColor[gpCpVars->ChatListDispIdx]=CHAT_MY_TXT_COLOR;
 		else gpCpVars->ChatListColor[gpCpVars->ChatListDispIdx]=CHAT_SHE_TXT_COLOR;
 
 		//行数自加
@@ -217,10 +217,10 @@ static void InsertOneRecord(u8 *pStr,bool IsMy)
 	}
 }
 
-static SYS_MSG RecvQwebData(const PAGE_ATTRIBUTE *pPage,int IntParam, void *pParam)
+static SYS_MSG RecvQwebData(PERIP_EVT PeripEvent,int IntParam, void *pParam)
 {
 	Debug("Recv from %d:%dbytes %s\n\r",IntParam>>24,IntParam&0xffffff,pParam);
-	InsertOneRecord((void *)pParam,FALSE);
+	InsertOneRecord((void *)pParam,IntParam>>24);
 	return 0;
 }
 
@@ -356,11 +356,11 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 			}break;
 
 		case Perip_QWebRecv:
-			RecvQwebData(NULL,IntParam,pParam);
+			RecvQwebData(Perip_QWebRecv,IntParam,pParam);
 			DispChatList();
 			break;
 		case Perip_QWebSendOk:
-			InsertOneRecord(gpCpVars->SendBuf,TRUE);
+			InsertOneRecord(gpCpVars->SendBuf,QWA_GetMyAddr());
 			DispChatList();
 			{
 				GUI_REGION DrawRegion;

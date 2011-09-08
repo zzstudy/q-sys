@@ -534,7 +534,6 @@ void QSYS_Init(void)
 	OS_TaskCreate(TouchHandler_Task,"Touch",OS_MINIMAL_STACK_SIZE*3,NULL,TOUCH_TASK_PRIORITY,&TouchHandler_Task_Handle);
 	OS_TaskCreate(KeysHandler_Task,"Keys",OS_MINIMAL_STACK_SIZE*2,NULL,KEYS_TASK_PRIORITY,&KeysHandler_Task_Handle);
 	OS_TaskCreate(QWebHandler_Task,"QWeb",OS_MINIMAL_STACK_SIZE*8,NULL,RF_DATA_TASK_PRIORITY,&QWebHandler_Task_Handle);
-	OS_TaskSuspend(QWebHandler_Task_Handle);//ÔÝÍ£Q web
 	
 	OS_TaskDelay(100);
 	OS_TaskStkCheck(FALSE);

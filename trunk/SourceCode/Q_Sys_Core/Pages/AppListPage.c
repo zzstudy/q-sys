@@ -542,7 +542,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 				QWA_SendData(&UserData);
 			}
 #endif
-			Q_GotoPage(GotoNewPage,"QWebPage",0,NULL);
+			Q_GotoPage(GotoNewPage,"QWebPage",GotoSubPage,"ChatPage");
 			break;
 		case TouchChkKV:
 			Q_GotoPage(GotoNewPage,"TouchCheckPage",0,NULL);
@@ -551,7 +551,6 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 			Q_GotoPage(GotoNewPage,"SnakePage",0,NULL);
 			break;		
 		case HomeKV:
-
 			{
 				u16 DataLen=50*50;
 				u8 *pData=OS_Mallco(DataLen);

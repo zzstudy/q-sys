@@ -41,6 +41,9 @@ typedef enum
 }QWebPage_KEY_NAME;
 
 //本页宏定义
+#define QWEB_PAGE_BG_COLOR FatColor(0xe0e0e0)//页面背景色
+#define QWEB_PAGE_FONT_COLOR FatColor(0x000000)//页面文字色
+#define QWEB_PAGE_SELECT_ACT_WAITING_MS	3000 //点击列表项之后，最多等待设备回应时间
 #define DEVICE_INFO_MAX_CLIENT_RECORD 7//最多纪录20个client
 #define DEVICE_INFO_MAX_LIST_NUM 7//一页最多显示7个信息
 #define DEVICE_NAME_MAX_LEN	16//名字长度
@@ -69,7 +72,7 @@ static const IMG_TCH_OBJ ImgTchRegCon[]={
 	{"Done",	DoneKV,RelMsk|PathMsk,183,287,54,31,0,0,"Common/Btn/Done",FatColor(NO_TRANS)},
 
 	//device list region
-	{"", ListKV,PrsMsk|RelMsk,DEVICE_INFO_START_X,DEVICE_INFO_START_Y,DEVICE_INFO_W,DEVICE_INFO_MAX_LIST_NUM*(DEVICE_INFO_H+DEVICE_INFO_LIST_SPACE),
+	{"", ListKV,PrsMsk|RelMsk|ReVMsk,DEVICE_INFO_START_X,DEVICE_INFO_START_Y,DEVICE_INFO_W,DEVICE_INFO_MAX_LIST_NUM*(DEVICE_INFO_H+DEVICE_INFO_LIST_SPACE),
 			0,0,"",FatColor(NO_TRANS)},
 	
 	//液晶屏下面非显示区域的四个键
@@ -108,28 +111,46 @@ const PAGE_ATTRIBUTE QWebPage={
 
 //-----------------------本页自定义变量声明-----------------------
 typedef struct{
-	u8 Addr;
-	u8 DispIdx;
-	bool IsHiLight;
-	u16 NameChk;
-	u8 Name[DEVICE_NAME_MAX_LEN];
+	u8 Addr;//记录地址
+	u8 DispIdx;//记录排到列表第几个位置，从1开始
+	bool IsHiLight;//设备名是否高亮
+	u16 NameChk;//名字校验码
+	u8 Name[DEVICE_NAME_MAX_LEN];//记录名字
 }CLIENT_RECORD;
 
 typedef struct{
-	YES_NO_OBJ YesNo;
-	u8 NowDispNum;// from 0 start
-	CLIENT_RECORD ClientRecord[DEVICE_INFO_MAX_CLIENT_RECORD];
+	YES_NO_OBJ YesNo;//q web 开关
+	u8 NowDispNum;// 当前列表显示数目，from 0 start
+	u8 NowPressKey;//当前按下的列表按键号，没有时为0xff
+	CLIENT_RECORD ClientRecord[DEVICE_INFO_MAX_CLIENT_RECORD];//q网设备记录
+	u8 SelectedAddr;//选定的地址，没有时为0
+	u32 SelectedTimeMs;//选定列表项的时间
+	PAGE_ACTION GotoPageAct;//按下列表项后需以何种方式进入的新页面
 	u8 GotoPageName[32];//按下列表项后需进入的页面
 }QWEB_PAGE_VARS;
-static QWEB_PAGE_VARS *gpQwpVar;
+static QWEB_PAGE_VARS *gpQwpVar=NULL;
 
 //-----------------------本页自定义函数-----------------------
+u8 *QWP_GetNameByAddr(u8 Addr)
+{
+	u8 i;
+	
+	if(gpQwpVar==NULL) return "";
+
+	for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)
+	if(gpQwpVar->ClientRecord[i].Addr==Addr)
+	{
+		return gpQwpVar->ClientRecord[i].Name;
+	}
+}
 
 //-----------------------本页系统函数----------------------
 static void DrawState(void)//更新当前q网状态显示
 {
 	GUI_REGION DrawRegion;
 	u8 Str[32];
+
+	if(Q_GetPageByTrack(0)!=(&QWebPage)) return;//看是否在本页面
 	
 	//q网开关
 	DrawRegion.x=10;
@@ -137,9 +158,9 @@ static void DrawState(void)//更新当前q网状态显示
 	DrawRegion.w=160;
 	DrawRegion.h=16;
 	DrawRegion.Space=0x00;
-	DrawRegion.Color=FatColor(0xe0e0e0);
+	DrawRegion.Color=QWEB_PAGE_BG_COLOR;
 	Gui_FillBlock(&DrawRegion);
-	DrawRegion.Color=FatColor(0x000000);
+	DrawRegion.Color=QWEB_PAGE_FONT_COLOR;
 	if(QWA_GetMyAddr()==QW_ADDR_DEF)//未分配
 	{
 		Gui_DrawFont(GBK16_FONT,"Q Web State",&DrawRegion);
@@ -175,7 +196,8 @@ static bool DrawDeviceInfo(u8 Idx,u8 Addr,u8 *Name,u8 Action)
 {
 	GUI_REGION DrawRegion;
 	u8 StrBuf[DEVICE_NAME_MAX_LEN<<1];
-	
+
+	if(Q_GetPageByTrack(0)!=(&QWebPage)) return TRUE;//看是否在本页面
 	if((Idx<1)||(Idx>DEVICE_INFO_MAX_LIST_NUM)) return FALSE;
 	Idx--;
 	
@@ -274,6 +296,7 @@ static void DeleteOneDevice(u8 Addr)
 			DispIdx=gpQwpVar->ClientRecord[i].DispIdx;
 			gpQwpVar->ClientRecord[i].Addr=0;
 			gpQwpVar->ClientRecord[i].Name[0]=0;
+			gpQwpVar->ClientRecord[i].DispIdx=0;
 			gpQwpVar->NowDispNum--;
 		}
 	}
@@ -314,6 +337,59 @@ static void HighLightOneDevice(u8 Addr)
 	DrawState();//更新下状态
 }
 
+static void DrawInitBg(void)
+{
+	GUI_REGION DrawRegion;
+	
+	//画标题栏
+	DrawRegion.x=DrawRegion.y=0;
+	DrawRegion.w=240;
+	DrawRegion.h=21;
+	DrawRegion.Color=FatColor(NO_TRANS);
+	Gui_FillImgArray((u8 *)gImage_StatusBar1,1,21,&DrawRegion);	
+	DrawTitle1(ASC14B_FONT,"QWebPage",(240-strlen("QWebPage")*GUI_ASC14B_ASCII_WIDTH)>>1,strlen("QWebPage"),QWEB_PAGE_BG_COLOR);//写标题
+	
+	//画背景
+	DrawRegion.x=0;
+	DrawRegion.y=21;
+	DrawRegion.w=240;
+	DrawRegion.h=320-21-39;
+	DrawRegion.Color=FatColor(0x8b8a8a);
+	Gui_FillBlock(&DrawRegion);
+
+	//画底栏
+	DrawRegion.x=0;
+	DrawRegion.y=320-39;
+	DrawRegion.w=240;
+	DrawRegion.h=39;
+	DrawRegion.Color=FatColor(NO_TRANS);
+	Gui_FillImgArray((u8 *)gImage_BottomBar1,1,39,&DrawRegion);
+
+	//画框
+	DrawFrame1(25,252);	
+
+	//画点
+	{GUI_REGION DrawRegTmp={109,292,22,22,0,FatColor(NO_TRANS)};
+	Gui_Draw24Bmp("Theme/F/Common/Btn/DotN.bmp",&DrawRegTmp);}
+
+	//device info list bg
+	DrawRegion.x=6;
+	DrawRegion.y=56;
+	DrawRegion.w=228;
+	DrawRegion.h=212;
+	DrawRegion.Color=DEVICE_INFO_LIST_BG;
+	Gui_FillBlock(&DrawRegion);
+
+	//device list
+	DrawRegion.x=76;
+	DrawRegion.y=56+4;
+	DrawRegion.w=100;
+	DrawRegion.h=16;
+	DrawRegion.Space=0x00;
+	DrawRegion.Color=DEVICE_INFO_FONT_COLOR;
+	Gui_DrawFont(ASC14B_FONT,"Device List",&DrawRegion);	
+}
+
 //发生某些事件时，会触发的函数
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam)
 {
@@ -326,68 +402,44 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 		case Sys_PageInit:		//系统每次打开这个页面，会处理这个事件				
 			 gpQwpVar=Q_PageMallco(sizeof(QWEB_PAGE_VARS));
 			 MemSet(gpQwpVar,0,sizeof(QWEB_PAGE_VARS));
-			 if(pSysParam) strncpy(gpQwpVar->GotoPageName,pSysParam,sizeof(gpQwpVar->GotoPageName));
-			 Debug("cpy goto page name %d :%s\n\r",sizeof(gpQwpVar->GotoPageName),pSysParam);
+			 gpQwpVar->NowPressKey=0xff;
+			 if(pSysParam) 
+			 {
+			 	gpQwpVar->GotoPageAct=IntParam;
+			 	strncpy(gpQwpVar->GotoPageName,pSysParam,sizeof(gpQwpVar->GotoPageName));
+			 }
 		case Sys_SubPageReturn:	//如果从子页面返回,就不会触发Sys_Page_Init事件,而是Sys_SubPage_Return
+			if(SysEvent==Sys_SubPageReturn) //关全局事件
+			{
+				Q_DisableGobalPeripEvent(Perip_QWebJoin,PeripheralsHandler);
+				Q_DisableGobalPeripEvent(Perip_QWebQueryName,PeripheralsHandler);
+			}
 			Q_TimSet(Q_TIM1,10000,500,TRUE);//5s poll
-			//画标题栏
-			DrawRegion.x=DrawRegion.y=0;
-			DrawRegion.w=240;
-			DrawRegion.h=21;
-			DrawRegion.Color=FatColor(NO_TRANS);
-			Gui_FillImgArray((u8 *)gImage_StatusBar1,1,21,&DrawRegion);	
-			DrawTitle1(ASC14B_FONT,"QWebPage",(240-strlen("QWebPage")*GUI_ASC14B_ASCII_WIDTH)>>1,strlen("QWebPage"),FatColor(0xe0e0e0));//写标题
-			
-			//画背景
-			DrawRegion.x=0;
-			DrawRegion.y=21;
-			DrawRegion.w=240;
-			DrawRegion.h=320-21-39;
-			DrawRegion.Color=FatColor(0x8b8a8a);
-			Gui_FillBlock(&DrawRegion);
 
-			//画底栏
-			DrawRegion.x=0;
-			DrawRegion.y=320-39;
-			DrawRegion.w=240;
-			DrawRegion.h=39;
-			DrawRegion.Color=FatColor(NO_TRANS);
-			Gui_FillImgArray((u8 *)gImage_BottomBar1,1,39,&DrawRegion);
-
-			//画框
-			DrawFrame1(25,252);	
-
-			//画点
-			{GUI_REGION DrawRegTmp={109,292,22,22,0,FatColor(NO_TRANS)};
-			Gui_Draw24Bmp("Theme/F/Common/Btn/DotN.bmp",&DrawRegTmp);}
-
+			DrawInitBg();
 			DrawState();
 
-			//device info list bg
-			DrawRegion.x=6;
-			DrawRegion.y=56;
-			DrawRegion.w=228;
-			DrawRegion.h=212;
-			DrawRegion.Color=DEVICE_INFO_LIST_BG;
-			Gui_FillBlock(&DrawRegion);
-
-			//device list
-			DrawRegion.x=76;
-			DrawRegion.y=56+4;
-			DrawRegion.w=100;
-			DrawRegion.h=16;
-			DrawRegion.Space=0x00;
-			DrawRegion.Color=DEVICE_INFO_FONT_COLOR;
-			Gui_DrawFont(ASC14B_FONT,"Device List",&DrawRegion);		
-
-			if(QWA_GetMyAddr()!=QW_ADDR_DEF)//已经入网
+			//如果q网已经开启，如果是主机，应迅速建立list
+			//如果q网已经开启，如果是从机，应迅速建立list
+			//如果q网没开启，不动
+			if(QWA_GetMyAddr()!=QW_ADDR_DEF)//q网已经启动
 			{
-				u8 i;
-				
-				for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)//检查主机还在不在
+				u8 Addr;
+				u8 MyAddr=QWA_GetMyAddr();
+
+				if(QWA_GetMyAddr()!=QW_ADDR_HOST)//自己是从机
 				{
-					if(gpQwpVar->ClientRecord[i].Addr!=0)
-						AddOneDevice(gpQwpVar->ClientRecord[i].Addr,(void *)gpQwpVar->ClientRecord[i].Name);
+					AddOneDevice(QW_ADDR_HOST,NULL);//添加主机
+				}
+				
+				//轮询添加在线从机
+				QWA_QueryNextOnline(TRUE);
+				while((Addr=QWA_QueryNextOnline(FALSE))!=0)
+				{
+					if(Addr!=MyAddr) 
+					{
+						AddOneDevice(Addr,NULL);//添加无名设备
+					}
 				}
 			}
 			break;
@@ -396,10 +448,16 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 			
 			break;
 		case Sys_PageClean:
-			if(QWA_QWebState()) QWA_StopQWeb();
+			//if(QWA_QWebState()) QWA_StopQWeb();
 			Q_PageFree(gpQwpVar);
+			gpQwpVar=NULL;
 		case Sys_PreSubPage:
 			Q_TimSet(Q_TIM1,0,0,FALSE);//stop poll
+			if(SysEvent==Sys_PreSubPage)//开全局事件 
+			{
+				Q_EnableGobalPeripEvent(Perip_QWebJoin,PeripheralsHandler);
+				Q_EnableGobalPeripEvent(Perip_QWebQueryName,PeripheralsHandler);
+			}
 			break;
 		default:
 			//需要响应的事件未定义
@@ -441,20 +499,28 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 			{
 				u8 i;
 				
-				for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)//检查主机还在不在
+				for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)//检查设备还在不在
 				{
 					if(gpQwpVar->ClientRecord[i].Addr!=0)
-						if(QWA_QueryOnline(gpQwpVar->ClientRecord[i].Addr)==0)
+						if(QWA_QueryOnline(gpQwpVar->ClientRecord[i].Addr)==0)//设备不在了
 						{Debug("@@ Delete %d\n\r",gpQwpVar->ClientRecord[i].Addr);
 							DeleteOneDevice(gpQwpVar->ClientRecord[i].Addr);
 						}
-						else if(gpQwpVar->ClientRecord[i].Name[0]==0)//没名字的，查询名字
+						else if(gpQwpVar->ClientRecord[i].Name[0]==0)//没名字的，查询名字 //unfinsh:如果查不到，会一直循环查
 						{
 							QWA_QueryName(gpQwpVar->ClientRecord[i].Addr);
 							Q_TimSet(Q_TIM1,10000,200,TRUE);// 2s poll
 							break;
 						}
 				}
+			}
+
+			//看看点击的设备，是否依然没有回应，如果超时，点击无效
+			if((gpQwpVar->SelectedAddr) && (gpQwpVar->SelectedAddr!=QW_ADDR_HOST)
+				&&	(OS_GetCurrentSysMs()-gpQwpVar->SelectedTimeMs > QWEB_PAGE_SELECT_ACT_WAITING_MS) )
+			{
+				DeleteOneDevice(gpQwpVar->SelectedAddr);
+				gpQwpVar->SelectedAddr=0;
 			}
 			break;
 			
@@ -478,11 +544,23 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 				{
 					if(Addr!=MyAddr) AddOneDevice(Addr,NULL);//添加无名设备
 				}
+
+				if(gpQwpVar->SelectedAddr==QW_ADDR_HOST)//有选定主机作为对话地址，正在等待主机info
+				{
+					gpQwpVar->SelectedAddr=0;
+					Q_GotoPage(gpQwpVar->GotoPageAct,gpQwpVar->GotoPageName,IntParam,pParam);
+				}
 			}
 			break;
 		case Perip_QWebQueryName:
 			Debug("QWeb Query [%d]%s\n\r",IntParam,pParam);
 			AddOneDevice(IntParam,pParam);
+
+			if(IntParam==gpQwpVar->SelectedAddr)//有选定地址，正在等待query ack
+			{
+				gpQwpVar->SelectedAddr=0;
+				Q_GotoPage(gpQwpVar->GotoPageAct,gpQwpVar->GotoPageName,IntParam,pParam);
+			}
 			break;
 		case Perip_QWebRecv://收到信息
 			HighLightOneDevice(IntParam>>24);
@@ -504,6 +582,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 {		
 	//GUI_REGION DrawRegion;
+	u8 i;
 	
 	switch(Key)
 	{
@@ -518,12 +597,12 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 		case ListKV:
 			if(InEvent==Tch_Press)
 			{
-				u8 i;
 				Key=((pTouchInfo->y-DEVICE_INFO_START_Y)/(DEVICE_INFO_H+DEVICE_INFO_LIST_SPACE))+1;
 				for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)
 				{
 					if(gpQwpVar->ClientRecord[i].DispIdx==Key)
 					{
+						gpQwpVar->NowPressKey=Key;//记录按下的项
 						DrawDeviceInfo(Key,gpQwpVar->ClientRecord[i].Addr,gpQwpVar->ClientRecord[i].Name,PressDisp);
 						break;
 					}
@@ -531,19 +610,55 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 			}
 			else if(InEvent==Tch_Release)
 			{
-				u8 i;
 				Key=((pTouchInfo->y-DEVICE_INFO_START_Y)/(DEVICE_INFO_H+DEVICE_INFO_LIST_SPACE))+1;
-				for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)
+				if(Key==gpQwpVar->NowPressKey)//在同一项上释放了，此按下动作有效
 				{
-					if(gpQwpVar->ClientRecord[i].DispIdx==Key)
+					for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++) //还原此项，进入处理页面
 					{
-						gpQwpVar->ClientRecord[i].IsHiLight=FALSE;
-						DrawDeviceInfo(Key,gpQwpVar->ClientRecord[i].Addr,gpQwpVar->ClientRecord[i].Name,NormalDisp);
-						if(gpQwpVar->GotoPageName&&gpQwpVar->GotoPageName[0])
-							Q_GotoPage(GotoSubPage,gpQwpVar->GotoPageName,gpQwpVar->ClientRecord[i].Addr,gpQwpVar->ClientRecord[i].Name);
-						break;
+						if(gpQwpVar->ClientRecord[i].DispIdx==Key)
+						{
+							gpQwpVar->ClientRecord[i].IsHiLight=FALSE;
+							DrawDeviceInfo(Key,gpQwpVar->ClientRecord[i].Addr,gpQwpVar->ClientRecord[i].Name,NormalDisp);
+							if((gpQwpVar->GotoPageName&&gpQwpVar->GotoPageName[0]) 
+								&& (gpQwpVar->SelectedAddr == 0))//允许进入子页面
+							{//进入子页面前先查询名字
+								gpQwpVar->SelectedAddr=gpQwpVar->ClientRecord[i].Addr;
+								QWA_QueryName(gpQwpVar->SelectedAddr);
+								gpQwpVar->SelectedTimeMs=OS_GetCurrentSysMs();
+								//在Perip_QWebQueryName事件里面执行goto page动作
+							}
+							break;
+						}
 					}
 				}
+				else//在其他项的位置释放了，此按下动作无效
+				{
+					for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)//还原此项显示
+					{
+						if(gpQwpVar->ClientRecord[i].DispIdx==gpQwpVar->NowPressKey)
+						{
+							if(gpQwpVar->ClientRecord[i].IsHiLight==TRUE)
+								DrawDeviceInfo(gpQwpVar->NowPressKey,gpQwpVar->ClientRecord[i].Addr,gpQwpVar->ClientRecord[i].Name,HighLightDisp);
+							else 
+								DrawDeviceInfo(gpQwpVar->NowPressKey,gpQwpVar->ClientRecord[i].Addr,gpQwpVar->ClientRecord[i].Name,NormalDisp);
+						}
+					}
+				}
+				gpQwpVar->NowPressKey=0xff;
+			}
+			else if(InEvent==Tch_ReleaseVain)//在超出list的区域释放了，无效
+			{
+				for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)//还原此项显示
+				{
+					if(gpQwpVar->ClientRecord[i].DispIdx==gpQwpVar->NowPressKey)
+					{
+						if(gpQwpVar->ClientRecord[i].IsHiLight==TRUE)
+							DrawDeviceInfo(gpQwpVar->NowPressKey,gpQwpVar->ClientRecord[i].Addr,gpQwpVar->ClientRecord[i].Name,HighLightDisp);
+						else 
+							DrawDeviceInfo(gpQwpVar->NowPressKey,gpQwpVar->ClientRecord[i].Addr,gpQwpVar->ClientRecord[i].Name,NormalDisp);
+					}
+				}
+				gpQwpVar->NowPressKey=0xff;
 			}
 			break;
 		case RightArrowKV:
@@ -567,8 +682,37 @@ static TCH_MSG YesNoHandler(u8 ObjID,bool NowValue)
 	switch(ObjID)
 	{
 		case 1:
-			if(NowValue==TRUE) QWA_StartQWeb();
-			else QWA_StopQWeb();
+			if(NowValue==TRUE) 
+			{
+				QWA_StartQWeb();
+			}
+			else
+			{
+				
+				u8 i;
+				GUI_REGION DrawRegion;
+				u8 Str[32];
+				
+				QWA_StopQWeb();
+				for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)//检查主机还在不在
+				{
+					if(gpQwpVar->ClientRecord[i].Addr!=0)
+					{
+						DeleteOneDevice(gpQwpVar->ClientRecord[i].Addr);
+					}
+				}
+					
+				//状态文字
+				DrawRegion.x=10;
+				DrawRegion.y=34;
+				DrawRegion.w=160;
+				DrawRegion.h=16;
+				DrawRegion.Space=0x00;
+				DrawRegion.Color=QWEB_PAGE_BG_COLOR;
+				Gui_FillBlock(&DrawRegion);
+				DrawRegion.Color=QWEB_PAGE_FONT_COLOR;
+				Gui_DrawFont(GBK16_FONT,"Q Web State",&DrawRegion);
+			}
 			break;
 	}
 	

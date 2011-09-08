@@ -76,7 +76,7 @@ SYS_MSG MyGobalPeripEvtHandler(PERIP_EVT PeripEvt,int intParam, void *pParam)
 	{
  		if(gGobalPeripEvtRecord[i].PeripEvt==PeripEvt)//事件对上号了
  		{
-			SysMsg|=gGobalPeripEvtRecord[i].GobalPeripEvtHandler(gpCurrentPage,intParam,pParam);
+			SysMsg|=gGobalPeripEvtRecord[i].GobalPeripEvtHandler(PeripEvt,intParam,pParam);
  		}
 	}	
 

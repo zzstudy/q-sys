@@ -199,7 +199,7 @@ typedef enum {
 }SYS_EVT;//4	传入SystemEventHandler的事件
 
 typedef enum{
-	Perip_KeyPress,//外部按键按下。ParamTable(PERIP_EVT,U16 KeyValue,EXIT_KEY_INFO*)
+	Perip_KeyPress,//外部按键按下。ParamTable(PERIP_EVT,KeyValue,EXIT_KEY_INFO*)
 	Perip_KeyRelease,//外部按键释放
 	
 	Perip_RtcSec,		//除了整分，每秒都会触发此事件。可以屏蔽，默认关闭
@@ -210,19 +210,19 @@ typedef enum{
 	Perip_LcdOff,//lcd超时熄灭触发此事件。可以屏蔽，默认关闭
 	Perip_LcdOn,//lcd 熄灭后，被触碰重新点亮会触发此事件。可以屏蔽，默认关闭
 
-	Perip_UartInput,//串口输入。ParamTable(PERIP_EVT,H16Bit_ComNum|L16Bit_StrBytes,u8 *Str)
+	Perip_UartInput,//串口输入。ParamTable(PERIP_EVT,(ComNum<<16)|StrBytes,u8 *Str)
 
 	Perip_MscPlay,//开始播放一个音乐文件时触发
 	Perip_MscPause,//音乐文件播放被暂停时触发
 	Perip_MscContinue,//音乐文件从暂停进入继续播放时被触发
 	Perip_MscStop,//音乐文件播放完毕时被触发
 
-	Perip_QWebJoin,//新从机加入或者自己获取到从机地址
-	Perip_QWebRecv,//收到Q网数据
-	Perip_QWebSendOk,//发送Q网数据完成
-	Perip_QWebSendFailed,//发送Q网数据失败
+	Perip_QWebJoin,//(主机)新从机加入;(从机)获取到从机地址.ParamTable(PERIP_EVT,Addr,u8 *DeviceName)
+	Perip_QWebRecv,//收到Q网数据.ParamTable(PERIP_EVT,(Addr<<24)|DataLen,u8 *pData)
+	Perip_QWebSendOk,//发送Q网数据完成.ParamTable(PERIP_EVT,(Addr<<24)|DataLen,u8 *pData)
+	Perip_QWebSendFailed,//发送Q网数据失败.ParamTable(PERIP_EVT,(Addr<<24)|DataLen,u8 *pData)
 	Perip_QWebHostConflict,//主机冲突
-	Perip_QWebQueryName,//收到一个query应答，用于查询设备名
+	Perip_QWebQueryName,//收到一个query应答.ParamTable(PERIP_EVT,Addr,u8 *DeviceName)
 	Perip_QWebError,//错误
 }PERIP_EVT;//4	传入PeripheralsHandler的事件
 
@@ -274,10 +274,6 @@ typedef struct PAGE_ATTRIBUTE{
 	StrInputBoxHandlerFunc StrInputBoxHandler;
 #endif	
 }PAGE_ATTRIBUTE;//4	每个页面都会定义的属性结构体
-
-//全局事件函数体
-//第一参数传递当前页面结构体指针
-typedef SYS_MSG (*GobalPeripEvtHandlerFunc)(const PAGE_ATTRIBUTE * ,int , void *);
 
 //4	数据库项
 typedef enum {
@@ -386,12 +382,11 @@ void Q_EnablePeripEvt(u32 RegID,PERIP_EVT SysEvent);//开启一个事件响应，如Enable
 void Q_DisablePeripEvt(u32 RegID,PERIP_EVT SysEvent);//关闭一个事件响应，如DisableSysEvt(Perip_RtcSec);
 INSPECT_SYSEVT_RET Q_InspectPeripEvt(u32 RegID,PERIP_EVT SysEvent);//检查指定事件是否可以被响应，如InspectSysEvt(Perip_RtcSec);
 
-//设置全局事件，任何页面下，都会触发事件的处理函数SysEventHandler
-//不对Sys_PreGotoPage起作用
-void Q_EnableGobalPeripEvent(PERIP_EVT SysEvent,GobalPeripEvtHandlerFunc SysEventHandler);
+//设置全局事件，任何页面下，都会触发事件的处理函数PeripEvtHandler
+void Q_EnableGobalPeripEvent(PERIP_EVT PeripEvt,PeripheralsHandlerFunc PeripEvtHandler);
 
 //注销全局事件
-void Q_DisableGobalPeripEvent(PERIP_EVT SysEvent,GobalPeripEvtHandlerFunc SysEventHandler);
+void Q_DisableGobalPeripEvent(PERIP_EVT PeripEvt,PeripheralsHandlerFunc PeripEvtHandler);
 
 //用于错误停止，此函数不能返回，直接死循环
 #define Q_ErrorStopScreen(Msg) Q_ErrorStop(__FILE__,__func__,__LINE__,Msg);

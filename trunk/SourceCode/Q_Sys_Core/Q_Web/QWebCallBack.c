@@ -195,7 +195,7 @@ QW_RESULT QW_SessionQueryHandler(QW_CALLBACK_ACT State,int IntParam,QW_SESSION *
 			QW_Sync(QWE_QueryAck,pPacket->SrcAddr,QW_ATTRIBUTE_STR_MAX_LEN,pAckQueryPkt->AttributeStr);
 			break;
 		case QWCA_TIMEOUT:
-			if((gMyQwDrviceType==QWDT_AUTO_HOST)&&(gMyQwNowRole==QWDT_SLAVE)&&(pSession->DstAddr==QW_ADDR_HOST))//query超时也没有收到info，直接变更为主机
+			if((pSession->ID==QWSI_SLAVE_QUERY)&&(gMyQwDrviceType==QWDT_AUTO_HOST)&&(gMyQwNowRole==QWDT_SLAVE)&&(pSession->DstAddr==QW_ADDR_HOST))//query超时也没有收到info，直接变更为主机
 			{
 				if((Error=QW_ChangeRole(QWDT_AUTO_HOST,GetHwID()&0xff))!=QWR_SUCCESS)//变为主机
 				{
@@ -231,12 +231,6 @@ QW_RESULT QW_SessionInfoHandler(QW_CALLBACK_ACT State,int IntParam,QW_SESSION *p
 						QW_Debug("QW HW ID error!%x %x\n\r",gMyQwHostHwId,pInfoPkt->HwID);
 						return QWR_SUCCESS;
 					}
-
-
-
-
-
-							
 					
 					//设置q网id
 					gMyQwID=pPacket->QW_ID;

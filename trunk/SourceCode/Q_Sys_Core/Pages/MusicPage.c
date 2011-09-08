@@ -15,7 +15,7 @@
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
 static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
-static SYS_MSG GobalMusicStopHandler(const PAGE_ATTRIBUTE * pCurPage,int intParam, void *pParam);
+static SYS_MSG GobalMusicStopHandler(PERIP_EVT PeripEvent,int intParam, void *pParam);
 
 //-----------------------本页系统变量及声明-----------------------
 enum
@@ -961,7 +961,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 
 	return 0;
 }
-static SYS_MSG GobalMusicStopHandler(const PAGE_ATTRIBUTE * pCurPage,int intParam, void *pParam)
+static SYS_MSG GobalMusicStopHandler(PERIP_EVT PeripEvent,int intParam, void *pParam)
 {
 	MUSIC_EVENT MusicEvent;
 	FILELIST_SET FLPS;
