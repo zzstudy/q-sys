@@ -167,7 +167,7 @@ static void DispChatList(void)//显示聊天记录
 //插入一条记录到聊天列表
 static void InsertOneRecord(u8 *pStr,bool IsMy)
 {
-	u8 Len,CopyLen;
+	u16 Len,CopyLen;
 	u8 NowRole=IsMy?1:2;
 	RTC_TIME NowTime;
 

@@ -78,7 +78,7 @@ const PAGE_ATTRIBUTE MainPage={
 	SystemEventHandler, //init page or app function  
 	PeripheralsHandler,
 	Bit(Perip_RtcMin)|Bit(Perip_LcdOff)|Bit(Perip_LcdOn)|Bit(Perip_UartInput)|
-	Bit(Perip_Timer)|Bit(Perip_RtcAlarm),
+	Bit(Perip_Timer)|Bit(Perip_RtcAlarm)|Bit(Perip_KeyPress)|Bit(Perip_KeyRelease),
 	TouchEventHandler, //touch input event handler function
 };
 
