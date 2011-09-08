@@ -33,6 +33,7 @@ typedef enum{
 
 typedef enum{
 	QWAC_Null=0,
+	QWAC_Stop,//停止q网线程，所有数据清空
 	QWAC_SendData,
 	QWAC_QueryName,	
 }QW_API_CMD;

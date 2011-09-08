@@ -295,16 +295,16 @@ INSPECT_SYSEVT_RET Q_InspectPeripEvt(u32 RegID,PERIP_EVT PeripEvt)
 
 //设置全局事件，任何页面下，都会触发事件的处理函数SysEventHandler
 //不对Sys_PreGotoPage起作用
-void Q_EnableGobalPeripEvent(PERIP_EVT PeripEvt,GobalPeripEvtHandlerFunc SysEventHandler)
+void Q_EnableGobalPeripEvent(PERIP_EVT PeripEvt,PeripheralsHandlerFunc PeripEvtHandler)
 {
 	u8 i;
 
-	if(SysEventHandler==NULL) return;
+	if(PeripEvtHandler==NULL) return;
 	
 	//找是否有重复记录
 	for(i=0;i<MAX_GOBAL_SYSEVT;i++)
 	{
-		if((gGobalPeripEvtRecord[i].PeripEvt==PeripEvt)&&(gGobalPeripEvtRecord[i].GobalPeripEvtHandler==SysEventHandler))
+		if((gGobalPeripEvtRecord[i].PeripEvt==PeripEvt)&&(gGobalPeripEvtRecord[i].GobalPeripEvtHandler==PeripEvtHandler))
 			return;
 	}	
 	
@@ -319,12 +319,12 @@ void Q_EnableGobalPeripEvent(PERIP_EVT PeripEvt,GobalPeripEvtHandlerFunc SysEven
 	}
 
 	gGobalPeripEvtRecord[i].PeripEvt=PeripEvt;
-	gGobalPeripEvtRecord[i].GobalPeripEvtHandler=SysEventHandler;
+	gGobalPeripEvtRecord[i].GobalPeripEvtHandler=PeripEvtHandler;
 	SetBit(gGobalPeripEvtBitFlag,PeripEvt);
 }
 
 //注销全局事件
-void Q_DisableGobalPeripEvent(PERIP_EVT PeripEvt,GobalPeripEvtHandlerFunc PeripEvtHandler)
+void Q_DisableGobalPeripEvent(PERIP_EVT PeripEvt,PeripheralsHandlerFunc PeripEvtHandler)
 {
 	u8 i;
 
