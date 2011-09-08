@@ -127,7 +127,7 @@ typedef struct{
 	FS_FILE *fp;
 	FS_DIR *dirp;
 }FLIELIST_PAGE_VARS;//将本页要用到的全局变量全部放入此结构体
-static FLIELIST_PAGE_VARS *gVars;//只需要定义一个指针，减少全局变量的使用
+static FLIELIST_PAGE_VARS *gpFpVars;//只需要定义一个指针，减少全局变量的使用
 
 //文件系统
 typedef struct {//sizeof=680
@@ -458,7 +458,7 @@ static bool DisplayFiles(FLIELIST_PAGE_VARS *pVars)
 		}
 		else if((pVars->CurStartNum+Row)>=pVars->Unit.N.CurSubDirTotal)
 		{//1如果当前选择超过子目录个数,显示文件
-			//Debug("readfile %d %d\n\r",gVars->CurrentStartNum+Row-gVars->CurSubDirTotal,gVars->FileIndex[gVars->CurrentStartNum+Row-gVars->CurSubDirTotal]);
+			//Debug("readfile %d %d\n\r",gpFpVars->CurrentStartNum+Row-gpFpVars->CurSubDirTotal,gpFpVars->FileIndex[gpFpVars->CurrentStartNum+Row-gpFpVars->CurSubDirTotal]);
 			if((pVars->pd= FS_ReadDir_IDX(pVars->dirp,pVars->Unit.N.FileIndex[pVars->CurStartNum+Row-pVars->Unit.N.CurSubDirTotal]))!=0)
 			{
 				//画底色
@@ -483,7 +483,7 @@ static bool DisplayFiles(FLIELIST_PAGE_VARS *pVars)
 		}
 		else
 		{//显示子目录
-			//Debug("readdir %d %d\n\r",gVars->CurrentStartNum+Row,gVars->DirIndex[gVars->CurrentStartNum+Row]);
+			//Debug("readdir %d %d\n\r",gpFpVars->CurrentStartNum+Row,gpFpVars->DirIndex[gpFpVars->CurrentStartNum+Row]);
 			if((pVars->pd= FS_ReadDir_IDX(pVars->dirp,pVars->Unit.N.DirIndex[pVars->CurStartNum+Row]))!=0)
 			{
 				//画底色
@@ -1113,36 +1113,36 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,FILELIST_CMD Cmd, FILELIST_S
 			
 			Debug("sizeof(FLIELIST_PAGE_VARS)=%d\n\r",sizeof(FLIELIST_PAGE_VARS));
 			Debug("Dir:%s\n\r",pFLS->pPathBuf);
-			gVars=(FLIELIST_PAGE_VARS *)Q_PageMallco(sizeof(FLIELIST_PAGE_VARS));//申请空间
+			gpFpVars=(FLIELIST_PAGE_VARS *)Q_PageMallco(sizeof(FLIELIST_PAGE_VARS));//申请空间
 
-			if(gVars==0)
+			if(gpFpVars==0)
 			{
-				Q_ErrorStopScreen("gVars malloc fail !\n\r");
+				Q_ErrorStopScreen("gpFpVars malloc fail !\n\r");
 			}
 					
-			gVars->Cmd=Cmd;//复制当前命令
-			gVars->pPath=pFLS->pPathBuf;//取得路径缓存指针
-			gVars->RootPathLen=strlen((void *)gVars->pPath);//取得初始路径长度
+			gpFpVars->Cmd=Cmd;//复制当前命令
+			gpFpVars->pPath=pFLS->pPathBuf;//取得路径缓存指针
+			gpFpVars->RootPathLen=strlen((void *)gpFpVars->pPath);//取得初始路径长度
 
 			//如果不复制，当函数返回，指针指向的内存就注销了
-			if(gVars->pPath[gVars->RootPathLen-1]=='/') 
+			if(gpFpVars->pPath[gpFpVars->RootPathLen-1]=='/') 
 			{//如果最后一个字符是斜杠
-				gVars->pPath[gVars->RootPathLen-1]=0;//去掉最后一个'/'
-				gVars->RootPathLen--;
+				gpFpVars->pPath[gpFpVars->RootPathLen-1]=0;//去掉最后一个'/'
+				gpFpVars->RootPathLen--;
 			}
-			gVars->CallerPageRid=pFLS->CallBackRid;		//记录返回页面	
-			strcpy((void *)gVars->SuffixStr,(void *)pFLS->pSuffixStr);//复制后缀名字符串
+			gpFpVars->CallerPageRid=pFLS->CallBackRid;		//记录返回页面	
+			strcpy((void *)gpFpVars->SuffixStr,(void *)pFLS->pSuffixStr);//复制后缀名字符串
 
-			Debug("ZCL: SuffixStr %s\r\n",gVars->SuffixStr);
+			Debug("ZCL: SuffixStr %s\r\n",gpFpVars->SuffixStr);
 			
 			//文件系统
-			gVars->fp =0 ;
-			gVars->dirp = 0;
+			gpFpVars->fp =0 ;
+			gpFpVars->dirp = 0;
 
 			if((Cmd&FL_CMD_MASK)==FL_CreatListBuf)
 			{
-				CreatListBuf(gVars,TRUE);
-				Q_PageFree(gVars);
+				CreatListBuf(gpFpVars,TRUE);
+				Q_PageFree(gpFpVars);
 				return SM_State_OK|SM_NoGoto;
 			}
 			
@@ -1179,10 +1179,10 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,FILELIST_CMD Cmd, FILELIST_S
 	
 			return SM_State_OK;
 		case Sys_TouchSetOk:
-			HandleNewDir(gVars);//进入新目录
+			HandleNewDir(gpFpVars);//进入新目录
 			return SM_State_OK;
 		case Sys_PageClean:
-			Q_PageFree(gVars);
+			Q_PageFree(gpFpVars);
 			return SM_State_OK;
 		default:
 			Debug("You should not here! %d\n\r",SysEvent);
@@ -1201,17 +1201,17 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 						PrtScreen();
 						break;
 					case ExtiKeyUp:
-						if(gVars->CurStartNum-PAGE_DISPALY_NUM>=0)
+						if(gpFpVars->CurStartNum-PAGE_DISPALY_NUM>=0)
 						{
-							gVars->CurStartNum-=PAGE_DISPALY_NUM;
-							DisplayFiles(gVars);
+							gpFpVars->CurStartNum-=PAGE_DISPALY_NUM;
+							DisplayFiles(gpFpVars);
 						}			
 						break;
 					case ExtiKeyDown:
-						if(gVars->CurStartNum+PAGE_DISPALY_NUM<gVars->CurTotal) 
+						if(gpFpVars->CurStartNum+PAGE_DISPALY_NUM<gpFpVars->CurTotal) 
 						{
-							gVars->CurStartNum+=PAGE_DISPALY_NUM;
-							DisplayFiles(gVars);
+							gpFpVars->CurStartNum+=PAGE_DISPALY_NUM;
+							DisplayFiles(gpFpVars);
 						}
 						break; 
 				}break;
@@ -1226,59 +1226,59 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 	{
 		case UpKV:
 			if(InEvent!=Tch_Release) return 0;
-			if(gVars->CurStartNum-PAGE_DISPALY_NUM>=0)
+			if(gpFpVars->CurStartNum-PAGE_DISPALY_NUM>=0)
 			{
-				gVars->CurStartNum-=PAGE_DISPALY_NUM;
-				DisplayFiles(gVars);
+				gpFpVars->CurStartNum-=PAGE_DISPALY_NUM;
+				DisplayFiles(gpFpVars);
 			}			
 			break;
 		case DownKV:
 			if(InEvent!=Tch_Release) return 0;
-			if(gVars->CurStartNum+PAGE_DISPALY_NUM<gVars->CurTotal) 
+			if(gpFpVars->CurStartNum+PAGE_DISPALY_NUM<gpFpVars->CurTotal) 
 			{
-				gVars->CurStartNum+=PAGE_DISPALY_NUM;
-				DisplayFiles(gVars);
+				gpFpVars->CurStartNum+=PAGE_DISPALY_NUM;
+				DisplayFiles(gpFpVars);
 			}
 			break;
 		case NumKV:
 			Key=(pTouchInfo->y+FONT_TOP_MARGIN-DISPLAY_START_Y)/ROW_HIGHT;
-			if((Key+gVars->CurStartNum)<gVars->CurTotal)
+			if((Key+gpFpVars->CurStartNum)<gpFpVars->CurTotal)
 			{
-				ChangeSelect(Key,gVars,InEvent);	
+				ChangeSelect(Key,gpFpVars,InEvent);	
 			}
 			break;
 		case ParentDirKV:
 			if(InEvent!=Tch_Release) return 0;
-			if(gVars->pPath[0]!=0)
+			if(gpFpVars->pPath[0]!=0)
 			{
-				for(i=strlen((void *)gVars->pPath);i;i--)//除去最后一层目录
+				for(i=strlen((void *)gpFpVars->pPath);i;i--)//除去最后一层目录
 				{
-					Debug("%c",gVars->pPath[i]);
-					if(gVars->pPath[i]=='/') break;
+					Debug("%c",gpFpVars->pPath[i]);
+					if(gpFpVars->pPath[i]=='/') break;
 				}
 
-				if((gVars->Cmd&FL_NoParent)&&(i<gVars->RootPathLen))//不准进入初始目录上层
+				if((gpFpVars->Cmd&FL_NoParent)&&(i<gpFpVars->RootPathLen))//不准进入初始目录上层
 					break;
 				else
-					gVars->pPath[i]=0;
+					gpFpVars->pPath[i]=0;
 
-				HandleNewDir(gVars);//进入新目录
+				HandleNewDir(gpFpVars);//进入新目录
 			}
 			break;
 		case EnterKV:
 			if(InEvent!=Tch_Release) return 0;
-			if(gVars->CurSelect!=0xff) 
+			if(gpFpVars->CurSelect!=0xff) 
 			{
-				sprintf((void *)gVars->pPath,"%s/%s",gVars->pPath,gVars->CurSelectName);
-				Debug("Select %s\n\r",gVars->pPath);//拼合文件路径
-				Q_GotoPage(SubPageReturn,"",TRUE,gVars->pPath);
+				sprintf((void *)gpFpVars->pPath,"%s/%s",gpFpVars->pPath,gpFpVars->CurSelectName);
+				Debug("Select %s\n\r",gpFpVars->pPath);//拼合文件路径
+				Q_GotoPage(SubPageReturn,"",TRUE,gpFpVars->pPath);
 			}
 			else
-				Q_GotoPage(SubPageReturn,"",FALSE,gVars->pPath);
+				Q_GotoPage(SubPageReturn,"",FALSE,gpFpVars->pPath);
 			break;		
 		case ReturnKV:
 			if(InEvent!=Tch_Release) return 0;
-			Q_GotoPage(SubPageReturn,"",FALSE,gVars->pPath);
+			Q_GotoPage(SubPageReturn,"",FALSE,gpFpVars->pPath);
 			break;
 		default:
 			Debug("You should not here! Key:%d\n\r",Key);

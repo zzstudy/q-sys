@@ -194,7 +194,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 					break;
 				case ExtiKey2:
 					Debug("Key%d,%d\n\r",ExtiKey2,Perip_KeyRelease);
-					Q_GotoPage(GotoNewPage,"AppListPage",-1,NULL);
+					Q_GotoPage(GotoNewPage,"AppListPage",0,NULL);
 					break; 
 			}break;
 		case Perip_Timer:			
@@ -246,23 +246,23 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 		case PrevKV:
 			break;
 		case MusicKV:
-			Q_GotoPage(GotoNewPage,"MusicPage",-1,NULL);
+			Q_GotoPage(GotoNewPage,"MusicPage",0,NULL);
 			break;
 		case EBookKV:
-			Q_GotoPage(GotoNewPage,"EBookPage",-1,NULL);
+			Q_GotoPage(GotoNewPage,"EBookPage",0,NULL);
 			break;
 		case PictureKV:
-			Q_GotoPage(GotoNewPage,"PicturePage",-1,NULL);
+			Q_GotoPage(GotoNewPage,"PicturePage",0,NULL);
 			break;
 		case AppListKV:
 			Debug("go to app list\n\r");
-			Q_GotoPage(GotoNewPage,"AppListPage",-1,NULL);
+			Q_GotoPage(GotoNewPage,"AppListPage",0,NULL);
 			break;
 		case AdcKV:
-			Q_GotoPage(GotoNewPage,"AdcPage",-1,NULL);
+			Q_GotoPage(GotoNewPage,"AdcPage",0,NULL);
 			break;
 		case CalculatorKV:
-			Q_GotoPage(GotoNewPage,"CalculatorPage",-1,NULL);
+			Q_GotoPage(GotoNewPage,"CalculatorPage",0,NULL);
 			break;
  		case HomeKV:
 

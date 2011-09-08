@@ -211,10 +211,10 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 	{
 		
 		case BackKV:
-			Q_GotoPage(GotoNewPage,Q_GetPageByTrack(1)->Name,-1,NULL);//返回前一个页面
+			Q_GotoPage(GotoNewPage,Q_GetPageByTrack(1)->Name,0,NULL);//返回前一个页面
 			break;
 		case DoneKV:
-			Q_GotoPage(GotoNewPage,Q_GetPageByTrack(1)->Name,-1,NULL);//返回前一个页面
+			Q_GotoPage(GotoNewPage,Q_GetPageByTrack(1)->Name,0,NULL);//返回前一个页面
 			break;	
 		case LeftArrowKV:
 			break;

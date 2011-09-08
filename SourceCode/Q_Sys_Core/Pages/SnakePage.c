@@ -52,9 +52,9 @@
 #define GROUND_S_PIX	280
 //场地边界的坐标	
 #define WESTWALL		0
-#define EASTWALL		(((GROUND_E_PIX-GROUND_W_PIX+1)/gVars->CUR_SIZE)-1)
+#define EASTWALL		(((GROUND_E_PIX-GROUND_W_PIX+1)/gpSpVars->CUR_SIZE)-1)
 #define NORTHWALL		0
-#define SOUTHWALL		(((GROUND_S_PIX-GROUND_N_PIX+1)/gVars->CUR_SIZE)-1)
+#define SOUTHWALL		(((GROUND_S_PIX-GROUND_N_PIX+1)/gpSpVars->CUR_SIZE)-1)
 //循环队列至少需保存的元素数目
 #define MAXQSIZE		((EASTWALL-WESTWALL+1)*(SOUTHWALL-NORTHWALL+1))	
 
@@ -178,7 +178,7 @@ typedef struct{
 	u8  CtrlFlag;//用来保证在定时器两次触发之间只响应第一次动作
 }SNAKE_PAGE_VARS;//将本页要用到的全局变量全部放入此结构体
 
-static SNAKE_PAGE_VARS *gVars;//只需要定义一个指针，减少全局变量的使用
+static SNAKE_PAGE_VARS *gpSpVars;//只需要定义一个指针，减少全局变量的使用
 //-----------------------本页自定义函数定义-----------------------
 //创建一个循环队列
 static void InitQueue(SqQueue *Q){
@@ -217,50 +217,50 @@ static void InQ_xy(u8 x,u8 y){
 	u16 temp=0;
 	temp=y;
 	temp|=x<<8;
-	EnQueue(&gVars->SNAKE_QUEUE,temp);		
+	EnQueue(&gpSpVars->SNAKE_QUEUE,temp);		
 }
 //从队头取出一组坐标
 static void OutQ_xy(u8 *x,u8 *y){
 	u16 temp=0;
-	DeQueue(&gVars->SNAKE_QUEUE,&temp);
+	DeQueue(&gpSpVars->SNAKE_QUEUE,&temp);
 	*x=temp>>8;
 	*y=temp&0xff;
 }	
 //画坐标对应方块
 static void DrBody_xy(u8 x,u8 y){
 	GUI_REGION DrawRegion;
-	DrawRegion.x=GROUND_W_PIX+gVars->CUR_SIZE*x;
-	DrawRegion.y=GROUND_N_PIX+gVars->CUR_SIZE*y;
-	DrawRegion.w=gVars->CUR_SIZE;
-	DrawRegion.h=gVars->CUR_SIZE;
-	DrawRegion.Color=gVars->SNAKE_COLOUR;
+	DrawRegion.x=GROUND_W_PIX+gpSpVars->CUR_SIZE*x;
+	DrawRegion.y=GROUND_N_PIX+gpSpVars->CUR_SIZE*y;
+	DrawRegion.w=gpSpVars->CUR_SIZE;
+	DrawRegion.h=gpSpVars->CUR_SIZE;
+	DrawRegion.Color=gpSpVars->SNAKE_COLOUR;
 	Gui_FillBlock(&DrawRegion);
 }
 //画坐标对应食物
 static void DrFood_xy(u8 x,u8 y){
 	GUI_REGION DrawRegion;
-	DrawRegion.x=(GROUND_W_PIX+gVars->CUR_SIZE*x)+gVars->CUR_SIZE/2;
-	DrawRegion.y=(GROUND_N_PIX+gVars->CUR_SIZE*y)+gVars->CUR_SIZE/2;
-	DrawRegion.w=(gVars->CUR_SIZE-1)/2;
-	DrawRegion.Color=gVars->FOOD_COLOUR;
+	DrawRegion.x=(GROUND_W_PIX+gpSpVars->CUR_SIZE*x)+gpSpVars->CUR_SIZE/2;
+	DrawRegion.y=(GROUND_N_PIX+gpSpVars->CUR_SIZE*y)+gpSpVars->CUR_SIZE/2;
+	DrawRegion.w=(gpSpVars->CUR_SIZE-1)/2;
+	DrawRegion.Color=gpSpVars->FOOD_COLOUR;
 	DrawRegion.Space=0xff;
 	Gui_DrawCircle(&DrawRegion,(bool)1); 
 }
 //清坐标对应方块
 static void ClBody_xy(u8 x,u8 y){
 	GUI_REGION DrawRegion;
-	DrawRegion.x=GROUND_W_PIX+gVars->CUR_SIZE*x;
-	DrawRegion.y=GROUND_N_PIX+gVars->CUR_SIZE*y;
-	DrawRegion.w=gVars->CUR_SIZE;
-	DrawRegion.h=gVars->CUR_SIZE;
+	DrawRegion.x=GROUND_W_PIX+gpSpVars->CUR_SIZE*x;
+	DrawRegion.y=GROUND_N_PIX+gpSpVars->CUR_SIZE*y;
+	DrawRegion.w=gpSpVars->CUR_SIZE;
+	DrawRegion.h=gpSpVars->CUR_SIZE;
 
-	DrawRegion.Color=gVars->BG_COLOUR;
+	DrawRegion.Color=gpSpVars->BG_COLOUR;
 	Gui_FillBlock(&DrawRegion);
 }
 //读坐标对应方块颜色
 static u16 GetColo_xy(u8 x,u8 y){
-	x=GROUND_W_PIX+gVars->CUR_SIZE*x;
-	y=GROUND_N_PIX+gVars->CUR_SIZE*y;
+	x=GROUND_W_PIX+gpSpVars->CUR_SIZE*x;
+	y=GROUND_N_PIX+gpSpVars->CUR_SIZE*y;
 	return Gui_ReadPixel16Bit(x,y);
 }
 //清屏
@@ -280,7 +280,7 @@ static void DrawBg(void){
 	DrawRegion.y=GROUND_N_PIX;
 	DrawRegion.w=GROUND_E_PIX-GROUND_W_PIX+1;
 	DrawRegion.h=GROUND_S_PIX-GROUND_N_PIX+1;
-	DrawRegion.Color=gVars->BG_COLOUR;
+	DrawRegion.Color=gpSpVars->BG_COLOUR;
 	Gui_FillBlock(&DrawRegion);
 }
 //复位蛇的所有状态
@@ -378,7 +378,7 @@ static u8 IfDie(psnake ps){
 	u8  x,y;
 	if(ps->nhposx<WESTWALL||ps->nhposx>EASTWALL||ps->nhposy<NORTHWALL||ps->nhposy>SOUTHWALL)
 		return 1;
-	j=QueueLength(&gVars->SNAKE_QUEUE);
+	j=QueueLength(&gpSpVars->SNAKE_QUEUE);
 	for(i=0;i<j;i++){
 		 OutQ_xy(&x,&y);
 		 InQ_xy(x,y);
@@ -416,15 +416,15 @@ static void Die(psnake ps){
 //开始游戏
 static void StartGame(void){
 	//清空队列
-	ClearQueue(&gVars->SNAKE_QUEUE);
+	ClearQueue(&gpSpVars->SNAKE_QUEUE);
 	//画背景
 	DrawBg();
 	//复位蛇的所有状态
-	ResetSnake(&gVars->SNAKE);
+	ResetSnake(&gpSpVars->SNAKE);
 	//生成第一个食物
-	CreatFood(&gVars->SNAKEFOOD);
+	CreatFood(&gpSpVars->SNAKEFOOD);
 	//开定时器
-	Q_TimSet(Q_TIM1,gVars->CUR_SPEED,100,(bool)1);
+	Q_TimSet(Q_TIM1,gpSpVars->CUR_SPEED,100,(bool)1);
 }
 //小延时保证读取的颜色正确
 static void delay(){
@@ -437,12 +437,12 @@ static void GetFood_xy(u8 *x,u8 *y){
 	u16 curcolo;
 	u8 tempx=0,tempy=0;
 	while(1){
-		curcolo=gVars->SNAKE_COLOUR;
+		curcolo=gpSpVars->SNAKE_COLOUR;
 		temp=Rand(0xffff);//产生十六位随机数 
 		tempx=(temp>>8)%(EASTWALL-WESTWALL+1);
 		tempy=(temp&0xff)%(SOUTHWALL-NORTHWALL+1);
 		curcolo=GetColo_xy(tempx,tempy);
-		if(curcolo!=gVars->SNAKE_COLOUR)//若生成的食物地址不在蛇身上则采用，否则重取
+		if(curcolo!=gpSpVars->SNAKE_COLOUR)//若生成的食物地址不在蛇身上则采用，否则重取
 			break;								  
 		else
 			delay();
@@ -471,7 +471,7 @@ static void digest(psnake ps){
 	ps->hposx=ps->nhposx;
 	ps->hposy=ps->nhposy;
 	InQ_xy(ps->hposx,ps->hposy);
-	ps->eatnum+=(gVars->CUR_SIZELEV*gVars->CUR_SPEEDLEV);//加分规则
+	ps->eatnum+=(gpSpVars->CUR_SIZELEV*gpSpVars->CUR_SPEEDLEV);//加分规则
 }
 //根据用户的设定调整蛇的速度和大小
 static void ModifySnakeSettings(void *OptionsBuf){
@@ -488,18 +488,18 @@ static void ModifySnakeSettings(void *OptionsBuf){
 				if(SP_IsModify(OptionsBuf,i)==FALSE) continue;//未修改
 				SP_GetNumOption(OptionsBuf,i,&Val);
 				if(Val==1){
-					gVars->CUR_SPEED=SLOW;
-					gVars->CUR_SPEEDLEV=1;
+					gpSpVars->CUR_SPEED=SLOW;
+					gpSpVars->CUR_SPEEDLEV=1;
 					break;
 				}
 				else if(Val==2){
-					gVars->CUR_SPEED=SWIFT;
-					gVars->CUR_SPEEDLEV=2;
+					gpSpVars->CUR_SPEED=SWIFT;
+					gpSpVars->CUR_SPEEDLEV=2;
 					break;
 				}
 				else if(Val==3){
-				    gVars->CUR_SPEED=LIGHTNING;
-					gVars->CUR_SPEEDLEV=3;
+				    gpSpVars->CUR_SPEED=LIGHTNING;
+					gpSpVars->CUR_SPEEDLEV=3;
 					break;
 				}
 				else
@@ -509,18 +509,18 @@ static void ModifySnakeSettings(void *OptionsBuf){
 				if(SP_IsModify(OptionsBuf,i)==FALSE) continue;//未修改
 				SP_GetNumOption(OptionsBuf,i,&Val);
 				if(Val==1){
-					gVars->CUR_SIZE=SMALL;
-					gVars->CUR_SIZELEV=1;
+					gpSpVars->CUR_SIZE=SMALL;
+					gpSpVars->CUR_SIZELEV=1;
 					break;
 				}
 				else if(Val==2){
-					gVars->CUR_SIZE=NORMAL;
-					gVars->CUR_SIZELEV=2;
+					gpSpVars->CUR_SIZE=NORMAL;
+					gpSpVars->CUR_SIZELEV=2;
 					break;
 				}
 				else if(Val==3){
-				    gVars->CUR_SIZE=BIG;
-					gVars->CUR_SIZELEV=3;
+				    gpSpVars->CUR_SIZE=BIG;
+					gpSpVars->CUR_SIZELEV=3;
 					break;
 				}
 				else
@@ -530,28 +530,28 @@ static void ModifySnakeSettings(void *OptionsBuf){
 				if(SP_IsModify(OptionsBuf,i)==FALSE) continue;//未修改
 				SP_GetNumOption(OptionsBuf,i,&Val);
 				if(Val==1){
-					gVars->SNAKE_COLOUR=RED;
-					gVars->SNAKE_COLOURLEV=1;
+					gpSpVars->SNAKE_COLOUR=RED;
+					gpSpVars->SNAKE_COLOURLEV=1;
 					break;
 				}
 				else if(Val==2){
-					gVars->SNAKE_COLOUR=GREEN;
-					gVars->SNAKE_COLOURLEV=2;
+					gpSpVars->SNAKE_COLOUR=GREEN;
+					gpSpVars->SNAKE_COLOURLEV=2;
 					break;
 				}
 				else if(Val==3){
-					gVars->SNAKE_COLOUR=BLUE;
-					gVars->SNAKE_COLOURLEV=3;
+					gpSpVars->SNAKE_COLOUR=BLUE;
+					gpSpVars->SNAKE_COLOURLEV=3;
 					break;
 				}
 				else if(Val==4){
-					gVars->SNAKE_COLOUR=ORANGE;
-					gVars->SNAKE_COLOURLEV=4;
+					gpSpVars->SNAKE_COLOUR=ORANGE;
+					gpSpVars->SNAKE_COLOURLEV=4;
 					break;
 				}
 				else if(Val==5){
-					gVars->SNAKE_COLOUR=PURPLE;
-					gVars->SNAKE_COLOURLEV=5;
+					gpSpVars->SNAKE_COLOUR=PURPLE;
+					gpSpVars->SNAKE_COLOURLEV=5;
 					break;
 				}
 				else
@@ -561,28 +561,28 @@ static void ModifySnakeSettings(void *OptionsBuf){
 				if(SP_IsModify(OptionsBuf,i)==FALSE) continue;//未修改
 				SP_GetNumOption(OptionsBuf,i,&Val);
 				if(Val==1){
-					gVars->FOOD_COLOUR=RED;
-					gVars->FOOD_COLOURLEV=1;
+					gpSpVars->FOOD_COLOUR=RED;
+					gpSpVars->FOOD_COLOURLEV=1;
 					break;
 				}
 				else if(Val==2){
-					gVars->FOOD_COLOUR=GREEN;
-					gVars->FOOD_COLOURLEV=2;
+					gpSpVars->FOOD_COLOUR=GREEN;
+					gpSpVars->FOOD_COLOURLEV=2;
 					break;
 				}
 				else if(Val==3){
-					gVars->FOOD_COLOUR=BLUE;
-					gVars->FOOD_COLOURLEV=3;
+					gpSpVars->FOOD_COLOUR=BLUE;
+					gpSpVars->FOOD_COLOURLEV=3;
 					break;
 				}
 				else if(Val==4){
-					gVars->FOOD_COLOUR=ORANGE;
-					gVars->FOOD_COLOURLEV=4;
+					gpSpVars->FOOD_COLOUR=ORANGE;
+					gpSpVars->FOOD_COLOURLEV=4;
 					break;
 				}
 				else if(Val==5){
-					gVars->FOOD_COLOUR=PURPLE;
-					gVars->FOOD_COLOURLEV=5;
+					gpSpVars->FOOD_COLOUR=PURPLE;
+					gpSpVars->FOOD_COLOURLEV=5;
 					break;
 				}
 				else
@@ -592,28 +592,28 @@ static void ModifySnakeSettings(void *OptionsBuf){
 				if(SP_IsModify(OptionsBuf,i)==FALSE) continue;//未修改
 				SP_GetNumOption(OptionsBuf,i,&Val);
 				if(Val==1){
-					gVars->BG_COLOUR=RED;
-					gVars->BG_COLOURLEV=1;
+					gpSpVars->BG_COLOUR=RED;
+					gpSpVars->BG_COLOURLEV=1;
 					break;
 				}
 				else if(Val==2){
-					gVars->BG_COLOUR=GREEN;
-					gVars->BG_COLOURLEV=2;
+					gpSpVars->BG_COLOUR=GREEN;
+					gpSpVars->BG_COLOURLEV=2;
 					break;
 				}
 				else if(Val==3){
-					gVars->BG_COLOUR=BLUE;
-					gVars->BG_COLOURLEV=3;
+					gpSpVars->BG_COLOUR=BLUE;
+					gpSpVars->BG_COLOURLEV=3;
 					break;
 				}
 				else if(Val==4){
-					gVars->BG_COLOUR=ORANGE;
-					gVars->BG_COLOURLEV=4;
+					gpSpVars->BG_COLOUR=ORANGE;
+					gpSpVars->BG_COLOURLEV=4;
 					break;
 				}
 				else if(Val==5){
-					gVars->BG_COLOUR=PURPLE;
-					gVars->BG_COLOURLEV=5;
+					gpSpVars->BG_COLOUR=PURPLE;
+					gpSpVars->BG_COLOURLEV=5;
 					break;
 				}
 				else
@@ -688,27 +688,27 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 			break;
 		case Sys_PageInit:		//系统每次打开这个页面，会处理这个事件
 		
-			gVars=(SNAKE_PAGE_VARS *)Q_PageMallco(sizeof(SNAKE_PAGE_VARS));//申请空间	
+			gpSpVars=(SNAKE_PAGE_VARS *)Q_PageMallco(sizeof(SNAKE_PAGE_VARS));//申请空间	
 			
-			if(gVars==0)
+			if(gpSpVars==0)
 			{
-				Q_ErrorStopScreen("gVars malloc fail !\n\r");
+				Q_ErrorStopScreen("gpSpVars malloc fail !\n\r");
 			}
 						
 			//全局变量初始化
-			gVars->CUR_SPEED=DEFA_SPEED,				//存储蛇当前速度
-			gVars->CUR_SIZE=DEFA_SIZE,					//存储蛇当前大小
-			gVars->SNAKE_COLOUR=DEFA_SNAKE_COLOUR,		//存储蛇当前颜色
-			gVars->FOOD_COLOUR=DEFA_FOOD_COLOUR,		//存储食物当前颜色
-			gVars->BG_COLOUR=DEFA_BG_COLOUR,			//存储场地当前颜色
+			gpSpVars->CUR_SPEED=DEFA_SPEED,				//存储蛇当前速度
+			gpSpVars->CUR_SIZE=DEFA_SIZE,					//存储蛇当前大小
+			gpSpVars->SNAKE_COLOUR=DEFA_SNAKE_COLOUR,		//存储蛇当前颜色
+			gpSpVars->FOOD_COLOUR=DEFA_FOOD_COLOUR,		//存储食物当前颜色
+			gpSpVars->BG_COLOUR=DEFA_BG_COLOUR,			//存储场地当前颜色
 	
-			gVars->CUR_SPEEDLEV=DEFA_CUR_SPEEDLEV,		//存储蛇当前速度（用作seting）
-			gVars->CUR_SIZELEV=DEFA_CUR_SIZELEV,		//存储蛇当前大小（用作seting）
-			gVars->SNAKE_COLOURLEV=DEFA_SNAKE_COLOURLEV,//存储蛇当前颜色（用作seting）
-			gVars->FOOD_COLOURLEV=DEFA_FOOD_COLOURLEV,	//存储食物当前颜色（用作seting）
-			gVars->BG_COLOURLEV=DEFA_BG_COLOURLEV,		//存储场地当前颜色（用作seting）
+			gpSpVars->CUR_SPEEDLEV=DEFA_CUR_SPEEDLEV,		//存储蛇当前速度（用作seting）
+			gpSpVars->CUR_SIZELEV=DEFA_CUR_SIZELEV,		//存储蛇当前大小（用作seting）
+			gpSpVars->SNAKE_COLOURLEV=DEFA_SNAKE_COLOURLEV,//存储蛇当前颜色（用作seting）
+			gpSpVars->FOOD_COLOURLEV=DEFA_FOOD_COLOURLEV,	//存储食物当前颜色（用作seting）
+			gpSpVars->BG_COLOURLEV=DEFA_BG_COLOURLEV,		//存储场地当前颜色（用作seting）
 
-			gVars->CtrlFlag=0;//用来保证在定时器两次触发之间只响应第一次动作
+			gpSpVars->CtrlFlag=0;//用来保证在定时器两次触发之间只响应第一次动作
 
 			//画标题栏
 			DrawRegion.x=DrawRegion.y=0;
@@ -757,7 +757,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 			Gui_FillImgArray((u8 *)gImage_BottomBar1,1,39,&DrawRegion);
 			
 			//第一次初始化循环队列
-			InitQueue(&gVars->SNAKE_QUEUE);
+			InitQueue(&gpSpVars->SNAKE_QUEUE);
 			break;						  
 
 		case Sys_SubPageReturn:	//如果从子页面返回,就不会触发Sys_Page_Init事件,而是Sys_SubPage_Return
@@ -775,16 +775,16 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 				Q_PageFree(pSysParam);//从设置页面返回必须释放当初进入时分配的内存，否则会造成泄漏
 			}						
 			DrawBg();//画背景			
-			ResetSnake(&gVars->SNAKE);////复位蛇的所有状态
-			DestroyQueue(&gVars->SNAKE_QUEUE);//销毁循环队列并释放堆内存				
-			InitQueue(&gVars->SNAKE_QUEUE);//重新初始化循环队列			
+			ResetSnake(&gpSpVars->SNAKE);////复位蛇的所有状态
+			DestroyQueue(&gpSpVars->SNAKE_QUEUE);//销毁循环队列并释放堆内存				
+			InitQueue(&gpSpVars->SNAKE_QUEUE);//重新初始化循环队列			
 			break;
 
 		case Sys_PageClean:
 		
 			//释放页面资源
-			Q_PageFree(gVars);
-			DestroyQueue(&gVars->SNAKE_QUEUE);//销毁循环队列并释放堆内存			
+			Q_PageFree(gpSpVars);
+			DestroyQueue(&gpSpVars->SNAKE_QUEUE);//销毁循环队列并释放堆内存			
 			Q_TimSet(Q_TIM1,0,0,(bool)1);//tm2停止计数
 			
 			break;
@@ -817,38 +817,38 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 					break;
 				case ExtiKeyUp:
 				    Q_PresentTch(LeftArrowKV,Tch_Release);
-					if(gVars->CtrlFlag==0)
-						Turn_left(&gVars->SNAKE);
-					gVars->CtrlFlag=1;
+					if(gpSpVars->CtrlFlag==0)
+						Turn_left(&gpSpVars->SNAKE);
+					gpSpVars->CtrlFlag=1;
 					break;
 				case ExtiKeyDown:
 					Q_PresentTch(RightArrowKV,Tch_Release);
-					if(gVars->CtrlFlag==0)
-						Turn_right(&gVars->SNAKE);
-					gVars->CtrlFlag=1;
+					if(gpSpVars->CtrlFlag==0)
+						Turn_right(&gpSpVars->SNAKE);
+					gpSpVars->CtrlFlag=1;
 					break; 
 			}break;
 
 		case Perip_Timer://游戏的脉搏
 		
 			 //若没有左转或右转则保持前行
-			 if(gVars->CtrlFlag==0)
-				Turn_ahead(&gVars->SNAKE);
-			 gVars->CtrlFlag=0;
+			 if(gpSpVars->CtrlFlag==0)
+				Turn_ahead(&gpSpVars->SNAKE);
+			 gpSpVars->CtrlFlag=0;
 			
 			 //若将死亡则进行死亡处理
-			 if(IfDie(&gVars->SNAKE))
-			 	Die(&gVars->SNAKE);
+			 if(IfDie(&gpSpVars->SNAKE))
+			 	Die(&gpSpVars->SNAKE);
 			 
 			 //若吃到食物则进行消化
-			 else if(IfEat(&gVars->SNAKE,&gVars->SNAKEFOOD)){
-			 	digest(&gVars->SNAKE);
-			 	CreatFood(&gVars->SNAKEFOOD);
+			 else if(IfEat(&gpSpVars->SNAKE,&gpSpVars->SNAKEFOOD)){
+			 	digest(&gpSpVars->SNAKE);
+			 	CreatFood(&gpSpVars->SNAKEFOOD);
 			 }
 			 
 			 //若下一步不会死，而且不会吃到食物则蠕动一下
 			 else	
-			 	Go(&gVars->SNAKE);	
+			 	Go(&gpSpVars->SNAKE);	
 				
 			break;
 			
@@ -860,7 +860,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo){		
 	switch(Key){	
 		case BackKV:
-			Q_GotoPage(GotoNewPage,"AppListPage",-1,NULL);			
+			Q_GotoPage(GotoNewPage,"AppListPage",0,NULL);			
 			break;
 		case DoneKV:
 				StartGame();//开始游戏
@@ -868,29 +868,29 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 		
 		case LeftArrowKV:
 			//蛇向左转
-			if(gVars->CtrlFlag==0)
-				Turn_left(&gVars->SNAKE);
-			gVars->CtrlFlag=1;
+			if(gpSpVars->CtrlFlag==0)
+				Turn_left(&gpSpVars->SNAKE);
+			gpSpVars->CtrlFlag=1;
 			break;
 		case DotKV:{
 				void *p;
 				Q_TimSet(Q_TIM1,0,0,(bool)1);//tm2停止计数
 				p=Q_PageMallco(1000);
 				SP_AddOptionsHeader(p,1000,"Set Snake",OSID_SNAKE);	
-				SP_AddNumListOption(p,SNAKEOP_SPEED,gVars->CUR_SPEEDLEV,1,3,1,"选择蛇的速度","1：慢蛇 2：快蛇 3：闪电蛇");
-				SP_AddNumListOption(p,SNAKEOP_SIZE,gVars->CUR_SIZELEV,1,3,1,"选择蛇的大小","1：小蛇 2：中蛇 3：大蛇");
-				SP_AddNumListOption(p,SNAKEOP_SNAKE_COLOUR,gVars->SNAKE_COLOURLEV,1,5,1,"选择蛇的颜色","1红 2绿 3蓝 4橙 5紫");
-				SP_AddNumListOption(p,SNAKEOP_FOOD_COLOUR,gVars->FOOD_COLOURLEV,1,5,1,"选择食物的颜色","1红 2绿 3蓝 4橙 5紫");
-				SP_AddNumListOption(p,SNAKEOP_BG_COLOUR,gVars->BG_COLOURLEV,1,5,1,"选择场地的颜色","1红 2绿 3蓝 4橙 5紫");
+				SP_AddNumListOption(p,SNAKEOP_SPEED,gpSpVars->CUR_SPEEDLEV,1,3,1,"选择蛇的速度","1：慢蛇 2：快蛇 3：闪电蛇");
+				SP_AddNumListOption(p,SNAKEOP_SIZE,gpSpVars->CUR_SIZELEV,1,3,1,"选择蛇的大小","1：小蛇 2：中蛇 3：大蛇");
+				SP_AddNumListOption(p,SNAKEOP_SNAKE_COLOUR,gpSpVars->SNAKE_COLOURLEV,1,5,1,"选择蛇的颜色","1红 2绿 3蓝 4橙 5紫");
+				SP_AddNumListOption(p,SNAKEOP_FOOD_COLOUR,gpSpVars->FOOD_COLOURLEV,1,5,1,"选择食物的颜色","1红 2绿 3蓝 4橙 5紫");
+				SP_AddNumListOption(p,SNAKEOP_BG_COLOUR,gpSpVars->BG_COLOURLEV,1,5,1,"选择场地的颜色","1红 2绿 3蓝 4橙 5紫");
 				Q_GotoPage(GotoSubPage,"SettingsPage",TRUE,p);				
 			}			
 			break;	
 		case RightArrowKV:
 		
 			//蛇向右转
-			if(gVars->CtrlFlag==0)
-				Turn_right(&gVars->SNAKE);
-			gVars->CtrlFlag=1;
+			if(gpSpVars->CtrlFlag==0)
+				Turn_right(&gpSpVars->SNAKE);
+			gpSpVars->CtrlFlag=1;
 			break;
 		case HomeKV:
 		case MessageKV:

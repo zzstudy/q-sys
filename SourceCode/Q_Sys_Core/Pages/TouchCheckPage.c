@@ -112,35 +112,35 @@ typedef struct{
 	GUI_REGION DrawRegion;
 	bool OkFlag;
 }TOUCH_CHK_PAGE_VARS;
-TOUCH_CHK_PAGE_VARS *gVars;
+static TOUCH_CHK_PAGE_VARS *gpTcpVars;
 void Init_TouchChkPageVars(int IntParam,void *pParam){
 	X_RATIO=1.0;
 	Y_RATIO=1.0;
 	X_OFFSET=0.0;
 	Y_OFFSET=0.0;
-	gVars->lu_flag=FALSE;
-	gVars->ru_flag=FALSE;
-	gVars->ld_flag=FALSE;
-	gVars->rd_flag=FALSE;
-	gVars->lu_x=LeftUp_X;
-	gVars->lu_y=LeftUp_Y;
-	gVars->ru_x=RightUp_X;
-	gVars->ru_y=RightUp_Y;
-	gVars->ld_x=LeftDown_X;
-	gVars->ld_y=LeftDown_Y;
-	gVars->rd_x=RightDown_X;
-	gVars->rd_y=RightDown_Y;
-	gVars->x_ratio =1;
-	gVars->y_ratio =1;
-	gVars->x_offset=0;
-	gVars->y_offset=0;
-	gVars->DrawRegion.x=MsgBox_X;
-	gVars->DrawRegion.y=MsgBox_Y;
-	gVars->DrawRegion.w=MsgBox_W;
-	gVars->DrawRegion.h=MsgBox_H;
-	gVars->DrawRegion.Color=FatColor(0xffffff);
-	gVars->DrawRegion.Space=0x50;
-	gVars->OkFlag=FALSE;
+	gpTcpVars->lu_flag=FALSE;
+	gpTcpVars->ru_flag=FALSE;
+	gpTcpVars->ld_flag=FALSE;
+	gpTcpVars->rd_flag=FALSE;
+	gpTcpVars->lu_x=LeftUp_X;
+	gpTcpVars->lu_y=LeftUp_Y;
+	gpTcpVars->ru_x=RightUp_X;
+	gpTcpVars->ru_y=RightUp_Y;
+	gpTcpVars->ld_x=LeftDown_X;
+	gpTcpVars->ld_y=LeftDown_Y;
+	gpTcpVars->rd_x=RightDown_X;
+	gpTcpVars->rd_y=RightDown_Y;
+	gpTcpVars->x_ratio =1;
+	gpTcpVars->y_ratio =1;
+	gpTcpVars->x_offset=0;
+	gpTcpVars->y_offset=0;
+	gpTcpVars->DrawRegion.x=MsgBox_X;
+	gpTcpVars->DrawRegion.y=MsgBox_Y;
+	gpTcpVars->DrawRegion.w=MsgBox_W;
+	gpTcpVars->DrawRegion.h=MsgBox_H;
+	gpTcpVars->DrawRegion.Color=FatColor(0xffffff);
+	gpTcpVars->DrawRegion.Space=0x50;
+	gpTcpVars->OkFlag=FALSE;
 }
 static void Draw_Bg(void){
     GUI_REGION DrawRegion;
@@ -171,16 +171,16 @@ static void Draw_Result(void){
     DrawRegion.h=MsgBox_H;
 	DrawRegion.Color=FatColor(0x0000ff);
 	DrawRegion.Space=0x00;
-	sprintf(charbuf,"X_RATIO =%.3f\n\r",gVars->x_ratio);
+	sprintf(charbuf,"X_RATIO =%.3f\n\r",gpTcpVars->x_ratio);
 	Gui_DrawFont(GBK16_FONT,(void *)charbuf,&DrawRegion);
 	DrawRegion.y+=18;
-	sprintf(charbuf,"Y_RATIO =%.3f\n\r",gVars->y_ratio);
+	sprintf(charbuf,"Y_RATIO =%.3f\n\r",gpTcpVars->y_ratio);
 	Gui_DrawFont(GBK16_FONT,(void *)charbuf,&DrawRegion);
 	DrawRegion.y+=18;
-	sprintf(charbuf,"X_OFFSET=%d\n\r",gVars->x_offset);
+	sprintf(charbuf,"X_OFFSET=%d\n\r",gpTcpVars->x_offset);
 	Gui_DrawFont(GBK16_FONT,(void *)charbuf,&DrawRegion);
 	DrawRegion.y+=18;
-	sprintf(charbuf,"Y_OFFSET=%d\n\r",gVars->y_offset);
+	sprintf(charbuf,"Y_OFFSET=%d\n\r",gpTcpVars->y_offset);
 	Gui_DrawFont(GBK16_FONT,(void *)charbuf,&DrawRegion);
 }
 
@@ -198,55 +198,55 @@ static bool Calculate(void){
 	s32   y_offset3;
 	s32   y_offset4;
 	
-	x_ratio1 =(float)(gVars->ru_x-gVars->lu_x)/(float)(RightUp_X-LeftUp_X);
-	x_ratio2 =(float)(gVars->rd_x-gVars->ld_x)/(float)(RightDown_X-LeftDown_X);
+	x_ratio1 =(float)(gpTcpVars->ru_x-gpTcpVars->lu_x)/(float)(RightUp_X-LeftUp_X);
+	x_ratio2 =(float)(gpTcpVars->rd_x-gpTcpVars->ld_x)/(float)(RightDown_X-LeftDown_X);
 	
-	y_ratio1 =(float)(gVars->ld_y-gVars->lu_y)/(float)(LeftDown_Y-LeftUp_Y);
-	y_ratio2 =(float)(gVars->rd_y-gVars->ru_y)/(float)(RightDown_Y-RightUp_Y);
+	y_ratio1 =(float)(gpTcpVars->ld_y-gpTcpVars->lu_y)/(float)(LeftDown_Y-LeftUp_Y);
+	y_ratio2 =(float)(gpTcpVars->rd_y-gpTcpVars->ru_y)/(float)(RightDown_Y-RightUp_Y);
 	
-	x_offset1=LeftUp_X-(s32)(gVars->x_ratio*(float)gVars->lu_x);
-	x_offset2=LeftDown_X-(s32)(gVars->x_ratio*(float)gVars->ld_x);
-	x_offset3=RightUp_X-(s32)(gVars->x_ratio*(float)gVars->ru_x);
-	x_offset4=RightDown_X-(s32)(gVars->x_ratio*(float)gVars->rd_x);
+	x_offset1=LeftUp_X-(s32)(gpTcpVars->x_ratio*(float)gpTcpVars->lu_x);
+	x_offset2=LeftDown_X-(s32)(gpTcpVars->x_ratio*(float)gpTcpVars->ld_x);
+	x_offset3=RightUp_X-(s32)(gpTcpVars->x_ratio*(float)gpTcpVars->ru_x);
+	x_offset4=RightDown_X-(s32)(gpTcpVars->x_ratio*(float)gpTcpVars->rd_x);
 	
-	y_offset1=LeftUp_Y-(s32)(gVars->y_ratio*(float)gVars->lu_y);
-	y_offset2=LeftDown_Y-(s32)(gVars->y_ratio*(float)gVars->ld_y);
-	y_offset3=RightUp_Y-(s32)(gVars->y_ratio*(float)gVars->ru_y);
-	y_offset4=RightDown_Y-(s32)(gVars->y_ratio*(float)gVars->rd_y);
+	y_offset1=LeftUp_Y-(s32)(gpTcpVars->y_ratio*(float)gpTcpVars->lu_y);
+	y_offset2=LeftDown_Y-(s32)(gpTcpVars->y_ratio*(float)gpTcpVars->ld_y);
+	y_offset3=RightUp_Y-(s32)(gpTcpVars->y_ratio*(float)gpTcpVars->ru_y);
+	y_offset4=RightDown_Y-(s32)(gpTcpVars->y_ratio*(float)gpTcpVars->rd_y);
 	
-	gVars->x_ratio=(x_ratio1+x_ratio2)/(float)2;
-	gVars->y_ratio=(y_ratio1+y_ratio2)/(float)2;
-	gVars->x_offset=(x_offset1+x_offset2+x_offset3+x_offset4)/4;
-	gVars->y_offset=(y_offset1+y_offset2+y_offset3+y_offset4)/4;
+	gpTcpVars->x_ratio=(x_ratio1+x_ratio2)/(float)2;
+	gpTcpVars->y_ratio=(y_ratio1+y_ratio2)/(float)2;
+	gpTcpVars->x_offset=(x_offset1+x_offset2+x_offset3+x_offset4)/4;
+	gpTcpVars->y_offset=(y_offset1+y_offset2+y_offset3+y_offset4)/4;
 	
-	if( gVars->x_ratio>X_RATIO_MAX || gVars->x_ratio<X_RATIO_MIN || gVars->y_ratio>Y_RATIO_MAX || gVars->y_ratio<Y_RATIO_MIN )
+	if( gpTcpVars->x_ratio>X_RATIO_MAX || gpTcpVars->x_ratio<X_RATIO_MIN || gpTcpVars->y_ratio>Y_RATIO_MAX || gpTcpVars->y_ratio<Y_RATIO_MIN )
 		return FALSE;
 		
-	if( gVars->x_offset>X_OFFSET_MAX || gVars->x_offset<X_OFFSET_MIN || gVars->y_offset>Y_OFFSET_MAX || gVars->y_offset<Y_OFFSET_MIN )
+	if( gpTcpVars->x_offset>X_OFFSET_MAX || gpTcpVars->x_offset<X_OFFSET_MIN || gpTcpVars->y_offset>Y_OFFSET_MAX || gpTcpVars->y_offset<Y_OFFSET_MIN )
 		return FALSE;
 	
 	return TRUE;
 }
 static void JudgeAndCal(void){
-	gVars->DrawRegion.Color=FatColor(0x5a5a5a);
-	Gui_FillBlock(&gVars->DrawRegion);
-	gVars->DrawRegion.Color=FatColor(0xffffff);
-	Gui_DrawFont(GBK16_FONT,"   点此重校",&gVars->DrawRegion);
-	if( gVars->lu_flag==TRUE && gVars->ld_flag==TRUE && gVars->ru_flag==TRUE && gVars->rd_flag==TRUE ){
+	gpTcpVars->DrawRegion.Color=FatColor(0x5a5a5a);
+	Gui_FillBlock(&gpTcpVars->DrawRegion);
+	gpTcpVars->DrawRegion.Color=FatColor(0xffffff);
+	Gui_DrawFont(GBK16_FONT,"   点此重校",&gpTcpVars->DrawRegion);
+	if( gpTcpVars->lu_flag==TRUE && gpTcpVars->ld_flag==TRUE && gpTcpVars->ru_flag==TRUE && gpTcpVars->rd_flag==TRUE ){
 		if(Calculate()==TRUE){
-			gVars->DrawRegion.Color=FatColor(0x5a5a5a);
-			Gui_FillBlock(&gVars->DrawRegion);
-			gVars->DrawRegion.Color=FatColor(0x00ff00);
-			Gui_DrawFont(GBK16_FONT,"校验完成点此退出",&gVars->DrawRegion);
+			gpTcpVars->DrawRegion.Color=FatColor(0x5a5a5a);
+			Gui_FillBlock(&gpTcpVars->DrawRegion);
+			gpTcpVars->DrawRegion.Color=FatColor(0x00ff00);
+			Gui_DrawFont(GBK16_FONT,"校验完成点此退出",&gpTcpVars->DrawRegion);
 			Draw_Result();
-			gVars->OkFlag=TRUE;
+			gpTcpVars->OkFlag=TRUE;
 		}else{
-			gVars->DrawRegion.Color=FatColor(0x5a5a5a);
-			Gui_FillBlock(&gVars->DrawRegion);
-			gVars->DrawRegion.Color=FatColor(0x00ff00);
-			Gui_DrawFont(GBK16_FONT,"校验失败点此重校",&gVars->DrawRegion);
+			gpTcpVars->DrawRegion.Color=FatColor(0x5a5a5a);
+			Gui_FillBlock(&gpTcpVars->DrawRegion);
+			gpTcpVars->DrawRegion.Color=FatColor(0x00ff00);
+			Gui_DrawFont(GBK16_FONT,"校验失败点此重校",&gpTcpVars->DrawRegion);
 			Draw_Result();
-			gVars->OkFlag=FALSE;
+			gpTcpVars->OkFlag=FALSE;
 		}
 	}
 }
@@ -255,9 +255,9 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent,int IntParam,void *pSysParam)
         case Sys_PreGotoPage:{
         }break;
         case Sys_PageInit:{
-			gVars=(TOUCH_CHK_PAGE_VARS *)Q_PageMallco(sizeof(TOUCH_CHK_PAGE_VARS));			
-			 if(gVars==0){
-				Q_ErrorStopScreen("gVars malloc fail !\n\r");
+			gpTcpVars=(TOUCH_CHK_PAGE_VARS *)Q_PageMallco(sizeof(TOUCH_CHK_PAGE_VARS));			
+			 if(gpTcpVars==0){
+				Q_ErrorStopScreen("gpTcpVars malloc fail !\n\r");
 			 }
 			Init_TouchChkPageVars(IntParam,pSysParam);
 			Draw_Bg();
@@ -265,12 +265,12 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent,int IntParam,void *pSysParam)
 			Draw_Focus(LeftDown_X,LeftDown_Y,FALSE);
 			Draw_Focus(RightUp_X,RightUp_Y,FALSE);
 			Draw_Focus(RightDown_X,RightDown_Y,FALSE);
-			Gui_DrawFont(GBK16_FONT,"请点击十字叉中心",&gVars->DrawRegion);
+			Gui_DrawFont(GBK16_FONT,"请点击十字叉中心",&gpTcpVars->DrawRegion);
         }break;
         case Sys_SubPageReturn:{
         }break;
         case Sys_PageClean:{
-			Q_PageFree(gVars);
+			Q_PageFree(gpTcpVars);
         }break;
     }
     return 0;
@@ -298,60 +298,60 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo){
     switch(Key){
 		case LU:{
-			if(gVars->lu_flag==FALSE){
-				gVars->lu_flag=TRUE;
+			if(gpTcpVars->lu_flag==FALSE){
+				gpTcpVars->lu_flag=TRUE;
 				Draw_Focus(LeftUp_X,LeftUp_Y,TRUE);
-				gVars->lu_x=pTouchInfo->x;
-				gVars->lu_y=pTouchInfo->y;				
+				gpTcpVars->lu_x=pTouchInfo->x;
+				gpTcpVars->lu_y=pTouchInfo->y;				
 				JudgeAndCal();
 			}
 		}break;
 		case LD:{
-			if(gVars->ld_flag==FALSE){
-				gVars->ld_flag=TRUE;
+			if(gpTcpVars->ld_flag==FALSE){
+				gpTcpVars->ld_flag=TRUE;
 				Draw_Focus(LeftDown_X,LeftDown_Y,TRUE);
-				gVars->ld_x=pTouchInfo->x;
-				gVars->ld_y=pTouchInfo->y;
+				gpTcpVars->ld_x=pTouchInfo->x;
+				gpTcpVars->ld_y=pTouchInfo->y;
 				JudgeAndCal();
 			}
 		}break;
 		case RU:{
-			if(gVars->ru_flag==FALSE){
-				gVars->ru_flag=TRUE;
+			if(gpTcpVars->ru_flag==FALSE){
+				gpTcpVars->ru_flag=TRUE;
 				Draw_Focus(RightUp_X,RightUp_Y,TRUE);
-				gVars->ru_x=pTouchInfo->x;
-				gVars->ru_y=pTouchInfo->y;
+				gpTcpVars->ru_x=pTouchInfo->x;
+				gpTcpVars->ru_y=pTouchInfo->y;
 				JudgeAndCal();
 			}
 		}break;
 		case RD:{
-			if(gVars->rd_flag==FALSE){
-				gVars->rd_flag=TRUE;
+			if(gpTcpVars->rd_flag==FALSE){
+				gpTcpVars->rd_flag=TRUE;
 				Draw_Focus(RightDown_X,RightDown_Y,TRUE);
-				gVars->rd_x=pTouchInfo->x;
-				gVars->rd_y=pTouchInfo->y;
+				gpTcpVars->rd_x=pTouchInfo->x;
+				gpTcpVars->rd_y=pTouchInfo->y;
 				JudgeAndCal();
 			}
 		}break;
 		case MsgBox:{
-			if(gVars->OkFlag==TRUE){
-				Debug("gVars->lu_x=%d\n\r",gVars->lu_x);
-				Debug("gVars->lu_y=%d\n\r",gVars->lu_y);
-				Debug("gVars->ld_x=%d\n\r",gVars->ld_x);
-				Debug("gVars->ld_y=%d\n\r",gVars->ld_y);
-				Debug("gVars->ru_x=%d\n\r",gVars->ru_x);
-				Debug("gVars->ru_y=%d\n\r",gVars->ru_y);
-				Debug("gVars->rd_x=%d\n\r",gVars->rd_x);
-				Debug("gVars->rd_y=%d\n\r",gVars->rd_y);
-				X_RATIO=gVars->x_ratio;
-				Y_RATIO=gVars->y_ratio;
-				X_OFFSET=gVars->x_offset;
-				Y_OFFSET=gVars->y_offset;
+			if(gpTcpVars->OkFlag==TRUE){
+				Debug("gpTcpVars->lu_x=%d\n\r",gpTcpVars->lu_x);
+				Debug("gpTcpVars->lu_y=%d\n\r",gpTcpVars->lu_y);
+				Debug("gpTcpVars->ld_x=%d\n\r",gpTcpVars->ld_x);
+				Debug("gpTcpVars->ld_y=%d\n\r",gpTcpVars->ld_y);
+				Debug("gpTcpVars->ru_x=%d\n\r",gpTcpVars->ru_x);
+				Debug("gpTcpVars->ru_y=%d\n\r",gpTcpVars->ru_y);
+				Debug("gpTcpVars->rd_x=%d\n\r",gpTcpVars->rd_x);
+				Debug("gpTcpVars->rd_y=%d\n\r",gpTcpVars->rd_y);
+				X_RATIO=gpTcpVars->x_ratio;
+				Y_RATIO=gpTcpVars->y_ratio;
+				X_OFFSET=gpTcpVars->x_offset;
+				Y_OFFSET=gpTcpVars->y_offset;
 				Debug("X_RATIO=%.3f\n\r",X_RATIO);
 				Debug("Y_RATIO=%.3f\n\r",Y_RATIO);
 				Debug("X_OFFSET=%d\n\r",X_OFFSET);
 				Debug("Y_OFFSET=%d\n\r",Y_OFFSET);
-				Q_GotoPage(GotoNewPage,"AppListPage",-1,NULL);
+				Q_GotoPage(GotoNewPage,"AppListPage",0,NULL);
 			}
 			else{
 				Init_TouchChkPageVars(0,NULL);
@@ -360,11 +360,11 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 				Draw_Focus(LeftDown_X,LeftDown_Y,FALSE);
 				Draw_Focus(RightUp_X,RightUp_Y,FALSE);
 				Draw_Focus(RightDown_X,RightDown_Y,FALSE);
-				Gui_DrawFont(GBK16_FONT,"请点击十字叉中心",&gVars->DrawRegion);
+				Gui_DrawFont(GBK16_FONT,"请点击十字叉中心",&gpTcpVars->DrawRegion);
 			}
 		}break;
         case HomeKV:{
-			Q_GotoPage(GotoNewPage,"AppListPage",-1,NULL);	
+			Q_GotoPage(GotoNewPage,"AppListPage",0,NULL);	
         }break;
         case MailKV:{
         }break;
