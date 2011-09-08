@@ -418,7 +418,7 @@ typedef struct{
 typedef struct{
 	LRCDEF LRC;
 }MUSIC_PAGE_VARS;//将本页要用到的全局变量全部放入此结构体
-static MUSIC_PAGE_VARS *gVars;
+static MUSIC_PAGE_VARS *gpMpVar;
 
 static bool IfReady;
 static u32 PauseTime;
@@ -452,60 +452,60 @@ void Lrc_Priv_GetLrcFile(void){//获得当前播放mp3对应的lrc文件路径
 	if(gpMusicPath[0]==0)
 		return;
 	while(gpMusicPath[i]!='.'){
-		gVars->LRC.LrcPath[i]=gpMusicPath[i];
+		gpMpVar->LRC.LrcPath[i]=gpMusicPath[i];
 		i++;
 		if(i>(MAX_LEN_FILENAME+7))
 			return;
 	}
-	gVars->LRC.LrcPath[i++]='.';
-	gVars->LRC.LrcPath[i++]='l';
-	gVars->LRC.LrcPath[i++]='r';
-	gVars->LRC.LrcPath[i++]='c';
-	gVars->LRC.LrcPath[i]=0;
-	Debug("当前mp3对应的歌词文件是%s\r\n",gVars->LRC.LrcPath);
+	gpMpVar->LRC.LrcPath[i++]='.';
+	gpMpVar->LRC.LrcPath[i++]='l';
+	gpMpVar->LRC.LrcPath[i++]='r';
+	gpMpVar->LRC.LrcPath[i++]='c';
+	gpMpVar->LRC.LrcPath[i]=0;
+	Debug("当前mp3对应的歌词文件是%s\r\n",gpMpVar->LRC.LrcPath);
 }
 
 bool Lrc_Priv_LrcParse(void){//解析lrc文件
 	FS_FILE* Fp_Lrc;
 	u32      CutPos=0,ReadByte,TempTime,index=0,repeat=0,TempOffset=0,i=0,j,k=0;
 	bool     ON=FALSE,IfTimeLabel=FALSE;
-	if (( Fp_Lrc = FS_FOpen((void *)_TEXT(gVars->LRC.LrcPath), FA_OPEN_EXISTING | FA_READ) )== 0 ){ 
-		Debug("打开歌词文件%s失败\n\r",gVars->LRC.LrcPath);
-		Gui_DrawFont(GBK12_FONT,"当前歌曲无对应歌词文件\r\n",&gVars->LRC.LrcRegion);
+	if (( Fp_Lrc = FS_FOpen((void *)_TEXT(gpMpVar->LRC.LrcPath), FA_OPEN_EXISTING | FA_READ) )== 0 ){ 
+		Debug("打开歌词文件%s失败\n\r",gpMpVar->LRC.LrcPath);
+		Gui_DrawFont(GBK12_FONT,"当前歌曲无对应歌词文件\r\n",&gpMpVar->LRC.LrcRegion);
 		return FALSE;
 	}
 	while(1){
 		FS_FSeek(Fp_Lrc,CutPos,FS_SEEK_SET);
-		if((ReadByte=FS_FRead(gVars->LRC.ReadBuf, 512, 1,Fp_Lrc))==0)
+		if((ReadByte=FS_FRead(gpMpVar->LRC.ReadBuf, 512, 1,Fp_Lrc))==0)
 			break;//读完文件退出循环
 		index=0;  //读缓存索引 
 		
 		while(index<ReadByte){//通过这个while循环把时间和其对应的偏移量信息存入TimeToText二维表中
-			if(gVars->LRC.ReadBuf[index]=='[')
+			if(gpMpVar->LRC.ReadBuf[index]=='[')
 				ON=TRUE;
-			if(gVars->LRC.ReadBuf[index]==']'){
+			if(gpMpVar->LRC.ReadBuf[index]==']'){
 				TempOffset = CutPos + index +1;
 				ON=FALSE;
 			}
 			if(ON==TRUE){
-				if(gVars->LRC.ReadBuf[index]==':'){
-					if( gVars->LRC.ReadBuf[index-2]<='9' && gVars->LRC.ReadBuf[index-2]>='0' && gVars->LRC.ReadBuf[index-1]<='9' && gVars->LRC.ReadBuf[index-1]>='0' && gVars->LRC.ReadBuf[index+1]<='9' && gVars->LRC.ReadBuf[index+1]>='0' && gVars->LRC.ReadBuf[index+2]<='9' && gVars->LRC.ReadBuf[index+2]>='0'){
+				if(gpMpVar->LRC.ReadBuf[index]==':'){
+					if( gpMpVar->LRC.ReadBuf[index-2]<='9' && gpMpVar->LRC.ReadBuf[index-2]>='0' && gpMpVar->LRC.ReadBuf[index-1]<='9' && gpMpVar->LRC.ReadBuf[index-1]>='0' && gpMpVar->LRC.ReadBuf[index+1]<='9' && gpMpVar->LRC.ReadBuf[index+1]>='0' && gpMpVar->LRC.ReadBuf[index+2]<='9' && gpMpVar->LRC.ReadBuf[index+2]>='0'){
 						IfTimeLabel=TRUE;
-						TempTime = (gVars->LRC.ReadBuf[index-2]-'0')*60000 + (gVars->LRC.ReadBuf[index-1]-'0')*6000 + (gVars->LRC.ReadBuf[index+1]-'0')*1000 + (gVars->LRC.ReadBuf[index+2]-'0')*100;
-						if( gVars->LRC.ReadBuf[index+3]=='.' || gVars->LRC.ReadBuf[index+3]==':' )
-							TempTime = TempTime + (gVars->LRC.ReadBuf[index+4]-'0')*10 + (gVars->LRC.ReadBuf[index+5]-'0');
-						gVars->LRC.TimeToText[gVars->LRC.TimeLabels][0]=TempTime;
-						gVars->LRC.TimeLabels++;
+						TempTime = (gpMpVar->LRC.ReadBuf[index-2]-'0')*60000 + (gpMpVar->LRC.ReadBuf[index-1]-'0')*6000 + (gpMpVar->LRC.ReadBuf[index+1]-'0')*1000 + (gpMpVar->LRC.ReadBuf[index+2]-'0')*100;
+						if( gpMpVar->LRC.ReadBuf[index+3]=='.' || gpMpVar->LRC.ReadBuf[index+3]==':' )
+							TempTime = TempTime + (gpMpVar->LRC.ReadBuf[index+4]-'0')*10 + (gpMpVar->LRC.ReadBuf[index+5]-'0');
+						gpMpVar->LRC.TimeToText[gpMpVar->LRC.TimeLabels][0]=TempTime;
+						gpMpVar->LRC.TimeLabels++;
 						repeat++;							
 					}			
 				}
 			}
-			if( gVars->LRC.ReadBuf[index]=='\n'){
+			if( gpMpVar->LRC.ReadBuf[index]=='\n'){
 				if( IfTimeLabel==TRUE ){
 					IfTimeLabel=FALSE;
 					while(repeat){
 						repeat--;
-						gVars->LRC.TimeToText[gVars->LRC.TimeLabels-repeat-1][1]=TempOffset;
+						gpMpVar->LRC.TimeToText[gpMpVar->LRC.TimeLabels-repeat-1][1]=TempOffset;
 					}
 					repeat=0;
 				}
@@ -519,16 +519,16 @@ bool Lrc_Priv_LrcParse(void){//解析lrc文件
 				CutPos+=(index+1);
 		}		
 	}
-	while( i < gVars->LRC.TimeLabels ){//这个while循环将根据TimeToText二维表中的第二维从lrc读出歌词放入LyricBuf中并将TimeToText二维表中的第二维更新为LyricBuf中每句歌词字符串的首地址
-		FS_FSeek(Fp_Lrc,gVars->LRC.TimeToText[i][1],FS_SEEK_SET);
-		FS_FRead(&gVars->LRC.LyricBuf[k], 100, 1,Fp_Lrc);
+	while( i < gpMpVar->LRC.TimeLabels ){//这个while循环将根据TimeToText二维表中的第二维从lrc读出歌词放入LyricBuf中并将TimeToText二维表中的第二维更新为LyricBuf中每句歌词字符串的首地址
+		FS_FSeek(Fp_Lrc,gpMpVar->LRC.TimeToText[i][1],FS_SEEK_SET);
+		FS_FRead(&gpMpVar->LRC.LyricBuf[k], 100, 1,Fp_Lrc);
 		j=0;
-		while(gVars->LRC.LyricBuf[k+j]!='\r')		
+		while(gpMpVar->LRC.LyricBuf[k+j]!='\r')		
 			j++;
-		gVars->LRC.LyricBuf[k+j]=NULL;
-		gVars->LRC.TimeToText[i][1]=(u32)&gVars->LRC.LyricBuf[k];
-		Debug("LRC.TimeToText[%d][0] :%d\n\r",i,(u8 *)gVars->LRC.TimeToText[i][0]);
-		Debug("LRC.TimeToText[%d][1] :%s\n\r",i,(u8 *)gVars->LRC.TimeToText[i][1]);
+		gpMpVar->LRC.LyricBuf[k+j]=NULL;
+		gpMpVar->LRC.TimeToText[i][1]=(u32)&gpMpVar->LRC.LyricBuf[k];
+		Debug("LRC.TimeToText[%d][0] :%d\n\r",i,(u8 *)gpMpVar->LRC.TimeToText[i][0]);
+		Debug("LRC.TimeToText[%d][1] :%s\n\r",i,(u8 *)gpMpVar->LRC.TimeToText[i][1]);
 
 		k=k+j+1;
 		i++;
@@ -540,13 +540,13 @@ bool Lrc_Priv_LrcParse(void){//解析lrc文件
 }
 
 void Lrc_Intf_Init(void){//初始化LRC对象
-	gVars->LRC.TimeLabels=0;
-	gVars->LRC.LrcRegion.x=LRC_BOX_X;
-	gVars->LRC.LrcRegion.y=LRC_BOX_Y;
-	gVars->LRC.LrcRegion.w=LRC_BOX_W;
-	gVars->LRC.LrcRegion.h=12;
-	gVars->LRC.LrcRegion.Space=(LRC_CHAR_SPACE<<4)|(LRC_ROW_SPACE);
-	gVars->LRC.LrcRegion.Color=LRC_CHAR_COLOR;
+	gpMpVar->LRC.TimeLabels=0;
+	gpMpVar->LRC.LrcRegion.x=LRC_BOX_X;
+	gpMpVar->LRC.LrcRegion.y=LRC_BOX_Y;
+	gpMpVar->LRC.LrcRegion.w=LRC_BOX_W;
+	gpMpVar->LRC.LrcRegion.h=12;
+	gpMpVar->LRC.LrcRegion.Space=(LRC_CHAR_SPACE<<4)|(LRC_ROW_SPACE);
+	gpMpVar->LRC.LrcRegion.Color=LRC_CHAR_COLOR;
 	Lrc_Priv_GetLrcFile();
 	MU_CalTimMs(MU_CAL_TIME_BEGIN,"Lrc_Priv_LrcParse()");
 	Lrc_Priv_LrcParse();
@@ -576,12 +576,12 @@ bool Lrc_Intf_Show(u32 time){//显示所给时间对应的歌词
 	static u32 Len=0;
 	static u32 Tim=0xffffffff;
 	static u32 k=0;
-	if( gVars->LRC.TimeLabels==0 ){
+	if( gpMpVar->LRC.TimeLabels==0 ){
 		return FALSE;
 	}
-	while( gVars->LRC.TimeToText[i][0]/10 != time/100 ){
-		if( i>=gVars->LRC.TimeLabels ){
-			RtoY(gVars->LRC.LrcRegion.x,gVars->LRC.LrcRegion.y,10*k*Len/Tim,gVars->LRC.LrcRegion.h);
+	while( gpMpVar->LRC.TimeToText[i][0]/10 != time/100 ){
+		if( i>=gpMpVar->LRC.TimeLabels ){
+			RtoY(gpMpVar->LRC.LrcRegion.x,gpMpVar->LRC.LrcRegion.y,10*k*Len/Tim,gpMpVar->LRC.LrcRegion.h);
 			k++;
 			return FALSE;
 		}
@@ -595,41 +595,41 @@ bool Lrc_Intf_Show(u32 time){//显示所给时间对应的歌词
 	Gui_FillBlock(&DrawRegion);		
 		
 	k=0;
-	if(*(u8 *)(gVars->LRC.TimeToText[i][1])==0)
-		Gui_DrawFont(GBK12_FONT,"......",&gVars->LRC.LrcRegion);
+	if(*(u8 *)(gpMpVar->LRC.TimeToText[i][1])==0)
+		Gui_DrawFont(GBK12_FONT,"......",&gpMpVar->LRC.LrcRegion);
 	else
-		Gui_DrawFont(GBK12_FONT,(u8 *)gVars->LRC.TimeToText[i][1],&gVars->LRC.LrcRegion);
-	Len=strlen((char *)gVars->LRC.TimeToText[i][1])*6;
+		Gui_DrawFont(GBK12_FONT,(u8 *)gpMpVar->LRC.TimeToText[i][1],&gpMpVar->LRC.LrcRegion);
+	Len=strlen((char *)gpMpVar->LRC.TimeToText[i][1])*6;
 	Tim=0xffffffff;
-	for(j=0,n=0;j<gVars->LRC.TimeLabels;j++){
+	for(j=0,n=0;j<gpMpVar->LRC.TimeLabels;j++){
 		if(j==i)
 			continue;
-		if( gVars->LRC.TimeToText[j][0] < gVars->LRC.TimeToText[i][0] )
+		if( gpMpVar->LRC.TimeToText[j][0] < gpMpVar->LRC.TimeToText[i][0] )
 			continue;
-		if((gVars->LRC.TimeToText[j][0] - gVars->LRC.TimeToText[i][0])<Tim){
-			Tim=gVars->LRC.TimeToText[j][0] - gVars->LRC.TimeToText[i][0];
+		if((gpMpVar->LRC.TimeToText[j][0] - gpMpVar->LRC.TimeToText[i][0])<Tim){
+			Tim=gpMpVar->LRC.TimeToText[j][0] - gpMpVar->LRC.TimeToText[i][0];
 			n=j;
 		}
 	}
 	TempTime=0xffffffff;
-	for(j=0,nn=0;j<gVars->LRC.TimeLabels;j++){
+	for(j=0,nn=0;j<gpMpVar->LRC.TimeLabels;j++){
 		if(j==n)
 			continue;
-		if( gVars->LRC.TimeToText[j][0] < gVars->LRC.TimeToText[n][0] )
+		if( gpMpVar->LRC.TimeToText[j][0] < gpMpVar->LRC.TimeToText[n][0] )
 			continue;
-		if((gVars->LRC.TimeToText[j][0] - gVars->LRC.TimeToText[n][0])<TempTime){
-			TempTime=gVars->LRC.TimeToText[j][0] - gVars->LRC.TimeToText[n][0];
+		if((gpMpVar->LRC.TimeToText[j][0] - gpMpVar->LRC.TimeToText[n][0])<TempTime){
+			TempTime=gpMpVar->LRC.TimeToText[j][0] - gpMpVar->LRC.TimeToText[n][0];
 			nn=j;
 		}
 	}
 	TempTime=0xffffffff;
-	for(j=0,nnn=0;j<gVars->LRC.TimeLabels;j++){
+	for(j=0,nnn=0;j<gpMpVar->LRC.TimeLabels;j++){
 		if(j==nn)
 			continue;
-		if( gVars->LRC.TimeToText[j][0] < gVars->LRC.TimeToText[nn][0] )
+		if( gpMpVar->LRC.TimeToText[j][0] < gpMpVar->LRC.TimeToText[nn][0] )
 			continue;
-		if((gVars->LRC.TimeToText[j][0] - gVars->LRC.TimeToText[nn][0])<TempTime){
-			TempTime=gVars->LRC.TimeToText[j][0] - gVars->LRC.TimeToText[nn][0];
+		if((gpMpVar->LRC.TimeToText[j][0] - gpMpVar->LRC.TimeToText[nn][0])<TempTime){
+			TempTime=gpMpVar->LRC.TimeToText[j][0] - gpMpVar->LRC.TimeToText[nn][0];
 			nnn=j;
 		}
 	}
@@ -640,41 +640,41 @@ bool Lrc_Intf_Show(u32 time){//显示所给时间对应的歌词
 	DrawRegion.Space=(LRC_CHAR_SPACE<<4)|(LRC_ROW_SPACE);
 	DrawRegion.Color=FatColor(0xb9b9b9);
 	if(n>0){
-		if(*(u8 *)(gVars->LRC.TimeToText[n][1])==0)
+		if(*(u8 *)(gpMpVar->LRC.TimeToText[n][1])==0)
 			Gui_DrawFont(GBK12_FONT,"......",&DrawRegion);
 		else
-			Gui_DrawFont(GBK12_FONT,(u8 *)gVars->LRC.TimeToText[n][1],&DrawRegion);
+			Gui_DrawFont(GBK12_FONT,(u8 *)gpMpVar->LRC.TimeToText[n][1],&DrawRegion);
 	}
 	DrawRegion.y=LRC_BOX_Y+16*2;
 	if(nn>1){
-		if(*(u8 *)(gVars->LRC.TimeToText[nn][1])==0)
+		if(*(u8 *)(gpMpVar->LRC.TimeToText[nn][1])==0)
 			Gui_DrawFont(GBK12_FONT,"......",&DrawRegion);
 		else
-			Gui_DrawFont(GBK12_FONT,(u8 *)gVars->LRC.TimeToText[nn][1],&DrawRegion);
+			Gui_DrawFont(GBK12_FONT,(u8 *)gpMpVar->LRC.TimeToText[nn][1],&DrawRegion);
 	}
 	DrawRegion.y=LRC_BOX_Y+16*3;
 	if(nnn>2){
-		if(*(u8 *)(gVars->LRC.TimeToText[nnn][1])==0)
+		if(*(u8 *)(gpMpVar->LRC.TimeToText[nnn][1])==0)
 			Gui_DrawFont(GBK12_FONT,"......",&DrawRegion);
 		else
-			Gui_DrawFont(GBK12_FONT,(u8 *)gVars->LRC.TimeToText[nnn][1],&DrawRegion);
+			Gui_DrawFont(GBK12_FONT,(u8 *)gpMpVar->LRC.TimeToText[nnn][1],&DrawRegion);
 	}
-	Debug("[%d%d:%d%d.%d0]%s\n\r",time/600000,time%600000/60000,time%60000/10000,time%10000/1000,time%1000/100,(u8 *)gVars->LRC.TimeToText[i][1]);
+	Debug("[%d%d:%d%d.%d0]%s\n\r",time/600000,time%600000/60000,time%60000/10000,time%10000/1000,time%1000/100,(u8 *)gpMpVar->LRC.TimeToText[i][1]);
 	return TRUE;
 }
 
 bool Lrc_Intf_ObscShow(u32 time){//模糊匹配并显示所给时间对应的歌词
 	GUI_REGION DrawRegion;
 	u32 i=0,j,n,nn,nnn,TempTime;
-	if( gVars->LRC.TimeLabels==0 ){
+	if( gpMpVar->LRC.TimeLabels==0 ){
 		return FALSE;
 	}
 	TempTime=0xffffffff;
-	for(j=0;j<gVars->LRC.TimeLabels;j++){
-		if( time/10 < gVars->LRC.TimeToText[j][0] )
+	for(j=0;j<gpMpVar->LRC.TimeLabels;j++){
+		if( time/10 < gpMpVar->LRC.TimeToText[j][0] )
 			continue;
-		if( time/10 - gVars->LRC.TimeToText[j][0] < TempTime){
-			TempTime = time/10 - gVars->LRC.TimeToText[j][0];
+		if( time/10 - gpMpVar->LRC.TimeToText[j][0] < TempTime){
+			TempTime = time/10 - gpMpVar->LRC.TimeToText[j][0];
 			i=j;
 		}
 	}	
@@ -686,40 +686,40 @@ bool Lrc_Intf_ObscShow(u32 time){//模糊匹配并显示所给时间对应的歌词
 	DrawRegion.Color=FatColor(MUSIC_PAGE_BG_COLOR);
 	Gui_FillBlock(&DrawRegion);		
 	
-	if(*(u8 *)(gVars->LRC.TimeToText[i][1])==0)
-		Gui_DrawFont(GBK12_FONT,"......",&gVars->LRC.LrcRegion);
+	if(*(u8 *)(gpMpVar->LRC.TimeToText[i][1])==0)
+		Gui_DrawFont(GBK12_FONT,"......",&gpMpVar->LRC.LrcRegion);
 	else
-		Gui_DrawFont(GBK12_FONT,(u8 *)gVars->LRC.TimeToText[i][1],&gVars->LRC.LrcRegion);
+		Gui_DrawFont(GBK12_FONT,(u8 *)gpMpVar->LRC.TimeToText[i][1],&gpMpVar->LRC.LrcRegion);
 	TempTime=0xffffffff;
-	for(j=0,n=0;j<gVars->LRC.TimeLabels;j++){
+	for(j=0,n=0;j<gpMpVar->LRC.TimeLabels;j++){
 		if(j==i)
 			continue;
-		if( gVars->LRC.TimeToText[j][0] < gVars->LRC.TimeToText[i][0] )
+		if( gpMpVar->LRC.TimeToText[j][0] < gpMpVar->LRC.TimeToText[i][0] )
 			continue;
-		if((gVars->LRC.TimeToText[j][0] - gVars->LRC.TimeToText[i][0])<TempTime){
-			TempTime=gVars->LRC.TimeToText[j][0] - gVars->LRC.TimeToText[i][0];
+		if((gpMpVar->LRC.TimeToText[j][0] - gpMpVar->LRC.TimeToText[i][0])<TempTime){
+			TempTime=gpMpVar->LRC.TimeToText[j][0] - gpMpVar->LRC.TimeToText[i][0];
 			n=j;
 		}
 	}
 	TempTime=0xffffffff;
-	for(j=0,nn=0;j<gVars->LRC.TimeLabels;j++){
+	for(j=0,nn=0;j<gpMpVar->LRC.TimeLabels;j++){
 		if(j==n)
 			continue;
-		if( gVars->LRC.TimeToText[j][0] < gVars->LRC.TimeToText[n][0] )
+		if( gpMpVar->LRC.TimeToText[j][0] < gpMpVar->LRC.TimeToText[n][0] )
 			continue;
-		if((gVars->LRC.TimeToText[j][0] - gVars->LRC.TimeToText[n][0])<TempTime){
-			TempTime=gVars->LRC.TimeToText[j][0] - gVars->LRC.TimeToText[n][0];
+		if((gpMpVar->LRC.TimeToText[j][0] - gpMpVar->LRC.TimeToText[n][0])<TempTime){
+			TempTime=gpMpVar->LRC.TimeToText[j][0] - gpMpVar->LRC.TimeToText[n][0];
 			nn=j;
 		}
 	}
 	TempTime=0xffffffff;
-	for(j=0,nnn=0;j<gVars->LRC.TimeLabels;j++){
+	for(j=0,nnn=0;j<gpMpVar->LRC.TimeLabels;j++){
 		if(j==nn)
 			continue;
-		if( gVars->LRC.TimeToText[j][0] < gVars->LRC.TimeToText[nn][0] )
+		if( gpMpVar->LRC.TimeToText[j][0] < gpMpVar->LRC.TimeToText[nn][0] )
 			continue;
-		if((gVars->LRC.TimeToText[j][0] - gVars->LRC.TimeToText[nn][0])<TempTime){
-			TempTime=gVars->LRC.TimeToText[j][0] - gVars->LRC.TimeToText[nn][0];
+		if((gpMpVar->LRC.TimeToText[j][0] - gpMpVar->LRC.TimeToText[nn][0])<TempTime){
+			TempTime=gpMpVar->LRC.TimeToText[j][0] - gpMpVar->LRC.TimeToText[nn][0];
 			nnn=j;
 		}
 	}
@@ -730,26 +730,26 @@ bool Lrc_Intf_ObscShow(u32 time){//模糊匹配并显示所给时间对应的歌词
 	DrawRegion.Space=(LRC_CHAR_SPACE<<4)|(LRC_ROW_SPACE);
 	DrawRegion.Color=FatColor(0xb9b9b9);
 	if(n>0){
-		if(*(u8 *)(gVars->LRC.TimeToText[n][1])==0)
+		if(*(u8 *)(gpMpVar->LRC.TimeToText[n][1])==0)
 			Gui_DrawFont(GBK12_FONT,"......",&DrawRegion);
 		else
-			Gui_DrawFont(GBK12_FONT,(u8 *)gVars->LRC.TimeToText[n][1],&DrawRegion);
+			Gui_DrawFont(GBK12_FONT,(u8 *)gpMpVar->LRC.TimeToText[n][1],&DrawRegion);
 	}
 	DrawRegion.y=LRC_BOX_Y+16*2;
 	if(nn>1){
-		if(*(u8 *)(gVars->LRC.TimeToText[nn][1])==0)
+		if(*(u8 *)(gpMpVar->LRC.TimeToText[nn][1])==0)
 			Gui_DrawFont(GBK12_FONT,"......",&DrawRegion);
 		else
-			Gui_DrawFont(GBK12_FONT,(u8 *)gVars->LRC.TimeToText[nn][1],&DrawRegion);
+			Gui_DrawFont(GBK12_FONT,(u8 *)gpMpVar->LRC.TimeToText[nn][1],&DrawRegion);
 	}
 	DrawRegion.y=LRC_BOX_Y+16*3;
 	if(nnn>2){
-		if(*(u8 *)(gVars->LRC.TimeToText[nnn][1])==0)
+		if(*(u8 *)(gpMpVar->LRC.TimeToText[nnn][1])==0)
 			Gui_DrawFont(GBK12_FONT,"......",&DrawRegion);
 		else
-			Gui_DrawFont(GBK12_FONT,(u8 *)gVars->LRC.TimeToText[nnn][1],&DrawRegion);
+			Gui_DrawFont(GBK12_FONT,(u8 *)gpMpVar->LRC.TimeToText[nnn][1],&DrawRegion);
 	}
-	Debug("[%d%d:%d%d.%d0]%s\n\r",time/600000,time%600000/60000,time%60000/10000,time%10000/1000,time%1000/100,(u8 *)gVars->LRC.TimeToText[i][1]);
+	Debug("[%d%d:%d%d.%d0]%s\n\r",time/600000,time%600000/60000,time%60000/10000,time%10000/1000,time%1000/100,(u8 *)gpMpVar->LRC.TimeToText[i][1]);
 	return TRUE;
 }
 /*************************************************************************************************************************************************************
@@ -770,9 +770,9 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 		case Sys_PreGotoPage:
 			break;
 		case Sys_PageInit:	
-			gVars=(MUSIC_PAGE_VARS *)Q_PageMallco(sizeof(MUSIC_PAGE_VARS));//申请空间	
-			if(gVars==0){
-				Q_ErrorStopScreen("gVars malloc fail !\n\r");
+			gpMpVar=(MUSIC_PAGE_VARS *)Q_PageMallco(sizeof(MUSIC_PAGE_VARS));//申请空间	
+			if(gpMpVar==0){
+				Q_ErrorStopScreen("gpMpVar malloc fail !\n\r");
 			}	
 		case Sys_SubPageReturn:
 			if(Q_GetPageEntries()==1)  //页面首次创建时需要做的事情
@@ -852,7 +852,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 			break;
 		case Sys_PageClean:
 			Tim2_Set(0,0,(bool)1);
-			Q_PageFree(gVars);
+			Q_PageFree(gpMpVar);
 			break;
 
 		case Sys_PreSubPage:
@@ -1173,7 +1173,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 			break;
 		case MpOffKV:
 			if(InEvent!=Tch_Release) return 0;
-			Q_GotoPage(GotoNewPage,"MainPage",-1,NULL);
+			Q_GotoPage(GotoNewPage,"MainPage",0,NULL);
 			break;
 		case MpPlayBarKV:
 			if(gpMusicPath[0]==0) break;

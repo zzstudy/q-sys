@@ -260,7 +260,7 @@ static TCH_MSG TouchEventHandlerPicturePage(u8 Key,TCH_EVT InEvent , TOUCH_INFO 
 			}
 			break;
 		case PicturePage_Return:	
-			Q_GotoPage(GotoNewPage,"MainPage",-1,NULL);
+			Q_GotoPage(GotoNewPage,"MainPage",0,NULL);
 			break;
 		case PicturePage_Pre:
 			if(InEvent!=Tch_Release) return 0;

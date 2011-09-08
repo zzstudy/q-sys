@@ -119,8 +119,9 @@ typedef struct{
 	YES_NO_OBJ YesNo;
 	u8 NowDispNum;// from 0 start
 	CLIENT_RECORD ClientRecord[DEVICE_INFO_MAX_CLIENT_RECORD];
-}QWEB_PAGE_VAR;
-static QWEB_PAGE_VAR *gpVar;
+	u8 GotoPageName[32];//按下列表项后需进入的页面
+}QWEB_PAGE_VARS;
+static QWEB_PAGE_VARS *gpQwpVar;
 
 //-----------------------本页自定义函数-----------------------
 
@@ -154,11 +155,11 @@ static void DrawState(void)//更新当前q网状态显示
 		Gui_DrawFont(GBK16_FONT,Str,&DrawRegion);
 	}
 	
-	gpVar->YesNo.DefVal=QWA_QWebState();
-	gpVar->YesNo.ObjID=1;
-	gpVar->YesNo.x=170;
-	gpVar->YesNo.y=33;
-	Q_SetYesNo(1,&gpVar->YesNo);
+	gpQwpVar->YesNo.DefVal=QWA_QWebState();
+	gpQwpVar->YesNo.ObjID=1;
+	gpQwpVar->YesNo.x=170;
+	gpQwpVar->YesNo.y=33;
+	Q_SetYesNo(1,&gpQwpVar->YesNo);
 }
 
 
@@ -223,20 +224,20 @@ static void AddOneDevice(u8 Addr,u8 *Name)
 	for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)
 	{
 		//对比地址或名字，如果地址相等，直接修改名字，如果名字相同，则修改地址。
-		if((gpVar->ClientRecord[i].Addr==Addr)||((gpVar->ClientRecord[i].Addr!=0)&&(gpVar->ClientRecord[i].NameChk==NameChk)))
+		if((gpQwpVar->ClientRecord[i].Addr==Addr)||((gpQwpVar->ClientRecord[i].Addr!=0)&&(gpQwpVar->ClientRecord[i].NameChk==NameChk)))
 		{//修改现成的
-			gpVar->ClientRecord[i].Addr=Addr;
+			gpQwpVar->ClientRecord[i].Addr=Addr;
 			
-			if((Name!=NULL)&&(gpVar->ClientRecord[i].NameChk!=NameChk))//修改名字
+			if((Name!=NULL)&&(gpQwpVar->ClientRecord[i].NameChk!=NameChk))//修改名字
 			{
-				MemCpy(gpVar->ClientRecord[i].Name,Name,Len);
-				gpVar->ClientRecord[i].Name[Len]=0;
+				MemCpy(gpQwpVar->ClientRecord[i].Name,Name,Len);
+				gpQwpVar->ClientRecord[i].Name[Len]=0;
 			}
 
-			if(gpVar->ClientRecord[i].IsHiLight==TRUE)
-				DrawDeviceInfo(gpVar->ClientRecord[i].DispIdx,Addr,gpVar->ClientRecord[i].Name,HighLightDisp);
+			if(gpQwpVar->ClientRecord[i].IsHiLight==TRUE)
+				DrawDeviceInfo(gpQwpVar->ClientRecord[i].DispIdx,Addr,gpQwpVar->ClientRecord[i].Name,HighLightDisp);
 			else
-				DrawDeviceInfo(gpVar->ClientRecord[i].DispIdx,Addr,gpVar->ClientRecord[i].Name,NormalDisp);
+				DrawDeviceInfo(gpQwpVar->ClientRecord[i].DispIdx,Addr,gpQwpVar->ClientRecord[i].Name,NormalDisp);
 			break;
 		}
 	}
@@ -244,14 +245,14 @@ static void AddOneDevice(u8 Addr,u8 *Name)
 	if(i==DEVICE_INFO_MAX_CLIENT_RECORD)//not found ,add new one.
 	{//建新的
 		for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)
-			if(gpVar->ClientRecord[i].Addr==0)
+			if(gpQwpVar->ClientRecord[i].Addr==0)
 			{
-				gpVar->ClientRecord[i].Addr=Addr;
-				MemCpy(gpVar->ClientRecord[i].Name,Name,Len);
-				gpVar->ClientRecord[i].Name[Len]=0;
-				gpVar->ClientRecord[i].NameChk=MakeHash33(gpVar->ClientRecord[i].Name,Len);
-				gpVar->ClientRecord[i].DispIdx=++gpVar->NowDispNum;
-				DrawDeviceInfo(gpVar->ClientRecord[i].DispIdx,Addr,gpVar->ClientRecord[i].Name,NormalDisp);
+				gpQwpVar->ClientRecord[i].Addr=Addr;
+				MemCpy(gpQwpVar->ClientRecord[i].Name,Name,Len);
+				gpQwpVar->ClientRecord[i].Name[Len]=0;
+				gpQwpVar->ClientRecord[i].NameChk=MakeHash33(gpQwpVar->ClientRecord[i].Name,Len);
+				gpQwpVar->ClientRecord[i].DispIdx=++gpQwpVar->NowDispNum;
+				DrawDeviceInfo(gpQwpVar->ClientRecord[i].DispIdx,Addr,gpQwpVar->ClientRecord[i].Name,NormalDisp);
 				break;
 			}
 	}	
@@ -267,22 +268,22 @@ static void DeleteOneDevice(u8 Addr)
 	
 	for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)
 	{
-		if(gpVar->ClientRecord[i].Addr==Addr)
+		if(gpQwpVar->ClientRecord[i].Addr==Addr)
 		{
-			DrawDeviceInfo(gpVar->ClientRecord[i].DispIdx,Addr,NULL,CleanDisp);
-			DispIdx=gpVar->ClientRecord[i].DispIdx;
-			gpVar->ClientRecord[i].Addr=0;
-			gpVar->ClientRecord[i].Name[0]=0;
-			gpVar->NowDispNum--;
+			DrawDeviceInfo(gpQwpVar->ClientRecord[i].DispIdx,Addr,NULL,CleanDisp);
+			DispIdx=gpQwpVar->ClientRecord[i].DispIdx;
+			gpQwpVar->ClientRecord[i].Addr=0;
+			gpQwpVar->ClientRecord[i].Name[0]=0;
+			gpQwpVar->NowDispNum--;
 		}
 	}
 
 	for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)
 	{
-		if((gpVar->ClientRecord[i].Addr!=0)&&(gpVar->ClientRecord[i].DispIdx>DispIdx))
+		if((gpQwpVar->ClientRecord[i].Addr!=0)&&(gpQwpVar->ClientRecord[i].DispIdx>DispIdx))
 		{
-			DrawDeviceInfo(gpVar->ClientRecord[i].DispIdx--,gpVar->ClientRecord[i].Addr,gpVar->ClientRecord[i].Name,CleanDisp);
-			DrawDeviceInfo(gpVar->ClientRecord[i].DispIdx,gpVar->ClientRecord[i].Addr,gpVar->ClientRecord[i].Name,NormalDisp);
+			DrawDeviceInfo(gpQwpVar->ClientRecord[i].DispIdx--,gpQwpVar->ClientRecord[i].Addr,gpQwpVar->ClientRecord[i].Name,CleanDisp);
+			DrawDeviceInfo(gpQwpVar->ClientRecord[i].DispIdx,gpQwpVar->ClientRecord[i].Addr,gpQwpVar->ClientRecord[i].Name,NormalDisp);
 		}
 	}
 }
@@ -295,10 +296,10 @@ static void HighLightOneDevice(u8 Addr)
 	for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)
 	{
 		//对比地址，如果地址相等，高亮
-		if(gpVar->ClientRecord[i].Addr==Addr)
+		if(gpQwpVar->ClientRecord[i].Addr==Addr)
 		{
-			gpVar->ClientRecord[i].IsHiLight=TRUE;
-			DrawDeviceInfo(gpVar->ClientRecord[i].DispIdx,Addr,gpVar->ClientRecord[i].Name,HighLightDisp);
+			gpQwpVar->ClientRecord[i].IsHiLight=TRUE;
+			DrawDeviceInfo(gpQwpVar->ClientRecord[i].DispIdx,Addr,gpQwpVar->ClientRecord[i].Name,HighLightDisp);
 			break;
 		}
 	}
@@ -323,8 +324,10 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 		case Sys_PreGotoPage:
 			break;
 		case Sys_PageInit:		//系统每次打开这个页面，会处理这个事件				
-			 gpVar=Q_PageMallco(sizeof(QWEB_PAGE_VAR));
-			 MemSet(gpVar,0,sizeof(QWEB_PAGE_VAR));
+			 gpQwpVar=Q_PageMallco(sizeof(QWEB_PAGE_VARS));
+			 MemSet(gpQwpVar,0,sizeof(QWEB_PAGE_VARS));
+			 if(pSysParam) strncpy(gpQwpVar->GotoPageName,pSysParam,sizeof(gpQwpVar->GotoPageName));
+			 Debug("cpy goto page name %d :%s\n\r",sizeof(gpQwpVar->GotoPageName),pSysParam);
 		case Sys_SubPageReturn:	//如果从子页面返回,就不会触发Sys_Page_Init事件,而是Sys_SubPage_Return
 			Q_TimSet(Q_TIM1,10000,500,TRUE);//5s poll
 			//画标题栏
@@ -383,8 +386,8 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 				
 				for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)//检查主机还在不在
 				{
-					if(gpVar->ClientRecord[i].Addr!=0)
-						AddOneDevice(gpVar->ClientRecord[i].Addr,(void *)gpVar->ClientRecord[i].Name);
+					if(gpQwpVar->ClientRecord[i].Addr!=0)
+						AddOneDevice(gpQwpVar->ClientRecord[i].Addr,(void *)gpQwpVar->ClientRecord[i].Name);
 				}
 			}
 			break;
@@ -394,7 +397,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 			break;
 		case Sys_PageClean:
 			if(QWA_QWebState()) QWA_StopQWeb();
-			Q_PageFree(gpVar);
+			Q_PageFree(gpQwpVar);
 		case Sys_PreSubPage:
 			Q_TimSet(Q_TIM1,0,0,FALSE);//stop poll
 			break;
@@ -440,14 +443,14 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 				
 				for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)//检查主机还在不在
 				{
-					if(gpVar->ClientRecord[i].Addr!=0)
-						if(QWA_QueryOnline(gpVar->ClientRecord[i].Addr)==0)
-						{Debug("@@ Delete %d\n\r",gpVar->ClientRecord[i].Addr);
-							DeleteOneDevice(gpVar->ClientRecord[i].Addr);
+					if(gpQwpVar->ClientRecord[i].Addr!=0)
+						if(QWA_QueryOnline(gpQwpVar->ClientRecord[i].Addr)==0)
+						{Debug("@@ Delete %d\n\r",gpQwpVar->ClientRecord[i].Addr);
+							DeleteOneDevice(gpQwpVar->ClientRecord[i].Addr);
 						}
-						else if(gpVar->ClientRecord[i].Name[0]==0)//没名字的，查询名字
+						else if(gpQwpVar->ClientRecord[i].Name[0]==0)//没名字的，查询名字
 						{
-							QWA_QueryName(gpVar->ClientRecord[i].Addr);
+							QWA_QueryName(gpQwpVar->ClientRecord[i].Addr);
 							Q_TimSet(Q_TIM1,10000,200,TRUE);// 2s poll
 							break;
 						}
@@ -519,9 +522,9 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 				Key=((pTouchInfo->y-DEVICE_INFO_START_Y)/(DEVICE_INFO_H+DEVICE_INFO_LIST_SPACE))+1;
 				for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)
 				{
-					if(gpVar->ClientRecord[i].DispIdx==Key)
+					if(gpQwpVar->ClientRecord[i].DispIdx==Key)
 					{
-						DrawDeviceInfo(Key,gpVar->ClientRecord[i].Addr,gpVar->ClientRecord[i].Name,PressDisp);
+						DrawDeviceInfo(Key,gpQwpVar->ClientRecord[i].Addr,gpQwpVar->ClientRecord[i].Name,PressDisp);
 						break;
 					}
 				}
@@ -532,11 +535,12 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 				Key=((pTouchInfo->y-DEVICE_INFO_START_Y)/(DEVICE_INFO_H+DEVICE_INFO_LIST_SPACE))+1;
 				for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)
 				{
-					if(gpVar->ClientRecord[i].DispIdx==Key)
+					if(gpQwpVar->ClientRecord[i].DispIdx==Key)
 					{
-						gpVar->ClientRecord[i].IsHiLight=FALSE;
-						DrawDeviceInfo(Key,gpVar->ClientRecord[i].Addr,gpVar->ClientRecord[i].Name,NormalDisp);
-						Q_GotoPage(GotoSubPage,"ChatPage",gpVar->ClientRecord[i].Addr,gpVar->ClientRecord[i].Name);
+						gpQwpVar->ClientRecord[i].IsHiLight=FALSE;
+						DrawDeviceInfo(Key,gpQwpVar->ClientRecord[i].Addr,gpQwpVar->ClientRecord[i].Name,NormalDisp);
+						if(gpQwpVar->GotoPageName&&gpQwpVar->GotoPageName[0])
+							Q_GotoPage(GotoSubPage,gpQwpVar->GotoPageName,gpQwpVar->ClientRecord[i].Addr,gpQwpVar->ClientRecord[i].Name);
 						break;
 					}
 				}

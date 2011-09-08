@@ -110,8 +110,8 @@ typedef struct{
 	u8 ChatListDispIdx;//start from 0 to CHAT_LIST_COL_NUM-1
 	u8 ReSendCnt;//需要发送的数据已经发送的次数
 	u8 LastRecordRole;//最后一条信息的角色
-}CHAT_PAGE_STRUCT;
-static CHAT_PAGE_STRUCT *gpVar;
+}CHAT_PAGE_VARS;
+static CHAT_PAGE_VARS *gpCpVars;
 //-----------------------本页自定义函数-----------------------
 static u8 CalculateRowByteNums(u8 *pStr,u8 MaxByteNums)	//计算一行最大容纳字数
 {
@@ -131,7 +131,7 @@ static u16 DispOneRecord(u16 StartY,u8 DispIdx)//显示一条聊天记录
 {
 	GUI_REGION DrawRegion;
 
-	if(gpVar->ChatList[DispIdx][0])
+	if(gpCpVars->ChatList[DispIdx][0])
 	{
 		DrawRegion.x=CHAT_FRAME_X;
 		DrawRegion.y=StartY;
@@ -140,8 +140,8 @@ static u16 DispOneRecord(u16 StartY,u8 DispIdx)//显示一条聊天记录
 		DrawRegion.Space=0x00;
 		DrawRegion.Color=CHAT_BG_COLOR;
 		Gui_FillBlock(&DrawRegion);
-		DrawRegion.Color=gpVar->ChatListColor[DispIdx];
-		Gui_DrawFont(GBK12_FONT,gpVar->ChatList[DispIdx],&DrawRegion);
+		DrawRegion.Color=gpCpVars->ChatListColor[DispIdx];
+		Gui_DrawFont(GBK12_FONT,gpCpVars->ChatList[DispIdx],&DrawRegion);
 
 		return StartY+CHAT_LIST_LINE_H;
 	}
@@ -153,12 +153,12 @@ static void DispChatList(void)//显示聊天记录
 	u8 i;
 	u16 StartY=CHAT_FRAME_Y;
 	
-	for(i=gpVar->ChatListDispIdx;i<CHAT_LIST_COL_NUM;i++)
+	for(i=gpCpVars->ChatListDispIdx;i<CHAT_LIST_COL_NUM;i++)
 	{
 		StartY=DispOneRecord(StartY,i);
 	}
 
-	for(i=0;i<gpVar->ChatListDispIdx;i++)
+	for(i=0;i<gpCpVars->ChatListDispIdx;i++)
 	{
 		StartY=DispOneRecord(StartY,i);
 	}
@@ -171,24 +171,24 @@ static void InsertOneRecord(u8 *pStr,bool IsMy)
 	u8 NowRole=IsMy?1:2;
 	RTC_TIME NowTime;
 
-	if(gpVar->LastRecordRole!=NowRole)//如果上一条和这一条是同一个人发的，无需显示名字信息
+	if(gpCpVars->LastRecordRole!=NowRole)//如果上一条和这一条是同一个人发的，无需显示名字信息
 	{
 		//插入名字
 		RTC_GetTime(&NowTime);
 		if(IsMy)
 		{
-			sprintf(gpVar->ChatList[gpVar->ChatListDispIdx],"%s (%02d:%02d:%02d)",(void *)QWA_MyQWebName(NULL),NowTime.hour,NowTime.min,NowTime.sec);		
-			gpVar->ChatListColor[gpVar->ChatListDispIdx]=CHAT_MY_NAME_COLOR;
+			sprintf(gpCpVars->ChatList[gpCpVars->ChatListDispIdx],"%s (%02d:%02d:%02d)",(void *)QWA_MyQWebName(NULL),NowTime.hour,NowTime.min,NowTime.sec);		
+			gpCpVars->ChatListColor[gpCpVars->ChatListDispIdx]=CHAT_MY_NAME_COLOR;
 		}
 		else
 		{
-			sprintf(gpVar->ChatList[gpVar->ChatListDispIdx],"%s (%02d:%02d:%02d)",(void *)gpVar->DstName,NowTime.hour,NowTime.min,NowTime.sec);		
-			gpVar->ChatListColor[gpVar->ChatListDispIdx]=CHAT_SHE_NAME_COLOR;
+			sprintf(gpCpVars->ChatList[gpCpVars->ChatListDispIdx],"%s (%02d:%02d:%02d)",(void *)gpCpVars->DstName,NowTime.hour,NowTime.min,NowTime.sec);		
+			gpCpVars->ChatListColor[gpCpVars->ChatListDispIdx]=CHAT_SHE_NAME_COLOR;
 		}
-		gpVar->ChatListDispIdx++;
-		if(gpVar->ChatListDispIdx==CHAT_LIST_COL_NUM) gpVar->ChatListDispIdx=0;
+		gpCpVars->ChatListDispIdx++;
+		if(gpCpVars->ChatListDispIdx==CHAT_LIST_COL_NUM) gpCpVars->ChatListDispIdx=0;
 
-		gpVar->LastRecordRole=NowRole;
+		gpCpVars->LastRecordRole=NowRole;
 	}
 
 	//插入内容
@@ -202,14 +202,14 @@ static void InsertOneRecord(u8 *pStr,bool IsMy)
 			CopyLen=CalculateRowByteNums(pStr,CHAT_LIST_ROW_BYTE);
 		}
 		
-		MemCpy(gpVar->ChatList[gpVar->ChatListDispIdx],pStr,CopyLen);
-		gpVar->ChatList[gpVar->ChatListDispIdx][CopyLen]=0;
-		if(IsMy) gpVar->ChatListColor[gpVar->ChatListDispIdx]=CHAT_MY_TXT_COLOR;
-		else gpVar->ChatListColor[gpVar->ChatListDispIdx]=CHAT_SHE_TXT_COLOR;
+		MemCpy(gpCpVars->ChatList[gpCpVars->ChatListDispIdx],pStr,CopyLen);
+		gpCpVars->ChatList[gpCpVars->ChatListDispIdx][CopyLen]=0;
+		if(IsMy) gpCpVars->ChatListColor[gpCpVars->ChatListDispIdx]=CHAT_MY_TXT_COLOR;
+		else gpCpVars->ChatListColor[gpCpVars->ChatListDispIdx]=CHAT_SHE_TXT_COLOR;
 
 		//行数自加
-		gpVar->ChatListDispIdx++;
-		if(gpVar->ChatListDispIdx==CHAT_LIST_COL_NUM) gpVar->ChatListDispIdx=0;
+		gpCpVars->ChatListDispIdx++;
+		if(gpCpVars->ChatListDispIdx==CHAT_LIST_COL_NUM) gpCpVars->ChatListDispIdx=0;
 
 		Len-=CopyLen;
 		if(Len<=0) break;
@@ -236,8 +236,8 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 		case Sys_PreGotoPage:
 			break;
 		case Sys_PageInit:		//系统每次打开这个页面，会处理这个事件				
-			gpVar=Q_PageMallco(sizeof(CHAT_PAGE_STRUCT));
-			MemSet(gpVar,0,sizeof(CHAT_PAGE_STRUCT));
+			gpCpVars=Q_PageMallco(sizeof(CHAT_PAGE_VARS));
+			MemSet(gpCpVars,0,sizeof(CHAT_PAGE_VARS));
 			//QWA_MyQWebName("我不怕");
 		case Sys_SubPageReturn:	//如果从子页面返回,就不会触发Sys_Page_Init事件,而是Sys_SubPage_Return
 			//画标题栏
@@ -260,8 +260,8 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 				u8 Buf[32];
 				if(SysEvent==Sys_PageInit)//复制地址和名字
 				{
-					gpVar->DstAddr=IntParam;
-					MemCpy(gpVar->DstName,pSysParam,16);
+					gpCpVars->DstAddr=IntParam;
+					MemCpy(gpCpVars->DstName,pSysParam,16);
 				}				
 				DrawRegion.x=8;
 				DrawRegion.y=26;
@@ -269,7 +269,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 				DrawRegion.h=16;
 				DrawRegion.Space=0x00;
 				DrawRegion.Color=FatColor(0xffffff);
-				sprintf(Buf,"Chat With [%d]%s\n\r",gpVar->DstAddr,(void *)gpVar->DstName);
+				sprintf(Buf,"Chat With [%d]%s\n\r",gpCpVars->DstAddr,(void *)gpCpVars->DstName);
 				Gui_DrawFont(GBK12_FONT,Buf,&DrawRegion);
 			}
 			
@@ -309,7 +309,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 
 			break;
 		case Sys_PageClean:
-			Q_PageFree(gpVar);
+			Q_PageFree(gpCpVars);
 			break;
 		case Sys_PreSubPage:
 			{
@@ -360,7 +360,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 			DispChatList();
 			break;
 		case Perip_QWebSendOk:
-			InsertOneRecord(gpVar->SendBuf,TRUE);
+			InsertOneRecord(gpCpVars->SendBuf,TRUE);
 			DispChatList();
 			{
 				GUI_REGION DrawRegion;
@@ -371,21 +371,21 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 				DrawRegion.h=SEND_FRAME_H;
 				DrawRegion.Color=CHAT_BG_COLOR;
 				Gui_FillBlock(&DrawRegion);
-				gpVar->SendBuf[0]=0;
+				gpCpVars->SendBuf[0]=0;
 			}
 			break;
 		case Perip_QWebSendFailed:
-			if(gpVar->SendBuf[0])
+			if(gpCpVars->SendBuf[0])
 			{
-				if(gpVar->ReSendCnt<MAX_RESEND_NUM)//重发
+				if(gpCpVars->ReSendCnt<MAX_RESEND_NUM)//重发
 				{
-					Debug("Send to Addr%d %s\n\r",strlen(gpVar->SendBuf),(void *)gpVar->SendBuf);
-					QWA_SendData(gpVar->DstAddr,strlen(gpVar->SendBuf)+1,gpVar->SendBuf);
-					gpVar->ReSendCnt++;
+					Debug("Send to Addr%d %s\n\r",strlen(gpCpVars->SendBuf),(void *)gpCpVars->SendBuf);
+					QWA_SendData(gpCpVars->DstAddr,strlen(gpCpVars->SendBuf)+1,gpCpVars->SendBuf);
+					gpCpVars->ReSendCnt++;
 				}
 				else
 				{
-					Debug("Send to Addr%d Failed:%s\n\r",strlen(gpVar->SendBuf),(void *)gpVar->SendBuf);
+					Debug("Send to Addr%d Failed:%s\n\r",strlen(gpCpVars->SendBuf),(void *)gpCpVars->SendBuf);
 				}
 			}
 			break;
@@ -409,13 +409,13 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 					Gui_DrawFont(GBK12_FONT,(void *)pParam,&DrawRegion);
 
 					if(IntParam>CHAT_BUF_MAX_BYTES) IntParam=CHAT_BUF_MAX_BYTES;
-					MemCpy(gpVar->SendBuf,pParam,IntParam);
-					gpVar->SendBuf[IntParam]=0;
+					MemCpy(gpCpVars->SendBuf,pParam,IntParam);
+					gpCpVars->SendBuf[IntParam]=0;
 				}			
-				else if((IntParam==0)&&((((u16 *)pParam)[0]==0x445b)||(((u16 *)pParam)[0]==0x435b))&&strlen((void *)gpVar->SendBuf))//前后键发送
+				else if((IntParam==0)&&((((u16 *)pParam)[0]==0x445b)||(((u16 *)pParam)[0]==0x435b))&&strlen((void *)gpCpVars->SendBuf))//前后键发送
 				{
-					Debug("Send to Addr%d %s\n\r",strlen((void *)gpVar->SendBuf),(void *)gpVar->SendBuf);
-					QWA_SendData(gpVar->DstAddr,strlen((void *)gpVar->SendBuf)+1,gpVar->SendBuf);
+					Debug("Send to Addr%d %s\n\r",strlen((void *)gpCpVars->SendBuf),(void *)gpCpVars->SendBuf);
+					QWA_SendData(gpCpVars->DstAddr,strlen((void *)gpCpVars->SendBuf)+1,gpCpVars->SendBuf);
 				}
 			}
 
@@ -444,18 +444,18 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 			break;
 
 		case ChatKV:
-			if(gpVar->SendBuf[0])
+			if(gpCpVars->SendBuf[0])
 			{
-				Debug("Send to Addr%d %s\n\r",strlen((void *)gpVar->SendBuf),gpVar->SendBuf);
-				QWA_SendData(gpVar->DstAddr,strlen((void *)gpVar->SendBuf)+1,gpVar->SendBuf);
-				gpVar->ReSendCnt=0;
+				Debug("Send to Addr%d %s\n\r",strlen((void *)gpCpVars->SendBuf),gpCpVars->SendBuf);
+				QWA_SendData(gpCpVars->DstAddr,strlen((void *)gpCpVars->SendBuf)+1,gpCpVars->SendBuf);
+				gpCpVars->ReSendCnt=0;
 			}
 			break;
 		case SendKV:
-			Q_GotoPage(GotoSubPage,"KeyBoardPage",CHAT_BUF_MAX_BYTES,gpVar->SendBuf);
+			Q_GotoPage(GotoSubPage,"KeyBoardPage",CHAT_BUF_MAX_BYTES,gpCpVars->SendBuf);
 			break;		
 		case HomeKV:
-			Q_GotoPage(SubPageReturn,"",-1,NULL);//返回前一个页面
+			Q_GotoPage(SubPageReturn,"",0,NULL);//返回前一个页面
 			break;
 		case MessageKV:
 		case MusicKV:

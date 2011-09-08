@@ -87,7 +87,7 @@ typedef struct {
 	FS_FILE *EBookObj;
 	u8 ReadBuf[READ_BUF_SIZE+1];
 }EBOOK_PAGE_VARS;
-static EBOOK_PAGE_VARS *gVars;//只需要定义一个指针，减少全局变量的使用
+static EBOOK_PAGE_VARS *gpEbpVars;//只需要定义一个指针，减少全局变量的使用
 
 //-----------------------本页自定义函数-----------------------
 static u32 GetSum(u16 *Buf,u16 Len)
@@ -196,10 +196,10 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 	{
 		case Sys_PageInit:		
 			Debug("sizeof(EBOOK_PAGE_VARS)=%d\n\r",sizeof(EBOOK_PAGE_VARS));
-			gVars=(EBOOK_PAGE_VARS *)Q_PageMallco(sizeof(EBOOK_PAGE_VARS));
-			if(gVars==0)
+			gpEbpVars=(EBOOK_PAGE_VARS *)Q_PageMallco(sizeof(EBOOK_PAGE_VARS));
+			if(gpEbpVars==0)
 			{
-				Q_ErrorStopScreen("gVars malloc fail !\n\r");
+				Q_ErrorStopScreen("gpEbpVars malloc fail !\n\r");
 			}
 
 		case Sys_SubPageReturn:
@@ -212,7 +212,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 			DrawRegion.h=320;
 			DrawRegion.Color=FatColor(EBOOK_BG_COLOR);
 			Gui_FillBlock(&DrawRegion);
-			gVars->PageTotal=gVars->CurPage=0;
+			gpEbpVars->PageTotal=gpEbpVars->CurPage=0;
 
 			//画底栏
 			DrawRegion.x=0;
@@ -226,18 +226,18 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 		case Sys_TouchSetOk_SR:
 			if(IntParam==TRUE)//从子页面返回
 			{
-				if(CheckMultiSuffix(gVars->EBookPath,".txt"))
+				if(CheckMultiSuffix(gpEbpVars->EBookPath,".txt"))
 				{//如果是文件，立即显示
-					Debug("Select %s\n\r",gVars->EBookPath);
+					Debug("Select %s\n\r",gpEbpVars->EBookPath);
 					Gui_DrawFont(GBK16_FONT,"正在预处理，请稍候...",(void *)&gEBookTxtRegion);
-					GetEBookLocal(EBOOK_MAX_PAGE,gVars);
-					Debug("Total Page Num:%d\n\r",gVars->PageTotal);
-					DispTxt(gVars);
+					GetEBookLocal(EBOOK_MAX_PAGE,gpEbpVars);
+					Debug("Total Page Num:%d\n\r",gpEbpVars->PageTotal);
+					DispTxt(gpEbpVars);
 				}
 			}
 			break;
 		case Sys_PageClean:
-			Q_PageFree(gVars);
+			Q_PageFree(gpEbpVars);
 			break;
 	}
 	
@@ -265,18 +265,18 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 					break;
 				case ExtiKeyUp:
 					Q_PresentTch(PrevOneKV,Tch_Release);
-					if(gVars->CurPage>0)
+					if(gpEbpVars->CurPage>0)
 					{
-						gVars->CurPage--;
-						DispTxt(gVars);
+						gpEbpVars->CurPage--;
+						DispTxt(gpEbpVars);
 					}
 					break;
 				case ExtiKeyDown:
 					Q_PresentTch(NextOneKV,Tch_Release);
-					if(gVars->CurPage+1<gVars->PageTotal)
+					if(gpEbpVars->CurPage+1<gpEbpVars->PageTotal)
 					{
-						gVars->CurPage++;
-						DispTxt(gVars);
+						gpEbpVars->CurPage++;
+						DispTxt(gpEbpVars);
 					}
 					break; 
 			}break;
@@ -291,30 +291,30 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 	{	
 		case OpenKV:
 			FileListParam.CallBackRid=Q_FindRidByPageName(NULL);
-			sprintf((void *)gVars->EBookPath,"/EBook");
-			FileListParam.pPathBuf=gVars->EBookPath;
+			sprintf((void *)gpEbpVars->EBookPath,"/EBook");
+			FileListParam.pPathBuf=gpEbpVars->EBookPath;
 			FileListParam.pSuffixStr=".txt";
 			Q_GotoPage(GotoSubPage,"FileListPage",FL_SelectOne|FL_NoParent|FL_NoListBuf,&FileListParam);
 			break;
 		case BackKV:
 			if(InEvent!=Tch_Release) return 0;
-			Q_GotoPage(GotoNewPage,"MainPage",-1,NULL);
+			Q_GotoPage(GotoNewPage,"MainPage",0,NULL);
 			break;
 		case DotKV:
 			break;
 		
 		case PrevOneKV:
-			if(gVars->CurPage>0)
+			if(gpEbpVars->CurPage>0)
 			{
-				gVars->CurPage--;
-				DispTxt(gVars);
+				gpEbpVars->CurPage--;
+				DispTxt(gpEbpVars);
 			}
 			break;	
 		case NextOneKV:
-			if(gVars->CurPage+1<gVars->PageTotal)
+			if(gpEbpVars->CurPage+1<gpEbpVars->PageTotal)
 			{
-				gVars->CurPage++;
-				DispTxt(gVars);
+				gpEbpVars->CurPage++;
+				DispTxt(gpEbpVars);
 			}
 			break;
 		default:

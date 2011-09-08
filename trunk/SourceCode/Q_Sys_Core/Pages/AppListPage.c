@@ -461,7 +461,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 	switch(Key)
 	{
 		case RetMainKV:
-			Q_GotoPage(GotoNewPage,"MainPage",-1,NULL);
+			Q_GotoPage(GotoNewPage,"MainPage",0,NULL);
 			break;
 		case SysSettingsKV:
 			{//添加选项到settings page的示例
@@ -527,7 +527,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 				Q_GotoPage(GotoSubPage,"KeyBoardPage",1024,p);
 			}
 			break;
-			//Q_GotoPage(GotoNewPage,"TestPage",-1,NULL);
+			//Q_GotoPage(GotoNewPage,"TestPage",0,NULL);
 		case WirelessKV:
 #if 0
 			{
@@ -560,7 +560,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 				for(i=0;i<DataLen;i++)pData[i]=i;
 				QWA_SendData(0x01,DataLen,pData);
 			}		
-			//Q_GotoPage(GotoNewPage,"MainPage",FALSE,NULL);
+			//Q_GotoPage(GotoNewPage,"MainPage",0,NULL);
 			break;
 		case MessageKV:
 		case MusicKV:

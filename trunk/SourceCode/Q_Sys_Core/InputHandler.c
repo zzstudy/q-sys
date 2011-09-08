@@ -327,7 +327,7 @@ void InputHandler_Task( void *Task_Parameters )
 
 	MemSet(ExtiKeyInfo,0,sizeof(EXIT_KEY_INFO)*EXTI_KEY_MAX_NUM);
 
-	Q_GotoPage(GotoNewPage,"MainPage",-1,NULL);	//进主页;
+	Q_GotoPage(GotoNewPage,"MainPage",0,NULL);	//进主页;
 	
 	while(1)
 	{
