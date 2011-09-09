@@ -363,19 +363,15 @@ extern "C" {
 #include "stm32f10x.h" 
 
 #if Q_HEAP_TRACK_DEBUG ==1
-
 void *QS_Mallco(u16 Size,u8 *pFuncName,u32 Lines);
 bool QS_Free(void *Ptr,u8 *pFuncName,u32 Lines);
 #define FreeRTOS_Mallco(n) QS_Mallco(n,(void *)__func__,__LINE__)
 #define FreeRTOS_Free(p) QS_Free(p,(void *)__func__,__LINE__)
-
 #else
-
 void *QS_Mallco(u16 Size);
 bool QS_Free(void *Ptr);
 #define FreeRTOS_Mallco QS_Mallco
 #define FreeRTOS_Free QS_Free
-
 #endif
 
 

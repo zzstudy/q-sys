@@ -4073,12 +4073,12 @@ void ff_rel_grant(_SYNC_t ID)
 #if _USE_LFN == 3					/* Memory functions */
 void* ff_memalloc (UINT Size)			/* Allocate memory block */
 {
-	OS_Mallco(Size);
+	Q_Mallco(Size);
 }
 
 void ff_memfree (void* ptr)			/* Free memory block */
 {
-	OS_Free(ptr);
+	Q_Free(ptr);
 }
 
 #endif

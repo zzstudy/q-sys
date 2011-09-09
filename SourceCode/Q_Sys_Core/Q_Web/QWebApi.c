@@ -93,8 +93,6 @@ QW_RESULT QWA_QueryName(u8 Addr)
 			OS_ExitCritical();
 			return (QW_RESULT)OS_SemaphoreGive(gRfRecvHandler_Sem);
 		}
-
-		return QWR_FAILED;
 	}
 	else
 	{
@@ -139,8 +137,6 @@ QW_RESULT QWA_SendData(u8 Addr,u32 DataLen,u8 *pData)
 		Debug("QW Send Data @ %d\n\r",QW_GetNowTimeMs());
 		return (QW_RESULT)OS_SemaphoreGive(gRfRecvHandler_Sem);
 	}
-
-	return QWR_FAILED;
 }
 
 //µ÷ÊÔ´òÓ¡

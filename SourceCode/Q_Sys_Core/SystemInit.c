@@ -130,13 +130,13 @@ static void SetupHardware( void )
 #if 0//debug by karlno
 	Debug("#### 123\n\r");
 
-	ptr1=OS_Mallco(200);
-	ptr2=OS_Mallco(68);
+	ptr1=Q_Mallco(200);
+	ptr2=Q_Mallco(68);
 
-	OS_Free(ptr1);
-	ptr3=OS_Mallco(68);
+	Q_Free(ptr1);
+	ptr3=Q_Mallco(68);
 
-	ptr3=OS_Mallco(68);
+	ptr3=Q_Mallco(68);
 
 while(1);
 #endif
@@ -179,7 +179,7 @@ while(1);
 	FIL fsrc;            // file objects
 	FRESULT res;         // FatFs function common result code
 	UINT br;   
-	u8 *p=OS_Mallco(1024);
+	u8 *p=Q_Mallco(1024);
 	u32 time=QW_GetNowTimeMs();
 
 
@@ -513,11 +513,11 @@ void QSYS_Init(void)
 
 #if 1 //首次下载完成后可关闭此处代码，防止误下载
 	Debug("\n\r-------------------SPI FLASH DOWNLOAD FROM SD------------------\n\r");
-	ptr1=(u8 *)OS_Mallco(CfgFileSize);
-	ptr2=(u8 *)OS_Mallco(SPI_FLASH_PAGE_SIZE);
+	ptr1=(u8 *)Q_Mallco(CfgFileSize);
+	ptr2=(u8 *)Q_Mallco(SPI_FLASH_PAGE_SIZE);
 	SpiFlashDownFromSD(FALSE,"System/Down.cfg",ptr1,ptr2);
-	OS_Free(ptr2);
-	OS_Free(ptr1);
+	Q_Free(ptr2);
+	Q_Free(ptr1);
 	Debug("-------------------SPI FLASH DOWNLOAD FROM SD------------------\n\r\n\r");
 #endif
 

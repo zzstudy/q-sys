@@ -1520,7 +1520,7 @@ GUI_RESULT Gui_Draw24Bmp(const u8 * pBmpPath,const GUI_REGION *pBmpRegion)
 		NeedTrans=TRUE;
 	}
 
-	gBmpColorTableBuf=OS_Mallco(GUI_BMP_COLOR_TABLE_BUF_SIZE+8);//∑÷≈‰ª∫¥Ê
+	gBmpColorTableBuf=Q_Mallco(GUI_BMP_COLOR_TABLE_BUF_SIZE+8);//∑÷≈‰ª∫¥Ê
 	
 	LCD_BlukWriteDataStart();
 	while(1)
@@ -1598,7 +1598,7 @@ GUI_RESULT Gui_Draw24Bmp(const u8 * pBmpPath,const GUI_REGION *pBmpRegion)
 		}
   	}	
 
-  	OS_Free(gBmpColorTableBuf);// Õ∑≈ª∫¥Ê
+  	Q_Free(gBmpColorTableBuf);// Õ∑≈ª∫¥Ê
   	
 	if(Gui_GetLandScapeMode())//∫·∆¡
 	{
@@ -1715,7 +1715,7 @@ GUI_RESULT Gui_DrawImgBin(const u8 * pPath,const GUI_REGION *pRegion)
 		NeedTrans=TRUE;
 	}
 
-	gBmpColorTableBuf=OS_Mallco(GUI_BMP_COLOR_TABLE_BUF_SIZE);//∑÷≈‰ª∫¥Ê
+	gBmpColorTableBuf=Q_Mallco(GUI_BMP_COLOR_TABLE_BUF_SIZE);//∑÷≈‰ª∫¥Ê
 	
 	LCD_BlukWriteDataStart();
 	
@@ -1754,7 +1754,7 @@ GUI_RESULT Gui_DrawImgBin(const u8 * pPath,const GUI_REGION *pRegion)
 		}
   	}	
 
-  	OS_Free(gBmpColorTableBuf);// Õ∑≈ª∫¥Ê
+  	Q_Free(gBmpColorTableBuf);// Õ∑≈ª∫¥Ê
   	
 	LCD_UnLock();// Õ∑≈∆¡ƒª◊ ‘¥
 
@@ -1797,7 +1797,7 @@ GUI_RESULT Gui_DrawImgFlashBin(u32 Page,const GUI_REGION *pRegion)
 		NeedTrans=TRUE;
 	}
 
-	gBmpColorTableBuf=OS_Mallco(GUI_BMP_COLOR_TABLE_BUF_SIZE);//∑÷≈‰ª∫¥Ê
+	gBmpColorTableBuf=Q_Mallco(GUI_BMP_COLOR_TABLE_BUF_SIZE);//∑÷≈‰ª∫¥Ê
 	
 	LCD_BlukWriteDataStart();
 	
@@ -1844,7 +1844,7 @@ GUI_RESULT Gui_DrawImgFlashBin(u32 Page,const GUI_REGION *pRegion)
 		}
   	}
 
-  	OS_Free(gBmpColorTableBuf);
+  	Q_Free(gBmpColorTableBuf);
   	
 	LCD_UnLock();// Õ∑≈∆¡ƒª◊ ‘¥
 	

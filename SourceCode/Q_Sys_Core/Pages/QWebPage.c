@@ -125,10 +125,17 @@ typedef struct{
 	CLIENT_RECORD ClientRecord[DEVICE_INFO_MAX_CLIENT_RECORD];//q网设备记录
 	u8 SelectedAddr;//选定的地址，没有时为0
 	u32 SelectedTimeMs;//选定列表项的时间
-	PAGE_ACTION GotoPageAct;//按下列表项后需以何种方式进入的新页面
-	u8 GotoPageName[32];//按下列表项后需进入的页面
+
+	u8 PageTitle[32];//页面标题
+	PAGE_ACTION GotoAct_List;//按下列表项后需以何种方式进入的新页面
+	u8 GotoName_List[20];//按下列表项后需进入的页面
+	PAGE_ACTION GotoAct_Back;//按下back后需以何种方式进入的新页面
+	u8 GotoName_Back[20];//按下back后需进入的页面
+	PAGE_ACTION GotoAct_Done;//按下done后需以何种方式进入的新页面
+	u8 GotoName_Done[20];//按下done后需进入的页面
 }QWEB_PAGE_VARS;
 static QWEB_PAGE_VARS *gpQwpVar=NULL;
+static QWEB_PAGE_SET *gpQwpSet=NULL;
 
 //-----------------------本页自定义函数-----------------------
 u8 *QWP_GetNameByAddr(u8 Addr)
@@ -142,6 +149,7 @@ u8 *QWP_GetNameByAddr(u8 Addr)
 	{
 		return gpQwpVar->ClientRecord[i].Name;
 	}
+	return "";
 }
 
 //-----------------------本页系统函数----------------------
@@ -347,7 +355,7 @@ static void DrawInitBg(void)
 	DrawRegion.h=21;
 	DrawRegion.Color=FatColor(NO_TRANS);
 	Gui_FillImgArray((u8 *)gImage_StatusBar1,1,21,&DrawRegion);	
-	DrawTitle1(ASC14B_FONT,"QWebPage",(240-strlen("QWebPage")*GUI_ASC14B_ASCII_WIDTH)>>1,strlen("QWebPage"),QWEB_PAGE_BG_COLOR);//写标题
+	if(gpQwpVar) DrawTitle1(ASC14B_FONT,gpQwpVar->PageTitle,(240-strlen((void *)gpQwpVar->PageTitle)*GUI_ASC14B_ASCII_WIDTH)>>1,strlen((void *)gpQwpVar->PageTitle),QWEB_PAGE_BG_COLOR);//写标题
 	
 	//画背景
 	DrawRegion.x=0;
@@ -393,21 +401,29 @@ static void DrawInitBg(void)
 //发生某些事件时，会触发的函数
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam)
 {
-	GUI_REGION DrawRegion;
-	
 	switch(SysEvent)
 	{
 		case Sys_PreGotoPage:
+			if(pSysParam!=NULL)//如果pSysParam不为空，则表示被其他页面调用，需传递数据
+			{
+				gpQwpSet=Q_Mallco(sizeof(QWEB_PAGE_SET));//使用QS_Mallco是为了逃避页面的堆检查机制
+				MemCpy((void *)gpQwpSet,pSysParam,sizeof(QWEB_PAGE_SET));
+			}
 			break;
-		case Sys_PageInit:		//系统每次打开这个页面，会处理这个事件				
-			 gpQwpVar=Q_PageMallco(sizeof(QWEB_PAGE_VARS));
-			 MemSet(gpQwpVar,0,sizeof(QWEB_PAGE_VARS));
-			 gpQwpVar->NowPressKey=0xff;
-			 if(pSysParam) 
-			 {
-			 	gpQwpVar->GotoPageAct=IntParam;
-			 	strncpy(gpQwpVar->GotoPageName,pSysParam,sizeof(gpQwpVar->GotoPageName));
-			 }
+		case Sys_PageInit:		//系统每次打开这个页面，会处理这个事件			
+			gpQwpVar=Q_PageMallco(sizeof(QWEB_PAGE_VARS));//在Sys_PreGotoPage中处理，并使用OS_Mallco，是为了获取到前页数据，屏蔽页面堆检查
+			MemSet(gpQwpVar,0,sizeof(QWEB_PAGE_VARS));
+			gpQwpVar->NowPressKey=0xff;
+			if(gpQwpSet!=NULL) 
+			{
+				strncpy((void *)gpQwpVar->PageTitle,(void *)gpQwpSet->PageTitle,sizeof(gpQwpVar->PageTitle));
+				gpQwpVar->GotoAct_List=gpQwpSet->GotoAct_List;
+				strncpy((void *)gpQwpVar->GotoName_List,(void *)gpQwpSet->GotoName_List,sizeof(gpQwpVar->GotoName_List));
+				gpQwpVar->GotoAct_Back=gpQwpSet->GotoAct_Back;
+				strncpy((void *)gpQwpVar->GotoName_Back,(void *)gpQwpSet->GotoName_Back,sizeof(gpQwpVar->GotoName_Back));			 	
+				gpQwpVar->GotoAct_Done=gpQwpSet->GotoAct_Done;
+				strncpy((void *)gpQwpVar->GotoName_Done,(void *)gpQwpSet->GotoName_Done,sizeof(gpQwpVar->GotoName_Done));
+			}		
 		case Sys_SubPageReturn:	//如果从子页面返回,就不会触发Sys_Page_Init事件,而是Sys_SubPage_Return
 			if(SysEvent==Sys_SubPageReturn) //关全局事件
 			{
@@ -442,13 +458,17 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 					}
 				}
 			}
+			if(gpQwpSet!=NULL)//保存前页数据的内存可以销毁了
+			{
+				Q_Free(gpQwpSet);
+				gpQwpSet=NULL;
+			}
 			break;
 		case Sys_TouchSetOk:
 		case Sys_TouchSetOk_SR:
 			
 			break;
 		case Sys_PageClean:
-			//if(QWA_QWebState()) QWA_StopQWeb();
 			Q_PageFree(gpQwpVar);
 			gpQwpVar=NULL;
 		case Sys_PreSubPage:
@@ -519,7 +539,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 			if((gpQwpVar->SelectedAddr) && (gpQwpVar->SelectedAddr!=QW_ADDR_HOST)
 				&&	(OS_GetCurrentSysMs()-gpQwpVar->SelectedTimeMs > QWEB_PAGE_SELECT_ACT_WAITING_MS) )
 			{
-				DeleteOneDevice(gpQwpVar->SelectedAddr);
+				//DeleteOneDevice(gpQwpVar->SelectedAddr);
 				gpQwpVar->SelectedAddr=0;
 			}
 			break;
@@ -527,7 +547,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 		case Perip_QWebJoin:
 			if(QWA_GetMyAddr()==QW_ADDR_HOST)//做为主机得到从机的query ack
 			{
-				Debug("QWeb Join [%d]%s\n\r",IntParam,pParam);
+				Debug("QWeb Join [%d]%s\n\r",IntParam,(u8 *)pParam);
 				AddOneDevice(IntParam,pParam);
 			}
 			else if(QWA_GetMyAddr()!=QW_ADDR_DEF)//做为从机，得到主机信息
@@ -535,7 +555,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 				u8 Addr;
 				u8 MyAddr=QWA_GetMyAddr();
 				
-				Debug("QWeb Get Host Info [%d]%s\n\r",IntParam,pParam);
+				Debug("QWeb Get Host Info [%d]%s\n\r",IntParam,(u8 *)pParam);
 				AddOneDevice(IntParam,pParam);
 
 				//轮询在线从机
@@ -548,18 +568,18 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 				if(gpQwpVar->SelectedAddr==QW_ADDR_HOST)//有选定主机作为对话地址，正在等待主机info
 				{
 					gpQwpVar->SelectedAddr=0;
-					Q_GotoPage(gpQwpVar->GotoPageAct,gpQwpVar->GotoPageName,IntParam,pParam);
+					Q_GotoPage(gpQwpVar->GotoAct_List,gpQwpVar->GotoName_List,IntParam,pParam);
 				}
 			}
 			break;
 		case Perip_QWebQueryName:
-			Debug("QWeb Query [%d]%s\n\r",IntParam,pParam);
+			Debug("QWeb Query [%d]%s\n\r",IntParam,(u8 *)pParam);
 			AddOneDevice(IntParam,pParam);
 
 			if(IntParam==gpQwpVar->SelectedAddr)//有选定地址，正在等待query ack
 			{
 				gpQwpVar->SelectedAddr=0;
-				Q_GotoPage(gpQwpVar->GotoPageAct,gpQwpVar->GotoPageName,IntParam,pParam);
+				Q_GotoPage(gpQwpVar->GotoAct_List,gpQwpVar->GotoName_List,IntParam,pParam);
 			}
 			break;
 		case Perip_QWebRecv://收到信息
@@ -587,9 +607,10 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 	switch(Key)
 	{
 		case BackKV:
-			Q_GotoPage(GotoNewPage,"AppListPage",0,NULL);//返回前一个页面
+			Q_GotoPage(gpQwpVar->GotoAct_Back,gpQwpVar->GotoName_Back,0,NULL);
 			break;
 		case DoneKV:
+			Q_GotoPage(gpQwpVar->GotoAct_Done,gpQwpVar->GotoName_Done,0,NULL);
 			break;	
 		case LeftArrowKV:
 
@@ -619,7 +640,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 						{
 							gpQwpVar->ClientRecord[i].IsHiLight=FALSE;
 							DrawDeviceInfo(Key,gpQwpVar->ClientRecord[i].Addr,gpQwpVar->ClientRecord[i].Name,NormalDisp);
-							if((gpQwpVar->GotoPageName&&gpQwpVar->GotoPageName[0]) 
+							if((gpQwpVar->GotoName_List&&gpQwpVar->GotoName_List[0]) 
 								&& (gpQwpVar->SelectedAddr == 0))//允许进入子页面
 							{//进入子页面前先查询名字
 								gpQwpVar->SelectedAddr=gpQwpVar->ClientRecord[i].Addr;
@@ -691,7 +712,6 @@ static TCH_MSG YesNoHandler(u8 ObjID,bool NowValue)
 				
 				u8 i;
 				GUI_REGION DrawRegion;
-				u8 Str[32];
 				
 				QWA_StopQWeb();
 				for(i=0;i<DEVICE_INFO_MAX_CLIENT_RECORD;i++)//检查主机还在不在

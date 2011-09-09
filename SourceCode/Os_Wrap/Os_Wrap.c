@@ -38,7 +38,7 @@ void OS_StartRun(void)
 u8 OS_TaskCreate(TASK_FUNC TaskFunc, const u8 *TaskName, u16 StackSizeByte, void *pParam, u8 Priority,void **pTaskHandle)
 {
 	u8 error;
-	void *ptr=OS_Mallco(StackSizeByte+4);//从mallco出来一定是4byte align，我们需要8byte align，所以多分配4个
+	void *ptr=Q_Mallco(StackSizeByte+4);//从mallco出来一定是4byte align，我们需要8byte align，所以多分配4个
 
 #if QS_TASK_RECORD
 	MemSet(ptr,0x5a,StackSizeByte);//记录堆栈
@@ -204,17 +204,17 @@ QSYS_MSG_BOX_MEM *QMBMemCreat(u16 blksize,u8 nblks)
 		return NULL;
 	}
 	ablksize = (((blksize-1)>>2)+1)<<2;//保证每封邮件的首地址都按四字节对齐
-	addr = OS_Mallco(ablksize*nblks);//获得邮箱内存
+	addr = Q_Mallco(ablksize*nblks);//获得邮箱内存
 	if(addr==NULL)
 	{
 		Debug("QMBMemCreat can't get mem from heap to creat QSYS_MSG_BOX_MEM\r\n");
 		return NULL;
 	}
-    pmem = OS_Mallco(sizeof(QSYS_MSG_BOX_MEM));//获得邮箱内存管理控制块内存                             
+    pmem = Q_Mallco(sizeof(QSYS_MSG_BOX_MEM));//获得邮箱内存管理控制块内存                             
     if (pmem == NULL)
 	{ 
 		Debug("QMBMemCreat can't get mem from heap to creat QSYS_MSG_BOX_MEM\r\n");
-		OS_Free(addr);//释放之前申请的内存
+		Q_Free(addr);//释放之前申请的内存
         return NULL;
 	}
 	//加工邮箱内存
@@ -308,7 +308,7 @@ OS_MsgBoxHandle OS_MsgBoxCreate(const u8 *Name,u16 ItemSize,u8 ItemNum)
 		Debug("OS_MsgBoxCreate parameter error!blksize and nblks must >0\r\n");
 		return NULL;
 	}
-	if((pMsgBox=(QSYS_MSG_BOX *)OS_Mallco(sizeof(QSYS_MSG_BOX)))==NULL)
+	if((pMsgBox=(QSYS_MSG_BOX *)Q_Mallco(sizeof(QSYS_MSG_BOX)))==NULL)
 	{
 		Debug("OS_MsgBoxCreate can't get mem from heap to creat QSYS_MSG_BOX\r\n");
 		return NULL; 
@@ -316,26 +316,26 @@ OS_MsgBoxHandle OS_MsgBoxCreate(const u8 *Name,u16 ItemSize,u8 ItemNum)
 	if((pMsgBox->Mem = QMBMemCreat(ItemSize, ItemNum))==NULL)
 	{
 		Debug("OS_MsgBoxCreate failed because QMBMemCreat failed\r\n");
-		OS_Free(pMsgBox);
+		Q_Free(pMsgBox);
 		return NULL; 
 	}
-	if((ptr = OS_Mallco(ItemNum*4))==NULL)
+	if((ptr = Q_Mallco(ItemNum*4))==NULL)
 	{
 		Debug("OS_MsgBoxCreate can't get mem from heap to creat OSMsg\r\n");
-		OS_Free(pMsgBox);
+		Q_Free(pMsgBox);
 	}
 	if((pMsgBox->Queue = OSQCreate (ptr,ItemNum))== (OS_EVENT *)0)
 	{
 		Debug("OS_MsgBoxCreate failed because OSQCreate failed\r\n");
-		OS_Free(pMsgBox);
-		OS_Free(ptr);
+		Q_Free(pMsgBox);
+		Q_Free(ptr);
 		return NULL; 
 	}
 	if((pMsgBox->Sem = OSSemCreate (ItemNum)) == (OS_EVENT *)0 )
 	{
 		Debug("OS_MsgBoxCreate failed because OSSemCreate failed\r\n");
-		OS_Free(pMsgBox);
-		OS_Free(ptr);
+		Q_Free(pMsgBox);
+		Q_Free(ptr);
 		return NULL; 
 	}
 	pMsgBox->Name = Name;

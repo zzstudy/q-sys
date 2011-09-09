@@ -129,8 +129,9 @@ OPTFFF 12,102,1,536870912,0,0,0,0,<..\..\Q_Sys_Core\Pages\SettingsPage.c><Settin
 OPTFFF 12,103,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\SnakePage.c><SnakePage.c> 
 OPTFFF 12,104,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\TestPage.c><TestPage.c> 
 OPTFFF 12,105,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\TouchCheckPage.c><TouchCheckPage.c> 
+OPTFFF 12,106,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\NewsPage.c><NewsPage.c> 
 
-ExtF <G:\MyDoc\Desktop\STM_SRC\SVN\q-sys\SourceCode\Drivers\Drivers.h> 28,32,0,{ 44,0,0,0,2,0,0,0,3,0,0,0,255,255,255,255,255,255,255,255,248,255,255,255,226,255,255,255,75,0,0,0,75,0,0,0,79,3,0,0,87,1,0,0 }
+ExtF <G:\MyDoc\Desktop\STM_SRC\SVN\q-sys\SourceCode\Drivers\Drivers.h> 19,32,0,{ 44,0,0,0,2,0,0,0,3,0,0,0,255,255,255,255,255,255,255,255,248,255,255,255,226,255,255,255,75,0,0,0,75,0,0,0,79,3,0,0,87,1,0,0 }
 
 TARGOPT 1, (Q-SYS)
  ADSCLK=8000000

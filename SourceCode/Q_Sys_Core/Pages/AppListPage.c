@@ -12,7 +12,7 @@
 #include "SettingsPage.h"
 #include "FileListPage.h"
 #include "KeyBoardPage.h"
-#include "QWebApi.h"
+#include "QWebPage.h"
 
 //函数声明
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
@@ -46,7 +46,7 @@ typedef enum
 	GameKV,
 	TouchChkKV,
 
-	MapKV,
+	NewsKV,
 	PianistKV,
 	TalkKV,
 	WeatherKV,
@@ -77,7 +77,7 @@ static const IMG_TCH_OBJ ImgTchRegCon[]={
 	{"Game",	GameKV,RelMsk|BinMsk,122,173,55,50,0,0,"Game",FatColor(NO_TRANS)},
 	{"Touch",	TouchChkKV,RelMsk|BinMsk,181,173,55,50,0,0,"TouchChk",FatColor(NO_TRANS)},
 
-	{"Map",	MapKV,RelMsk|BinMsk,4,242,55,50,0,0,"Map",FatColor(NO_TRANS)},
+	{"News",	NewsKV,RelMsk|BinMsk,4,242,55,50,0,0,"Map",FatColor(NO_TRANS)},
 	{"Pianist",	PianistKV,RelMsk|BinMsk,63,242,55,50,0,0,"Pianist",FatColor(NO_TRANS)},
 	{"Talk",	TalkKV,RelMsk|BinMsk,122,242,55,50,0,0,"Talk",FatColor(NO_TRANS)},
 	{"Weather",	WeatherKV,RelMsk|BinMsk,181,242,55,50,0,0,"Weather",FatColor(NO_TRANS)},
@@ -119,7 +119,7 @@ static const CHAR_TCH_OBJ CharTchRegCon[]={
 	{"触屏校验",TouchChkKV,RoueMsk|RelMsk,181,223,55,15,
 		4,2,0x00,0x00,FatColor(0x000000),FatColor(0xe0e0e0),FatColor(0xffffff),FatColor(0x333333),FatColor(0x000000),FatColor(0xe0e0e0)},
 
-	{"地图导航",MapKV,RoueMsk|RelMsk,4,292,55,15,
+	{"新闻资讯",NewsKV,RoueMsk|RelMsk,4,292,55,15,
 		4,2,0x00,0x00,FatColor(0x000000),FatColor(0xe0e0e0),FatColor(0xffffff),FatColor(0x333333),FatColor(0x000000),FatColor(0xe0e0e0)},
 	{"钢琴",PianistKV,RoueMsk|RelMsk,63+12,292,32,15,
 		4,2,0x00,0x00,FatColor(0x000000),FatColor(0xe0e0e0),FatColor(0xffffff),FatColor(0x333333),FatColor(0x000000),FatColor(0xe0e0e0)},
@@ -529,31 +529,43 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 			break;
 			//Q_GotoPage(GotoNewPage,"TestPage",0,NULL);
 		case WirelessKV:
-#if 0
 			{
-				QWEB_DATA_STRUCT UserData;
-				u16 i;
+				QWEB_PAGE_SET QWebPageSet;
 
-				UserData.DataLen=50*50;
-				UserData.pData=OS_Mallco(UserData.DataLen);
-				UserData.DstAddr=0x01;
-
-				for(i=0;i<UserData.DataLen;i++)UserData.pData[i]=i;
-				QWA_SendData(&UserData);
+				sprintf((void *)QWebPageSet.PageTitle,"Select One To Chat");
+				QWebPageSet.GotoAct_List=GotoSubPage;
+				sprintf((void *)QWebPageSet.GotoName_List,"ChatPage");
+				QWebPageSet.GotoAct_Back=GotoNewPage;
+				sprintf((void *)QWebPageSet.GotoName_Back,"AppListPage");
+				QWebPageSet.GotoAct_Done=GotoNewPage;
+				sprintf((void *)QWebPageSet.GotoName_Done,"AppListPage");
+				Q_GotoPage(GotoNewPage,"QWebPage",0,&QWebPageSet);
 			}
-#endif
-			Q_GotoPage(GotoNewPage,"QWebPage",GotoSubPage,"ChatPage");
 			break;
 		case TouchChkKV:
 			Q_GotoPage(GotoNewPage,"TouchCheckPage",0,NULL);
 			break;	
+		case NewsKV:
+			{
+				QWEB_PAGE_SET QWebPageSet;
+
+				sprintf((void *)QWebPageSet.PageTitle,"Select View Server");
+				QWebPageSet.GotoAct_List=GotoSubPage;
+				sprintf((void *)QWebPageSet.GotoName_List,"News");
+				QWebPageSet.GotoAct_Back=GotoNewPage;
+				sprintf((void *)QWebPageSet.GotoName_Back,"AppListPage");
+				QWebPageSet.GotoAct_Done=GotoNewPage;
+				sprintf((void *)QWebPageSet.GotoName_Done,"AppListPage");
+				Q_GotoPage(GotoNewPage,"QWebPage",0,&QWebPageSet);
+			}
+			break;
 		case GameKV:
 			Q_GotoPage(GotoNewPage,"SnakePage",0,NULL);
 			break;		
 		case HomeKV:
 			{
 				u16 DataLen=50*50;
-				u8 *pData=OS_Mallco(DataLen);
+				u8 *pData=Q_Mallco(DataLen);
 				u16 i;
 
 				for(i=0;i<DataLen;i++)pData[i]=i;

@@ -52,12 +52,12 @@ u32 QW_GetNowTimeMs(void)
 
 void *QW_Mallco(u16 Size)
 {
-	return OS_Mallco(Size);
+	return Q_Mallco(Size);
 }
 
 bool QW_Free(void *Ptr)
 {
-	return OS_Free(Ptr);
+	return Q_Free(Ptr);
 }
 
 //主动设定角色
