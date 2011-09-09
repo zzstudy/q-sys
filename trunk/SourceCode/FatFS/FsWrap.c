@@ -37,14 +37,14 @@ FS_FILE* FS_FOpen(const TCHAR *pFileName, const FS_i32 Mode)
 {
 	_FS_PTR * fp;
 
-	fp = (_FS_PTR*)OS_Mallco(sizeof(_FS_PTR));
+	fp = (_FS_PTR*)Q_Mallco(sizeof(_FS_PTR));
 	MemSet((void*)fp,0,sizeof(_FS_PTR));
 
 	fp->error = f_open(&fp->fs.file,pFileName,Mode);
 
 	if(fp->error!=FR_OK) 
 	{
-		OS_Free((void *)fp );
+		Q_Free((void *)fp );
 		fp = 0;
 	}
 
@@ -61,7 +61,7 @@ FS_i32 FS_FClose(FS_FILE* pFile)
 
 	if(fp->error!=FR_OK) return -1;
 
-	OS_Free((void *)pFile);
+	Q_Free((void *)pFile);
 
 	return 0;
 }
@@ -127,14 +127,14 @@ FS_DIR *FS_OpenDir( const TCHAR *dirname )
 {
 	_FS_PTR * dir;
 
-	dir = (_FS_PTR *)OS_Mallco(sizeof(_FS_PTR));
+	dir = (_FS_PTR *)Q_Mallco(sizeof(_FS_PTR));
 	MemSet((void*)dir,0,sizeof(_FS_PTR));
 
 	dir->error= f_opendir(&dir->fs.dir,dirname);
 
 	if(dir->error!=FR_OK)
 	{
-		OS_Free((void *)dir );
+		Q_Free((void *)dir );
 		dir= 0;
 	}
 
@@ -269,7 +269,7 @@ FS_i32 FS_CloseDir( FS_DIR *dirp )
 {
     if(dirp == 0) return -1;
 
-    OS_Free((void *)dirp);
+    Q_Free((void *)dirp);
 
 	return 0;
 }
@@ -373,7 +373,7 @@ FS_i32 FS_FileCpy(const TCHAR*path1, const TCHAR*path2)		//path1: souce file    
 		return 0;
 	}
 
-	buffer=OS_Mallco(COPY_FILE_BUFFER);
+	buffer=Q_Mallco(COPY_FILE_BUFFER);
 
 	do{		
 		read_size = FS_FRead(buffer, COPY_FILE_BUFFER,1,src);
@@ -382,12 +382,12 @@ FS_i32 FS_FileCpy(const TCHAR*path1, const TCHAR*path2)		//path1: souce file    
 		if(write_size < read_size)
 		{
 			FS_Debug("ERROR:file write error\r\n");
-			OS_Free(buffer);
+			Q_Free(buffer);
 			goto CP_FILE_ERROR;
 		}
 	}while(read_size == COPY_FILE_BUFFER);
 
-	OS_Free(buffer);
+	Q_Free(buffer);
 	FS_FClose(src);
 	FS_FClose(dst);
 

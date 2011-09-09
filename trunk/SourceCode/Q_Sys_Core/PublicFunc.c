@@ -136,9 +136,9 @@ void DisplayBuf(const u8 *Buf,u16 Len,u8 RawLen)
 bool FileCpy(u8 *DstPath,u8 *SrcPath)
 {
 	u32 ReadByte,WrtByte;
-	u8 *Buf=OS_Mallco(512);
-	FIL *pDstFileObj=OS_Mallco(sizeof(FIL));
-	FIL *pSrcFileObj=OS_Mallco(sizeof(FIL));
+	u8 *Buf=Q_Mallco(512);
+	FIL *pDstFileObj=Q_Mallco(sizeof(FIL));
+	FIL *pSrcFileObj=Q_Mallco(sizeof(FIL));
 	bool Ret=TRUE;
 
 	if (f_open(pSrcFileObj ,(void *)SrcPath, FA_OPEN_EXISTING | FA_READ) != FR_OK ) 
@@ -186,9 +186,9 @@ bool FileCpy(u8 *DstPath,u8 *SrcPath)
 	}
 
 CopyEnd:
-	OS_Free(pSrcFileObj);
-	OS_Free(pDstFileObj);
-	OS_Free(Buf);
+	Q_Free(pSrcFileObj);
+	Q_Free(pDstFileObj);
+	Q_Free(Buf);
 	return Ret;
 }
 #endif
@@ -266,7 +266,7 @@ PrtScnEnd:
 bool PrtScreenToBin(u8 *pNewFilePath,u16 x,u16 y,u16 w,u16 h)
 {
 	unsigned int WrtByte;
-	u8 *Buf=OS_Mallco(PRINT_SRC_BUF_LEN);
+	u8 *Buf=Q_Mallco(PRINT_SRC_BUF_LEN);
 	FS_FILE *pDstFileObj=NULL;
 	GUI_REGION ReadRegion;
 	u16 Rows,LastRows,Num;
@@ -330,7 +330,7 @@ bool PrtScreenToBin(u8 *pNewFilePath,u16 x,u16 y,u16 w,u16 h)
 PrtEnd:
 	if(pDstFileObj)
 		FS_FClose(pDstFileObj);
-	OS_Free(Buf);
+	Q_Free(Buf);
 	if(Ret==TRUE) Debug("Finish!\n\r");
 	else Debug("Failed!\n\r");
 	return Ret;
@@ -339,7 +339,7 @@ PrtEnd:
 #define SPI_FLASH_PAGE_SIZE 256
 bool ReadSpiFlashToBin(u8 *pNewFilePath,u32 StartPage,u32 EndPage)
 {
-	u8 *Buf=OS_Mallco(SPI_FLASH_PAGE_SIZE);
+	u8 *Buf=Q_Mallco(SPI_FLASH_PAGE_SIZE);
 	FS_FILE *pDstFileObj=NULL;
 	u16 Num;
 	bool Ret=TRUE;
@@ -372,7 +372,7 @@ bool ReadSpiFlashToBin(u8 *pNewFilePath,u32 StartPage,u32 EndPage)
 PrtEnd:
 	if(pDstFileObj)
 		FS_FClose(pDstFileObj);
-	OS_Free(Buf);
+	Q_Free(Buf);
 	if(Ret==TRUE) Debug("Finish!\n\r");
 	else Debug("Failed!\n\r");
 	return Ret;

@@ -17,8 +17,6 @@ typedef u32 FILELIST_CMD;
 #define FL_NoParent  (1<<10)//禁止进入初始化目录的上层目录
 
 
-
-
 typedef struct {
 	u32 CallBackRid;//完成后返回的页面RID
 	

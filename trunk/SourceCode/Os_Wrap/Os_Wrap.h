@@ -104,13 +104,6 @@ u32 OS_GetCurrentSysMs(void)	;
 
 #define OS_DebugHeap DebugHeap
 #define OS_HeapMonitor QS_MonitorFragment
-#if Q_HEAP_TRACK_DEBUG ==1
-#define OS_Mallco(n) QS_Mallco(n,(void *)__func__,__LINE__)
-#define OS_Free(p) QS_Free(p,(void *)__func__,__LINE__)
-#else
-#define OS_Mallco QS_Mallco
-#define OS_Free QS_Free
-#endif
 
 #elif OS_USE_FREERTOS
 typedef void (*TASK_FUNC)(void *);
@@ -170,13 +163,7 @@ void OS_SchedUnlock(void);
 
 #define OS_DebugHeap DebugHeap
 #define OS_HeapMonitor QS_MonitorFragment
-#if Q_HEAP_TRACK_DEBUG ==1
-#define OS_Mallco(n) QS_Mallco(n,(void *)__func__,__LINE__)
-#define OS_Free(p) QS_Free(p,(void *)__func__,__LINE__)
-#else
-#define OS_Mallco QS_Mallco
-#define OS_Free QS_Free
-#endif
+
 #define CPU_SR u32
 
 

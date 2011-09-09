@@ -42,6 +42,7 @@
 #include "SnakePage.h"
 #include "TouchCheckPage.h"
 #include "ChatPage.h"
+#include "NewsPage.h"
 
 const PAGE_CONGREGATION AllPage[]={//页面总数不得大于255，RID不能为零
 	{0x1,&MainPage},// 1
@@ -54,6 +55,7 @@ const PAGE_CONGREGATION AllPage[]={//页面总数不得大于255，RID不能为零
 	{0x16,&KeyBoardPage},
 	{0x17,&QWebPage},
 	{0x18,&ChatPage},
+	{0x19,&NewsPage},
 	{0x2,&AppListPage},
 	{0x21,&SnakePage},
 	{0x23,&TouchCheckPage},

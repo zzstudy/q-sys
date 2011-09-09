@@ -668,7 +668,7 @@ FS_i32 FS_FileCpy(const TCHAR*path1, const TCHAR*path2)		//path1: souce file    
 		return 0;
 	}
 
-	buffer=OS_Mallco(COPY_FILE_BUFFER);
+	buffer=Q_Mallco(COPY_FILE_BUFFER);
 
 	do{		
 		read_size = FS_FRead(buffer, COPY_FILE_BUFFER,1,src);
@@ -677,12 +677,12 @@ FS_i32 FS_FileCpy(const TCHAR*path1, const TCHAR*path2)		//path1: souce file    
 		if(write_size < read_size)
 		{
 			FS_Debug("ERROR:file write error\r\n");
-			OS_Free(buffer);
+			Q_Free(buffer);
 			goto CP_FILE_ERROR;
 		}
 	}while(read_size == COPY_FILE_BUFFER);
 
-	OS_Free(buffer);
+	Q_Free(buffer);
 	FS_FClose(src);
 	FS_FClose(dst);
 

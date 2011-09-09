@@ -166,7 +166,7 @@ static void DispChatList(void)//显示聊天记录
 }
 
 //插入一条记录到聊天列表
-static void InsertOneRecord(u8 *pStr,bool SrcAddr)
+static void InsertOneRecord(u8 *pStr,u8 SrcAddr)
 {
 	u16 Len,CopyLen;
 	RTC_TIME NowTime;
@@ -177,12 +177,12 @@ static void InsertOneRecord(u8 *pStr,bool SrcAddr)
 		RTC_GetTime(&NowTime);
 		if(QWA_GetMyAddr()==SrcAddr)//is my
 		{
-			sprintf(gpCpVars->ChatList[gpCpVars->ChatListDispIdx],"%s (%02d:%02d:%02d)",(void *)QWA_MyQWebName(NULL),NowTime.hour,NowTime.min,NowTime.sec);		
+			sprintf((void *)gpCpVars->ChatList[gpCpVars->ChatListDispIdx],"%s (%02d:%02d:%02d)",QWA_MyQWebName(NULL),NowTime.hour,NowTime.min,NowTime.sec);		
 			gpCpVars->ChatListColor[gpCpVars->ChatListDispIdx]=CHAT_MY_NAME_COLOR;
 		}
 		else
 		{
-			sprintf(gpCpVars->ChatList[gpCpVars->ChatListDispIdx],"%s (%02d:%02d:%02d)",(void *)QWP_GetNameByAddr(SrcAddr),NowTime.hour,NowTime.min,NowTime.sec);		
+			sprintf((void *)gpCpVars->ChatList[gpCpVars->ChatListDispIdx],"%s (%02d:%02d:%02d)",QWP_GetNameByAddr(SrcAddr),NowTime.hour,NowTime.min,NowTime.sec);		
 			gpCpVars->ChatListColor[gpCpVars->ChatListDispIdx]=CHAT_SHE_NAME_COLOR;
 		}
 		gpCpVars->ChatListDispIdx++;
@@ -219,7 +219,7 @@ static void InsertOneRecord(u8 *pStr,bool SrcAddr)
 
 static SYS_MSG RecvQwebData(PERIP_EVT PeripEvent,int IntParam, void *pParam)
 {
-	Debug("Recv from %d:%dbytes %s\n\r",IntParam>>24,IntParam&0xffffff,pParam);
+	Debug("Recv from %d:%dbytes %s\n\r",IntParam>>24,IntParam&0xffffff,(u8 *)pParam);
 	InsertOneRecord((void *)pParam,IntParam>>24);
 	return 0;
 }
@@ -269,7 +269,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 				DrawRegion.h=16;
 				DrawRegion.Space=0x00;
 				DrawRegion.Color=FatColor(0xffffff);
-				sprintf(Buf,"Chat With [%d]%s\n\r",gpCpVars->DstAddr,(void *)gpCpVars->DstName);
+				sprintf((void *)Buf,"Chat With [%d]%s\n\r",gpCpVars->DstAddr,(u8 *)gpCpVars->DstName);
 				Gui_DrawFont(GBK12_FONT,Buf,&DrawRegion);
 			}
 			
@@ -345,7 +345,13 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 		case Perip_KeyRelease:
 			switch(IntParam){
 				case ExtiKeyEnter:
-					PrtScreen();
+					//PrtScreen();
+					if(gpCpVars->SendBuf[0])
+					{
+						Debug("Send to Addr%d %s\n\r",strlen((void *)gpCpVars->SendBuf),gpCpVars->SendBuf);
+						QWA_SendData(gpCpVars->DstAddr,strlen((void *)gpCpVars->SendBuf)+1,gpCpVars->SendBuf);
+						gpCpVars->ReSendCnt=0;
+					}
 					break;
 				case ExtiKeyUp:
 					Q_PresentTch(LeftArrowKV,Tch_Release);
@@ -379,13 +385,13 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 			{
 				if(gpCpVars->ReSendCnt<MAX_RESEND_NUM)//重发
 				{
-					Debug("Send to Addr%d %s\n\r",strlen(gpCpVars->SendBuf),(void *)gpCpVars->SendBuf);
-					QWA_SendData(gpCpVars->DstAddr,strlen(gpCpVars->SendBuf)+1,gpCpVars->SendBuf);
+					Debug("Send to Addr%d %s\n\r",strlen((void *)gpCpVars->SendBuf),(u8 *)gpCpVars->SendBuf);
+					QWA_SendData(gpCpVars->DstAddr,strlen((void *)gpCpVars->SendBuf)+1,gpCpVars->SendBuf);
 					gpCpVars->ReSendCnt++;
 				}
 				else
 				{
-					Debug("Send to Addr%d Failed:%s\n\r",strlen(gpCpVars->SendBuf),(void *)gpCpVars->SendBuf);
+					Debug("Send to Addr%d Failed:%s\n\r",strlen((void *)gpCpVars->SendBuf),(u8 *)gpCpVars->SendBuf);
 				}
 			}
 			break;
@@ -414,7 +420,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 				}			
 				else if((IntParam==0)&&((((u16 *)pParam)[0]==0x445b)||(((u16 *)pParam)[0]==0x435b))&&strlen((void *)gpCpVars->SendBuf))//前后键发送
 				{
-					Debug("Send to Addr%d %s\n\r",strlen((void *)gpCpVars->SendBuf),(void *)gpCpVars->SendBuf);
+					Debug("Send to Addr%d %s\n\r",strlen((void *)gpCpVars->SendBuf),gpCpVars->SendBuf);
 					QWA_SendData(gpCpVars->DstAddr,strlen((void *)gpCpVars->SendBuf)+1,gpCpVars->SendBuf);
 				}
 			}

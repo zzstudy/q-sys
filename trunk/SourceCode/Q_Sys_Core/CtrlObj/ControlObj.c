@@ -227,7 +227,7 @@ void PageSwithcCtrlObjDataHandler(const PAGE_ATTRIBUTE *pNewPage)
 	gpCurImgTchCon=gpCurrentPage->pImgTchRegCon;//切换基本触摸区域集指针
 	gpCurCharTchCon=gpCurrentPage->pCharTchRegCon;
 	
-	if(gTouchRegionNum) OS_Free(gpTouchRegions);//收回上个页面的内存
+	if(gTouchRegionNum) Q_Free(gpTouchRegions);//收回上个页面的内存
 	
 	gTouchRegionNum=gpCtrlObjNum->ImgTchNum
 									+gpCtrlObjNum->CharTchNum
@@ -242,7 +242,7 @@ void PageSwithcCtrlObjDataHandler(const PAGE_ATTRIBUTE *pNewPage)
 	;
 	if(gTouchRegionNum)//申请新内存用于存放坐标信息
 	{
-		gpTouchRegions=OS_Mallco(gTouchRegionNum*sizeof(TOUCH_REGION));//复制触碰区域
+		gpTouchRegions=Q_Mallco(gTouchRegionNum*sizeof(TOUCH_REGION));//复制触碰区域
 		CopyCtrlObjTouchReg(gpTouchRegions);
 	}
 }
@@ -787,7 +787,7 @@ void PushPageCtrlObjData(void)
 	//Debug("%d\n\r",sizeof(REP_IMG_SUFX)*MAX_IMG_KEY_NUM);
 	//Debug("%d\n\r",sizeof(u8 *)*MAX_CHAR_KEY_NUM);
 	
-	p=gPageDataPtrRecord[GetCurLayerNum()]=OS_Mallco(sizeof(void*)*MAX_DYN_CTRL_OBJ_NUM
+	p=gPageDataPtrRecord[GetCurLayerNum()]=Q_Mallco(sizeof(void*)*MAX_DYN_CTRL_OBJ_NUM
 								+sizeof(REP_IMG_SUFX)*MAX_IMG_KEY_NUM+sizeof(u8 *)*MAX_CHAR_KEY_NUM);
 	
 	memcpy(p,gCtrlObjPtrBuf,sizeof(void*)*MAX_DYN_CTRL_OBJ_NUM);
@@ -807,7 +807,7 @@ void PopPageCtrlObjData(bool DeleteAll)
 		Debug("PopPageCtrlObjData Delete All\n\r");
 		for(i=0;i<=MAX_PAGE_LAYER_NUM;i++)
 			if(gPageDataPtrRecord[i]!=NULL) 
-				OS_Free(gPageDataPtrRecord[i]);
+				Q_Free(gPageDataPtrRecord[i]);
 	}
 	else if(gPageDataPtrRecord[GetCurLayerNum()]!=NULL)
 	{
@@ -821,7 +821,7 @@ void PopPageCtrlObjData(bool DeleteAll)
 		p=(void *)((u32)p+sizeof(REP_IMG_SUFX)*MAX_IMG_KEY_NUM);
 		memcpy((void *)gRepKeyNameCon,p,sizeof(u8 *)*MAX_CHAR_KEY_NUM);
 
-		OS_Free(gPageDataPtrRecord[GetCurLayerNum()]);
+		Q_Free(gPageDataPtrRecord[GetCurLayerNum()]);
 		gPageDataPtrRecord[GetCurLayerNum()]=NULL;
 	}
 }
