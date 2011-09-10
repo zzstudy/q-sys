@@ -1,4 +1,8 @@
 ﻿Q-SYS Update Record.
+2011-9-10
+添加了NewsPage页面，用来从view网桥获取网络信息
+添加了IsHeapRam函数
+
 2011-8-28
 修复setting page 死机bug
 修改sd模式为4bit
