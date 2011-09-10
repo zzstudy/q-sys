@@ -437,11 +437,18 @@ void QS_MonitorFragment(void)
 	Debug("**********************************\n\r");
 }
 
-
 //用于整理内存碎片
 bool QS_HeapArrange(void)
 {//unfinish
 	return TRUE;
 }
 
+//检查该地址是否属于堆空间
+bool IsHeapRam(void *p)
+{
+	if(((u32)p >= (u32)QHS.Heap)&&((u32)p < ((u32)QHS.Heap+Q_HEAP_SIZE_BYTE)))
+		return TRUE;
+
+	return FALSE;
+}
 

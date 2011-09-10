@@ -551,7 +551,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 
 				sprintf((void *)QWebPageSet.PageTitle,"Select View Server");
 				QWebPageSet.GotoAct_List=GotoSubPage;
-				sprintf((void *)QWebPageSet.GotoName_List,"News");
+				sprintf((void *)QWebPageSet.GotoName_List,"NewsPage");
 				QWebPageSet.GotoAct_Back=GotoNewPage;
 				sprintf((void *)QWebPageSet.GotoName_Back,"AppListPage");
 				QWebPageSet.GotoAct_Done=GotoNewPage;
@@ -563,15 +563,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 			Q_GotoPage(GotoNewPage,"SnakePage",0,NULL);
 			break;		
 		case HomeKV:
-			{
-				u16 DataLen=50*50;
-				u8 *pData=Q_Mallco(DataLen);
-				u16 i;
-
-				for(i=0;i<DataLen;i++)pData[i]=i;
-				QWA_SendData(0x01,DataLen,pData);
-			}		
-			//Q_GotoPage(GotoNewPage,"MainPage",0,NULL);
+			Q_GotoPage(GotoNewPage,"MainPage",0,NULL);
 			break;
 		case MessageKV:
 		case MusicKV:
