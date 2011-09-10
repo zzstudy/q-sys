@@ -640,8 +640,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 						{
 							gpQwpVar->ClientRecord[i].IsHiLight=FALSE;
 							DrawDeviceInfo(Key,gpQwpVar->ClientRecord[i].Addr,gpQwpVar->ClientRecord[i].Name,NormalDisp);
-							if((gpQwpVar->GotoName_List&&gpQwpVar->GotoName_List[0]) 
-								&& (gpQwpVar->SelectedAddr == 0))//允许进入子页面
+							if(gpQwpVar->GotoName_List&&gpQwpVar->GotoName_List[0])//允许进入子页面
 							{//进入子页面前先查询名字
 								gpQwpVar->SelectedAddr=gpQwpVar->ClientRecord[i].Addr;
 								QWA_QueryName(gpQwpVar->SelectedAddr);

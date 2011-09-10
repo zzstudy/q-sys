@@ -120,6 +120,7 @@ u8 *QWA_MyQWebName(u8 *NewName)
 }
 
 //应用程序发送数据
+//pData必须等send ok或者send failed之后才能被释放
 QW_RESULT QWA_SendData(u8 Addr,u32 DataLen,u8 *pData)
 {
 	if(DataLen>QW_MAX_MALLCO_BYTES) return QWR_BUF_UN_ENOUGH;

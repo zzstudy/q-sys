@@ -6,6 +6,7 @@
 void DebugHeap(void);
 void QS_HeapInit(void);
 void QS_MonitorFragment(void);
+bool IsHeapRam(void *p);
 
 #if Q_HEAP_TRACK_DEBUG == 1
 void *QS_Mallco(u16 Size,u8 *pFuncName,u32 Lines);

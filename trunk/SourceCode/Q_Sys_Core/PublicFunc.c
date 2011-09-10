@@ -225,7 +225,7 @@ bool PrtScreen(void)
 		goto PrtScnEnd;
 	}
 
-	if(FS_FSeek(pSnapBmpObj,sizeof(BMP_INFO),FS_SEEK_SET)==-1)//移到位图色彩表
+	if(FS_FSeek(pSnapBmpObj,0x36,FS_SEEK_SET)==-1)//移到位图色彩表
 	{
 		Debug("Bmp fseek err!\r\n");
 		Ret=FALSE;
