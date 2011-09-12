@@ -636,12 +636,13 @@ void OS_TaskStkCheck(bool Display)
 	#if QS_TASK_RECORD
 	u8 i;
 	if(Display)
-	{
-		Debug("----------------------Task Record----------------------");
-		//格式：任务名,任务状态,优先级，堆栈剩余量,TCB号
+	{		
 		vTaskList(pcTaskInfoBuffer);
+		Debug("----------------------Task Record----------------------\r\n");
+		//格式：任务名,任务状态,优先级，堆栈剩余量,TCB号
+		Debug("              State   Prio  StkRemain  TCBNum");
 		Debug("%s",pcTaskInfoBuffer);
-		Debug("----------------------Task Record----------------------\n\r");
+		Debug("----------------------Task Record----------------------\r\n");
 	}
 	else
 	{
