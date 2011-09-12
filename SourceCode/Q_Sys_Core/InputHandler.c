@@ -322,7 +322,6 @@ void InputHandler_Task( void *Task_Parameters )
 	TCH_MSG TchMsg;
 
 	QSYS_Init();//系统初始化
-
 	QSYS_DataInit();//系统数据初始化
 
 	MemSet(ExtiKeyInfo,0,sizeof(EXIT_KEY_INFO)*EXTI_KEY_MAX_NUM);
@@ -417,14 +416,16 @@ void InputHandler_Task( void *Task_Parameters )
 						ExtiKeyInfo[ExtiKeyNum].TimeStamp=0;
 						MyGobalPeripEvtHandler(Perip_KeyPress,ExtiKeyNum+EXTI_KEY_VALUE_START,&ExtiKeyInfo[ExtiKeyNum]);
 						if(Q_InspectPeripEvt(0,Perip_KeyPress)==HasPagePeripEvt)//检查是否允许触发
-							TchMsg=gpCurrentPage->PeripEvtHandler(Perip_KeyPress,ExtiKeyNum+EXTI_KEY_VALUE_START,&ExtiKeyInfo[ExtiKeyNum]);
+							if(gpCurrentPage->PeripEvtHandler)//这里要检查是因为按键可能在还没进入第一个页面的时候就按下了。
+								TchMsg=gpCurrentPage->PeripEvtHandler(Perip_KeyPress,ExtiKeyNum+EXTI_KEY_VALUE_START,&ExtiKeyInfo[ExtiKeyNum]);
 					}
 					else	//key release
 					{
 						ExtiKeyInfo[ExtiKeyNum].TimeStamp=(OS_GetCurrentTick()-TickStamp[ExtiKeyNum])*OS_TICK_RATE_MS;
 						MyGobalPeripEvtHandler(Perip_KeyRelease,ExtiKeyNum+EXTI_KEY_VALUE_START,&ExtiKeyInfo[ExtiKeyNum]);
 						if(Q_InspectPeripEvt(0,Perip_KeyRelease)==HasPagePeripEvt)//检查是否允许触发
-							TchMsg=gpCurrentPage->PeripEvtHandler(Perip_KeyRelease,ExtiKeyNum+EXTI_KEY_VALUE_START,&ExtiKeyInfo[ExtiKeyNum]);
+							if(gpCurrentPage->PeripEvtHandler)//这里要检查是因为按键可能在还没进入第一个页面的时候就按下了。
+								TchMsg=gpCurrentPage->PeripEvtHandler(Perip_KeyRelease,ExtiKeyNum+EXTI_KEY_VALUE_START,&ExtiKeyInfo[ExtiKeyNum]);
 					}
 					//OS_TaskDelayMs(20);
 				}

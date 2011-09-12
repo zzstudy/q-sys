@@ -538,6 +538,9 @@ void QSYS_Init(void)
 	OS_TaskDelay(100);
 	OS_TaskStkCheck(FALSE);
 
-	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-	//USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+	if(GPIO_ReadInputDataBit(GPIOE,GPIO_Pin_2)==0) //如果没按下Key-PE2，就正常启动串口中断
+	{
+		USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+		//USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+	}
 }
