@@ -263,6 +263,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 	switch(SysEvent)
 	{
 		case Sys_PreGotoPage:
+			if(IntParam<QW_ADDR_HOST || IntParam>QW_ADDR_MAX) return SM_NoGoto;
 			break;
 		case Sys_PageInit:		//系统每次打开这个页面，会处理这个事件				
 			if(IntParam) 
@@ -275,10 +276,17 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 				gNspVars->TxtRegion.h=NEWS_TXT_DISP_H;
 				gNspVars->TxtRegion.Space=NEWS_TXT_DISP_SPACE;
 				gNspVars->TxtRegion.Color=NEWS_TXT_DISP_BG;
-			}
-		case Sys_SubPageReturn:	//如果从子页面返回,就不会触发Sys_Page_Init事件,而是Sys_SubPage_Return
+			}			
 			DrawInitBg();
 			SendViewCmd(VC_CONN,NEWS_HOST_URL);
+
+			//提示信息
+			gNspVars->TxtRegion.Color=NEWS_TXT_DISP_BG;
+			Gui_FillBlock(&gNspVars->TxtRegion);//填充背景
+			gNspVars->TxtRegion.Color=NEWS_TXT_DISP_COLOR;
+			Gui_DrawFont(GBK12_FONT,"下方中部圆点为高亮表示已经正确连接到VIEW网桥及远端Web服务器，则可以点击标签按键获取新闻。若圆点为灰色，请重复进入此页面。",&gNspVars->TxtRegion);
+			break;
+		case Sys_SubPageReturn:	//如果从子页面返回,就不会触发Sys_Page_Init事件,而是Sys_SubPage_Return
 			break;
 		case Sys_TouchSetOk:
 		case Sys_TouchSetOk_SR:
