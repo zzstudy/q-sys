@@ -698,11 +698,11 @@ void MusicHandler_Task(void *Task_Parameters)
 	u32 SendByte=0,i;
 	u8 *pBuf=NULL;
 	u32 TimeSnap=0;
+	FS_FILE *fp=NULL;
 #if(QXW_PRODUCT_ID==114)
 	OS_DeclareCritical();
 #endif
-	FS_FILE *fp=NULL;
-
+	
 ////ZCL ad for fs test
 /*{
 	int	Time;
