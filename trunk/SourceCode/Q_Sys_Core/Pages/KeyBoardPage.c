@@ -853,7 +853,7 @@ bool KB_TempBuf_InsTail(u8 inchar){
 		   break;
 	}					 
 	//打开定时器
-	Tim2_Set(KB_DKTIME,100,(bool)1);
+	Q_TimSet(Q_TIM1,KB_DKTIME,100,(bool)1);
 	return(TRUE);
 }
 void KB_TempBuf_PleaseUploadText(KB_TextBoxDef *ptextbox){
@@ -866,13 +866,13 @@ void KB_TempBuf_UploadText(KB_TextBoxDef *ptextbox){
 	ptextbox->InsTailChain(gpKbpVars->KB_TempBuf.decodebuf);
 	gpKbpVars->KB_TempBuf.Clr();  		 
 	//关闭定时器
-	Tim2_Set(0,0,(bool)1);	
+	Q_TimSet(Q_TIM1,0,0,(bool)1);	
 }	
 void KB_TempBuf_UploadPinYin(KB_PinYinBoxDef *ppinyinbox){ 
 	ppinyinbox->InsTailChain(gpKbpVars->KB_TempBuf.decodebuf);
 	gpKbpVars->KB_TempBuf.Clr();	 		 
 	//关闭定时器
-	Tim2_Set(0,0,(bool)1);	
+	Q_TimSet(Q_TIM1,0,0,(bool)1);	
 }
 //----------------拼音框对象成员函数定义----------------
 void KB_PinYinBox_ClrPinYinShow(void){	

@@ -205,7 +205,7 @@ static void ModifySysSettings(void *OptionsBuf)
 			case SYSOP_LightScale:
 				if(SP_IsModify(OptionsBuf,i)==FALSE) continue;//未修改
 				SP_GetNumOption(OptionsBuf,i,&Val);
-				Tim3_PWM(Val);//生效
+				Gui_SetBgLight(Val);//生效
 				Q_DB_SetValue(Setting_BgLightScale,Val,NULL,0);
 				DbFlag=TRUE;
 				//Q_DB_BurnToSpiFlash();//烧入数据库

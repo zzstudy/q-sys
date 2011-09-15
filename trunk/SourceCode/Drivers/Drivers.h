@@ -16,6 +16,8 @@
 #define USART1_IRQn_Priority 7
 #define USART3_IRQn_Priority 8
 #define TIME2_IRQn_Priority 9
+#define TIME4_IRQn_Priority 9
+#define TIME5_IRQn_Priority 9
 #define RTCAlarm_Priority 10
 
 //-------------------²úÆ· ID-----------------------

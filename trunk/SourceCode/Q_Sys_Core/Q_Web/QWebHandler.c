@@ -161,7 +161,7 @@ void QWebHandler_Task(void *Task_Parameters)
 	if(QW_HwSetup()==FALSE)
 	{
 		Debug("Read Rf chip id error!\n\r");
-		while(1) OS_TaskDelayMs(0xffff);
+		OS_TaskSuspend(QWebHandler_Task_Handle);//Í£Ö¹±¾Ïß³Ì
 	}
 
 QWebWaitStart:	
