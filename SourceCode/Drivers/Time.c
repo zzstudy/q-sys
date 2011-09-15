@@ -1,5 +1,4 @@
 #include "Drivers.h"
-#include "Rtc.h"
 
 void Tim3_Init(void)
 {
@@ -40,16 +39,43 @@ void Tim3_PWM(u8 Value)
 
 void Tim2_Init(void)
 {
+	NVIC_InitTypeDef NVIC_InitStructure;
+	
+	//配置定时器TIM2中断
+	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = TIME2_IRQn_Priority;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 }
 
 void Tim4_Init(void)
 {
+	NVIC_InitTypeDef NVIC_InitStructure;
+	
+	//配置定时器TIM4中断
+	NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = TIME4_IRQn_Priority;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 }
 
 void Tim5_Init(void)
 {
+	NVIC_InitTypeDef NVIC_InitStructure;
+	
+	//配置定时器TIM5中断
+	NVIC_InitStructure.NVIC_IRQChannel = TIM5_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = TIME5_IRQn_Priority;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
 }
 

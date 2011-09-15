@@ -784,7 +784,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 			gpMusicPath=Q_MusicGetPath();
 			if(IfReady==TRUE){
 				Lrc_Intf_Init();
-				Tim2_Set(DELAYTIME,100,(bool)1);
+				Q_TimSet(Q_TIM1,DELAYTIME,100,(bool)1);
 				Q_SetPeripEvt(0,Bit(Perip_RtcSec));//开启事件响应
 				Lrc_Intf_ObscShow(Q_MusicGetPlayMs()-PauseTime);
 			}
@@ -851,12 +851,12 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 			}
 			break;
 		case Sys_PageClean:
-			Tim2_Set(0,0,(bool)1);
+			Q_TimSet(Q_TIM1,0,0,(bool)1);
 			Q_PageFree(gpMpVar);
 			break;
 
 		case Sys_PreSubPage:
-			Tim2_Set(0,0,(bool)1);
+			Q_TimSet(Q_TIM1,0,0,(bool)1);
 			break;
 		
 		default:
@@ -936,21 +936,21 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 			for(i=strlen((void *)gpMusicPath);i;i--) if(gpMusicPath[i]=='/')break;
 			DispPlayInfo(&gpMusicPath[++i]);
 			DispPlayBtn();
-			Tim2_Set(DELAYTIME,100,(bool)1);
+			Q_TimSet(Q_TIM1,DELAYTIME,100,(bool)1);
 			Q_SetPeripEvt(0,Bit(Perip_RtcSec));//开启事件响应
 			break;
 		case Perip_MscPause:
 			Debug("Perip_MscPause\n\r");
 			PauseStart=Q_MusicGetPlayMs();
 			DispPlayBtn();
-			Tim2_Set(0,0,(bool)1);
+			Q_TimSet(Q_TIM1,0,0,(bool)1);
 			break;
 		case Perip_MscContinue:
 			Debug("Perip_MscContinue\n\r");
 			PauseEnd=Q_MusicGetPlayMs();
 			PauseTime+=(PauseEnd-PauseStart);
 			DispPlayBtn();
-			Tim2_Set(DELAYTIME,100,(bool)1);
+			Q_TimSet(Q_TIM1,DELAYTIME,100,(bool)1);
 			break;
 		case Perip_Timer:
 			//MU_CalTimMs(MU_CAL_TIME_BEGIN,"Lrc_Intf_Show()");

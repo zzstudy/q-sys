@@ -26,6 +26,7 @@
 #include "Vs1003b.h"
 #include "diskio.h"
 #include "Adc.h"
+#include "Time.h"
 #include "usb_hw_config.h"
 
 #include "InputHandler.h"
@@ -33,7 +34,7 @@
 #include "MusicHandler.h"
 
 //------------------------------酷系统信息-----------------------------------
-#define QSYS_VERSION 	"V2.33-110910"
+#define QSYS_VERSION 	"V2.34-110915"
 
 
 #endif
