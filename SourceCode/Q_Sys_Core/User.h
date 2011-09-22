@@ -100,6 +100,7 @@
 #include "Debug.h"
 #include "Q_Heap.h"
 #include "Q_Gui.h"
+#include "Q_Database.h"
 #include "QWebApi.h"
 #include "Resources.h"
 #include "PublicFunc.h"
@@ -274,25 +275,6 @@ typedef struct PAGE_ATTRIBUTE{
 #endif	
 }PAGE_ATTRIBUTE;//4	每个页面都会定义的属性结构体
 
-//4	数据库项
-typedef enum {
-//-------------------系统数据-----------------------
-	//下面存放系统数据，系统数据会被存到flash中
-	Setting_BgLightTime=0,
-	Setting_BgLightScale,
-	
-	Setting_DBMaxNum,		//最后一个值会影响数据库版本
-
-//-------------------系统状态-----------------------
-	//下面存放系统状态，系统状态不会被存到flash中
-	//并且默认值都是0
-	Status_ValueStart,
-	Status_FsInitFinish,//文件系统是否完成挂载
-
-	Setting_Status_MaxNum,//设置和状态的最大数目
-}SETTING_NAME;
-//4	数据库项结束
-
 //4	spi flash项
 typedef enum{
 	FlashNothing=0,
@@ -404,25 +386,6 @@ void Q_UartCmdHandler(u16 Len,u8 *pStr);
 //页面Run线程和页面同步的函数
 //成功返回TRUE
 bool Q_PageSync(int IntParam,void *pSysParam,u32 TicksToWait);
-
-//数据库读函数
-u32 Q_DB_GetValue(SETTING_NAME Name,void *Val);
-
-//数据库写函数,不调用DB_BurnToSpiFlash的话,掉电会失去
-//成功返回TRUE
-bool Q_DB_SetValue(SETTING_NAME Name,u32 IntParam,void *pParam,u8 ByteLen);
-
-//从系统获取状态,系统状态为临时变量
-u32 Q_DB_GetStatus(SETTING_NAME Name,void *Val);
-
-//设置系统状态
-bool Q_DB_SetStatus(SETTING_NAME Name,u32 IntParam,void *pParam,u8 ByteLen);
-
-//将数据库写到spi flash里
-//成功返回TRUE
-bool Q_DB_BurnToSpiFlash(void);
-
-
 
 //2									酷系统函数	结束									
 

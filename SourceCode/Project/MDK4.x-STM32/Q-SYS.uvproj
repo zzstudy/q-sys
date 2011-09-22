@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <Project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_proj.xsd">
 
-  <SchemaVersion>1.0</SchemaVersion>
+  <SchemaVersion>1.1</SchemaVersion>
 
   <Header>### uVision Project, (C) Keil Software</Header>
 
@@ -29,12 +29,13 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
+          <SFDFile></SFDFile>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
           <IncludePath></IncludePath>
           <LibPath></LibPath>
-          <RegisterFilePath>ST\STM32F10x\</RegisterFilePath>
-          <DBRegisterFilePath>ST\STM32F10x\</DBRegisterFilePath>
+          <RegisterFilePath>ST\STM32F10x\</RegisterFilePath>
+          <DBRegisterFilePath>ST\STM32F10x\</DBRegisterFilePath>
           <TargetStatus>
             <Error>0</Error>
             <ExitCodeStop>0</ExitCodeStop>
@@ -345,7 +346,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F10X_HD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\Drivers\Lib;..\..\Drivers\Lib\inc;..\..\Q_Sys_Core;..\..\Drivers;..\..\Q_Sys_Core\Pages;..\..\Q_Sys_Core\Resources;..\..\FatFS;..\..\uCos;..\..\uCos\Cpu;..\..\uCos\Ports;..\..\uCos\Lib;..\..\Q_Sys_Core\Q_Gui;..\..\Q_Sys_Core\Q_Heap;..\..\Drivers\UsbLib\inc;..\..\Drivers\Usb\inc;..\..\Q_Sys_Core\Q_Web;..\..\Q_Sys_Core\CtrlObj;..\..\Os_Wrap;..\..\FreeRTOS\include;..\..\FreeRTOS\portable</IncludePath>
+              <IncludePath>..\..\Drivers\Lib;..\..\Drivers\Lib\inc;..\..\Q_Sys_Core;..\..\Drivers;..\..\Q_Sys_Core\Pages;..\..\Q_Sys_Core\Resources;..\..\FatFS;..\..\uCos;..\..\uCos\Cpu;..\..\uCos\Ports;..\..\uCos\Lib;..\..\Q_Sys_Core\Q_Gui;..\..\Q_Sys_Core\Q_Heap;..\..\Drivers\UsbLib\inc;..\..\Drivers\Usb\inc;..\..\Q_Sys_Core\Q_Web;..\..\Q_Sys_Core\CtrlObj;..\..\Os_Wrap;..\..\FreeRTOS\include;..\..\FreeRTOS\portable;..\..\Q_Sys_Core\Q_Database;..\..\Q_Sys_Core\Q_Music</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -761,11 +762,6 @@
           <GroupName>System</GroupName>
           <Files>
             <File>
-              <FileName>DbSetting.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\Q_Sys_Core\DbSetting.c</FilePath>
-            </File>
-            <File>
               <FileName>InputHandler.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Q_Sys_Core\InputHandler.c</FilePath>
@@ -779,11 +775,6 @@
               <FileName>KeyHandler.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Q_Sys_Core\KeyHandler.c</FilePath>
-            </File>
-            <File>
-              <FileName>MusicHandler.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\Q_Sys_Core\MusicHandler.c</FilePath>
             </File>
             <File>
               <FileName>PublicFunc.c</FileName>
@@ -829,6 +820,16 @@
               <FileName>Q_Heap.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Q_Sys_Core\Q_Heap\Q_Heap.c</FilePath>
+            </File>
+            <File>
+              <FileName>MusicHandler.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Q_Sys_Core\Q_Music\MusicHandler.c</FilePath>
+            </File>
+            <File>
+              <FileName>Q_Database.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Q_Sys_Core\Q_Database\Q_Database.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -215,7 +215,7 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 	gpCurrentPage=Q_GetPageByTrack(0);
 	gEntriesOfPage[PageIdx]++;//进页面一次自加一次
 
-	PageSwithcCtrlObjDataHandler(gpCurrentPage);
+	PageSwithcCtrlObjDataHandler(gpCurrentPage);//控件处理
 	
 	OS_ExitCritical();
 	//4-------------------------数据处理完成--------------------------

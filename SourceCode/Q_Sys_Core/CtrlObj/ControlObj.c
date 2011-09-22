@@ -68,7 +68,7 @@ void ControlObjInit(void)//系统启动时的初始化
 	}
 }
 
-//复制所有控件的区域到同一的存储区
+//进入新页面时复制所有控件的区域到统一的存储区
 //返回区域个数
 //拷贝顺序如下:
 //图片按键
@@ -243,7 +243,7 @@ void PageSwithcCtrlObjDataHandler(const PAGE_ATTRIBUTE *pNewPage)
 	if(gTouchRegionNum)//申请新内存用于存放坐标信息
 	{
 		gpTouchRegions=Q_Mallco(gTouchRegionNum*sizeof(TOUCH_REGION));//复制触碰区域
-		CopyCtrlObjTouchReg(gpTouchRegions);
+		CopyCtrlObjTouchReg(gpTouchRegions);//将所有控件的坐标信息复制到触碰区域记录结构体，供触摸线程使用
 	}
 }
 
@@ -1053,6 +1053,8 @@ bool Q_SetDynamicCharTch(u8 Idx,CHAR_TCH_OBJ *pTchReg)
 
 #ifdef QSYS_FRAME_FULL
 //设置yes no选项，pYesNo指向的内存在调用完函数后不可注销
+//一旦设置，当进入页面时，会用到此内存
+//所以当页面还存在时，必须保证此内存存在
 bool Q_SetYesNo(u8 Idx,YES_NO_OBJ *pYesNo)
 {
 	YES_NO_OBJ **pYesNoCon=(void *)&gCtrlObjPtrBuf[gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum];
@@ -1094,10 +1096,14 @@ bool Q_SetYesNo(u8 Idx,YES_NO_OBJ *pYesNo)
 	}
 	
 	return FALSE;
-
 }
 
+//设置yes no选项，pYesNo指向的内存在调用完函数后不可注销
+bool Q_SetNumBox(u8 Idx,NUM_BOX_OBJ *pNumBox)
+{
 
+
+}
 
 
 #endif
