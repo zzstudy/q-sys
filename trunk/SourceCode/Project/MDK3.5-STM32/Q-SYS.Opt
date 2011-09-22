@@ -17,7 +17,7 @@ GRPOPT 3,(Drivers),0,0,0
 GRPOPT 4,(UsbLib),0,0,0
 GRPOPT 5,(FreeRTOS),0,0,0
 GRPOPT 6,(uCos),0,0,0
-GRPOPT 7,(OS_Wrap),0,0,0
+GRPOPT 7,(OS_Wrap),1,0,0
 GRPOPT 8,(FatFs),0,0,0
 GRPOPT 9,(System),0,0,0
 GRPOPT 10,(Resources),0,0,0
@@ -131,7 +131,7 @@ OPTFFF 12,104,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\TestPage.c><TestPage.c>
 OPTFFF 12,105,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\TouchCheckPage.c><TouchCheckPage.c> 
 OPTFFF 12,106,1,0,0,0,0,0,<..\..\Q_Sys_Core\Pages\NewsPage.c><NewsPage.c> 
 
-ExtF <G:\MyDoc\Desktop\STM_SRC\SVN\q-sys\SourceCode\Drivers\Drivers.h> 19,32,0,{ 44,0,0,0,2,0,0,0,3,0,0,0,255,255,255,255,255,255,255,255,248,255,255,255,226,255,255,255,75,0,0,0,75,0,0,0,79,3,0,0,87,1,0,0 }
+ExtF <G:\MyDoc\Desktop\STM_SRC\SVN\q-sys\SourceCode\Drivers\Drivers.h> 33,37,0,{ 44,0,0,0,2,0,0,0,3,0,0,0,255,255,255,255,255,255,255,255,248,255,255,255,226,255,255,255,75,0,0,0,75,0,0,0,79,3,0,0,87,1,0,0 }
 
 TARGOPT 1, (Q-SYS)
  ADSCLK=8000000

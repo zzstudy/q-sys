@@ -187,12 +187,36 @@ typedef struct{
 	u16 y;	//触摸区域起点的y值
 	u16 w; //触摸区域宽度,如果按键是横屏模式,注意横过显示屏来定义
 	
-	u8 EnumTotal;
+	s32 Value;
+}NUM_BOX_OBJ;//4		数字输入框
+
+typedef struct{
+	u8 ObjID;//标识符，页面内必须唯一，以区分其他控件对象
+	NUM_BOX_TYPE Type;//num box类型
+
+	u16 x; 	//触摸区域起点的x值，屏幕左上点为0，0坐标。如果是横屏模式，则需要横过显示屏，指定显示区域的左上点。
+	u16 y;	//触摸区域起点的y值
+	u16 w; //触摸区域宽度,如果按键是横屏模式,注意横过显示屏来定义
+
 	s32 Value;
 	s32 Max;
 	s32 Min;
 	s32 Step;
-}NUM_BOX_OBJ;//4		数字输入框
+}NUM_LIST_BOX_OBJ;//4		数字输入框
+
+typedef struct{
+	u8 ObjID;//标识符，页面内必须唯一，以区分其他控件对象
+	NUM_BOX_TYPE Type;//num box类型
+
+	u16 x; 	//触摸区域起点的x值，屏幕左上点为0，0坐标。如果是横屏模式，则需要横过显示屏，指定显示区域的左上点。
+	u16 y;	//触摸区域起点的y值
+	u16 w; //触摸区域宽度,如果按键是横屏模式,注意横过显示屏来定义
+
+	u8 Idx;//当前值索引
+	u8 Num;//当前值个数
+	u8 Total;//可容纳总数
+	s32 EnumList[1];
+}NUM_ENUM_BOX_OBJ;//4		数字输入框
 
 typedef struct{
 	u8 ObjID;//标识符，页面内必须唯一，以区分其他控件对象
