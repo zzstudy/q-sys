@@ -69,7 +69,7 @@ int  FS_X_OS_Init (void)
 		FS_SemMemManager&&
 		FS_SemDirOps))
 	{
-		DEBUG_PRINT("ERROR:%s Fail\r\n!",__func__);
+		DEBUG_PRINT("FSW_ERROR:%s Fail\r\n!",__func__);
 		while(1);
 	}
 	
@@ -207,7 +207,7 @@ FS_FILE* FS_FOpen(const TCHAR *pFileName, const FS_i32 Mode)
   fp = (_FS_PTR*)FS_malloc();
   if (fp == 0) {
 	  FS_X_OS_UnlockFileHandle();   
-	  DEBUG_PRINT("ERROR:Open %s ,but fs malloc fail \r\n",pFileName);
+	  DEBUG_PRINT("FSW_ERROR:Open %s ,but fs malloc fail \r\n",pFileName);
     return 0;  /* Device not found */
   }
 
@@ -373,7 +373,7 @@ FS_DIR *FS_OpenDir( const TCHAR *dirname )
 	dir = (_FS_PTR *)FS_malloc();
 	if (dir == 0) {
 		FS_X_OS_UnlockDirHandle();
-		DEBUG_PRINT("ERROR:OpenDir %s ,but fs malloc fail \r\n",dirname);
+		DEBUG_PRINT("FSW_ERROR:OpenDir %s ,but fs malloc fail \r\n",dirname);
   		return 0;  /* Device not found */
 	}
 
@@ -633,7 +633,7 @@ FS_i32 FS_FileCpy(const TCHAR*path1, const TCHAR*path2)		//path1: souce file    
 
 	if( !strcmp((const char *)path1, (const char *)path2) )
 	{
-		FS_Debug("ERROR:can not copy a file to itself\r\n");
+		FS_Debug("FSW_ERROR:can not copy a file to itself\r\n");
 		return 0;
 	}
 	
@@ -643,7 +643,7 @@ FS_i32 FS_FileCpy(const TCHAR*path1, const TCHAR*path2)		//path1: souce file    
 
 	if(GetDiskInfo(path2,&info)==-1)
 	{
-		FS_Debug("ERROR:getdiskinfo err\r\n");
+		FS_Debug("FSW_ERROR:getdiskinfo err\r\n");
 		return 0;
 	}
 		
@@ -656,14 +656,14 @@ FS_i32 FS_FileCpy(const TCHAR*path1, const TCHAR*path2)		//path1: souce file    
 	src = FS_FOpen(path1, FA_READ|FA_OPEN_EXISTING);
 	if(0 == src)
 	{
-		FS_Debug("ERROR:cannot open the source file\r\n");
+		FS_Debug("FSW_ERROR:cannot open the source file\r\n");
 		return 0;
 	}
 
 	dst = FS_FOpen(path2, FA_CREATE_ALWAYS|FA_WRITE);
 	if(0 == dst)
 	{
-		FS_Debug("ERROR:cannot create the distance file\r\n");
+		FS_Debug("FSW_ERROR:cannot create the distance file\r\n");
 		FS_FClose(src);
 		return 0;
 	}
@@ -676,7 +676,7 @@ FS_i32 FS_FileCpy(const TCHAR*path1, const TCHAR*path2)		//path1: souce file    
 
 		if(write_size < read_size)
 		{
-			FS_Debug("ERROR:file write error\r\n");
+			FS_Debug("FSW_ERROR:file write error\r\n");
 			Q_Free(buffer);
 			goto CP_FILE_ERROR;
 		}

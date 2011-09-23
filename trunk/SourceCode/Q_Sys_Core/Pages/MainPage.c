@@ -215,7 +215,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 		case Perip_UartInput:
 			if((IntParam>>16)==1)//´®¿Ú1
 			{
-				Q_UartCmdHandler(IntParam&0xffff,pParam);
+				Q_Sh_CmdHandler(IntParam&0xffff,pParam);
 			}
 			if((IntParam>>16)==3)//´®¿Ú3
 			{

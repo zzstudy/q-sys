@@ -36,6 +36,7 @@ u32 gPagePeripEvtFlag[PAGE_TOTAL];//记录每个页面的外围事件响应标志
 
 GOBAL_PERIPEVT_RECORD gGobalPeripEvtRecord[MAX_GOBAL_SYSEVT];//记录所有页面的全局事件表
 u32 gGobalPeripEvtBitFlag;//全局事件标志
+QSH_VAR_REG(gGobalPeripEvtBitFlag,u32 gGobalPeripEvtBitFlag)
 
 u8 gHeapLayer=0;//记录用户页面堆栈层数的变量
 #endif 
@@ -95,7 +96,6 @@ static SYS_MSG OldPageClean(INPUT_EVT_TYPE EventType,u8 NewPageIndex)
 	switch(EventType)
 	{
 		case Input_GotoSubPage://进入子页面
-			//进入子页面不会停掉PageRun线程
 			SysMsg=gpCurrentPage->SysEvtHandler(Sys_PreSubPage,GetRegIdByIdx(NewPageIndex),
 				(void *)GetPageByIdx(NewPageIndex));
 			break;
@@ -153,7 +153,7 @@ void ExtiKeyHandler(u8 KeyId,u8 KeyStaus)
 
 static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam, void *pSysParam)
 {
-	SYS_MSG SysMsg;
+	SYS_MSG SysMsg=SM_State_OK;
 	u32 TimeMsRecord;
 	u8 i;
 	OS_DeclareCritical();
@@ -164,7 +164,8 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 	//在无输入状态下Clean页面
 	if(gpCurrentPage)
 	{
-		OldPageClean(EventType,PageIdx);
+		//如果要进入的页面是POP_PAGE页面，就不需要进入当前的清除case
+		if(GetPageByIdx(PageIdx)->Type!=POP_PAGE) OldPageClean(EventType,PageIdx);
 		Debug("∧∧∧∧∧∧ Leave %s ∧∧∧∧∧∧\n\r",gpCurrentPage->Name);
 	}
 	else	//没有上一个页面
@@ -233,7 +234,7 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 	if((!(SysMsg&SM_NoTouchInit))&&(Q_GetPageByTrack(1)->Type!=POP_PAGE))	 
 	{
 		SysMsg|=CurrPageCtrlObjInit(EventType,IntParam,pSysParam);	
-		while((OS_GetCurrentSysMs()-TimeMsRecord)<200) OS_TaskDelayMs(50);//循环延时200ms，以避免触摸响应混乱
+		while((OS_GetCurrentSysMs()-TimeMsRecord)<300) OS_TaskDelayMs(50);//循环延时300ms，以避免触摸响应混乱
 	}
 
 	Q_EnableInput();

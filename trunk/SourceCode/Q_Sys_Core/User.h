@@ -101,6 +101,7 @@
 #include "Q_Heap.h"
 #include "Q_Gui.h"
 #include "Q_Database.h"
+#include "Q_Shell.h"
 #include "QWebApi.h"
 #include "Resources.h"
 #include "PublicFunc.h"
@@ -144,17 +145,19 @@ typedef enum {
 	// 普通页面
 	NORMAL_PAGE=0,
 
-	//弹出页面，只能作为子页面进入。
-	//和普通页面相比，POP_PAGE返回不会重新画主页面的按键。
-	//所以也不会触发主页面的Sys_TouchSetOk_SR事件。
+	//弹出页面，和普通页面相比有如下不同
+	// 1.进入弹出页面时，不会触发主页面Sys_PageClean或Sys_PreSubPage这2个case
+	// 2.在弹出页面内，不能用GotoPage进入任何其他页面，只能返回之前的主页面
+	// 3.从弹出页面返回时，不会触发主页面的Sys_PreGotoPage、Sys_PageInit、Sys_SubPageReturn等case
+	// 4.从弹出页面返回时，不会对主页面的控件进行绘画，但会还原控件触碰区域的有效性，因此也不会触发Sys_TouchSetOk、Sys_TouchSetOk_SR等case
 	POP_PAGE=1,
 }PAGE_TYPE;//4		页面类型
 
 typedef enum {
-	GotoNewPage=0,//进入一个新页面，原来所有子页面会以先进后出的方式执行Clean
-	GotoSubPage,//进入一个子页面，页面层级深入一层
-	SubPageReturn,//返回到上一个页面，页面层级减一层，当前页面会执行Clean
-	SubPageTranslate,//从一个子页面跳转到另外一个同级的子页面，当前页面会执行Clean
+	GotoNewPage=0,//进入一个新页面，原来的主页面及其所有子页面会以先进后出的方式执行Sys_SubPageReturn或Sys_PageClean
+	GotoSubPage,//进入一个子页面，页面层级深入一层，主页面会执行Sys_PreSubPage
+	SubPageReturn,//返回到上一个页面，页面层级减一层，此子页面会执行Sys_PageClean，返回到的页面会执行Sys_SubPageReturn
+	SubPageTranslate,//从一个子页面跳转到另外一个同级的子页面，层级不变，当前页面会执行Sys_PageClean，新页面会执行Sys_PageInit
 }PAGE_ACTION;
 
 //4	用于页面的SystemHandler返回值，旨在告诉系统做一些事情
@@ -178,9 +181,9 @@ typedef enum {
 #define SM_State_Faile 0x80000000
 
 typedef enum {
-	Sys_PreGotoPage=0,//当一个页面调用GotoPage/GotoSubPage/SubPageReturn函数时，会触发将要进入页面的此事件。
+	Sys_PreGotoPage=0,//当一个页面调用GotoPage函数时，会触发将要进入页面的此事件。
 									//Sys_PreGotoPage这个case就相当于是前个页面的子函数，而不是当前页面的函数，这是和Sys_PageInit的本质区别。
-									//如果此case返回SM_NoGoto，那么就相当于只调用了存在于页面源码中的一个函数而已，根本不会触发新页面的动作。
+									//如果此case返回SM_NoGoto，那么就相当于只调用了存在于当前页面源码中的一个函数而已，根本不会触发新页面的动作。
 									
 	Sys_PageInit,	//每次打开页面首先会触发此事件。
 	Sys_SubPageReturn,//从子页返回，和Sys_PageInit相对。
@@ -190,7 +193,7 @@ typedef enum {
 	
 	Sys_PageSync,		//当用户线程发出同步信息时，会触发此事件。
 	
-	Sys_PageClean,	//页面由当前页面变成非当前页面时调用,即退出时调用。
+	Sys_PageClean,	//页面由当前页面变成非当前页面时调用,即退出时调用。ParamTable(SYS_EVT,NewPageRegID,NewPagePtr)
 	Sys_PreSubPage,//将要进入子页面，和Sys_PageClean是相对的。ParamTable(SYS_EVT,NewPageRegID,NewPagePtr)
 	
 	Sys_Error,//错误
@@ -200,22 +203,22 @@ typedef enum {
 
 typedef enum{
 	Perip_KeyPress,//外部按键按下。ParamTable(PERIP_EVT,KeyValue,EXIT_KEY_INFO*)
-	Perip_KeyRelease,//外部按键释放
+	Perip_KeyRelease,//外部按键释放。ParamTable(PERIP_EVT,KeyValue,EXIT_KEY_INFO*)
 	
-	Perip_RtcSec,		//除了整分，每秒都会触发此事件。可以屏蔽，默认关闭
-	Perip_RtcMin,	//每分都会发出此事件。可以屏蔽，默认关闭
-	Perip_RtcAlarm,//RTC到期报警。可以屏蔽，默认关闭
-	Perip_Timer,		//定时器到期，可以支持多个定时器，以IntParam区别不同定时器。在退出页面时，请关闭当前页的定时器!!!
+	Perip_RtcSec,		//除了整分，每秒都会触发此事件。可以屏蔽，默认关闭。ParamTable(PERIP_EVT,(u16)RTC_Counter,NULL)
+	Perip_RtcMin,	//每分都会发出此事件。可以屏蔽，默认关闭。ParamTable(PERIP_EVT,(u16)RTC_Counter,NULL)
+	Perip_RtcAlarm,//RTC到期报警。可以屏蔽，默认关闭。ParamTable(PERIP_EVT,(u16)RTC_Counter,NULL)
+	Perip_Timer,		//定时器到期，可以支持多个定时器，以IntParam区别不同定时器。在退出页面时，请关闭当前页的定时器!!!ParamTable(PERIP_EVT,TIM ID,NULL)
 	
-	Perip_LcdOff,//lcd超时熄灭触发此事件。可以屏蔽，默认关闭
-	Perip_LcdOn,//lcd 熄灭后，被触碰重新点亮会触发此事件。可以屏蔽，默认关闭
+	Perip_LcdOff,//lcd超时熄灭触发此事件。可以屏蔽，默认关闭。ParamTable(PERIP_EVT,(u16)RTC_Counter,NULL)
+	Perip_LcdOn,//lcd 熄灭后，被触碰重新点亮会触发此事件。可以屏蔽，默认关闭。ParamTable(PERIP_EVT,(u16)RTC_Counter,NULL)
 
 	Perip_UartInput,//串口输入。ParamTable(PERIP_EVT,(ComNum<<16)|StrBytes,u8 *Str)
 
-	Perip_MscPlay,//开始播放一个音乐文件时触发
-	Perip_MscPause,//音乐文件播放被暂停时触发
-	Perip_MscContinue,//音乐文件从暂停进入继续播放时被触发
-	Perip_MscStop,//音乐文件播放完毕时被触发
+	Perip_MscPlay,//开始播放一个音乐文件时触发。ParamTable(PERIP_EVT,0,u8 *FilePath)
+	Perip_MscPause,//音乐文件播放被暂停时触发。ParamTable(PERIP_EVT,PlayTime,u8 *FilePath)
+	Perip_MscContinue,//音乐文件从暂停进入继续播放时被触发。ParamTable(PERIP_EVT,PlayTime,u8 *FilePath)
+	Perip_MscStop,//音乐文件播放完毕时被触发。ParamTable(PERIP_EVT,PlayTime,u8 *FilePath)
 
 	Perip_QWebJoin,//(主机)新从机加入;(从机)获取到从机地址.ParamTable(PERIP_EVT,Addr,u8 *DeviceName)
 	Perip_QWebRecv,//收到Q网数据.ParamTable(PERIP_EVT,(Addr<<24)|DataLen,u8 *pData)
