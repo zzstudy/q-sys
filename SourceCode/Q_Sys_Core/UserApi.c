@@ -149,7 +149,7 @@ SYS_MSG Q_GotoPage(PAGE_ACTION PageAction, u8 *Name, int IntParam, void *pSysPar
 	}
 	
 	//POP页面只允许以进入子页面的形式进入
-	if((GetPageByIdx(PageIdx)->Type==POP_PAGE)&&(PageAction==GotoNewPage))
+	if((GetPageByIdx(PageIdx)->Type==POP_PAGE)&&(PageAction!=GotoSubPage))
 	{
 		Debug("Pop Page not allow entry by \"GotoNewPage\" param!");
 		return SM_State_Faile;
@@ -190,6 +190,7 @@ SYS_MSG Q_GotoPage(PAGE_ACTION PageAction, u8 *Name, int IntParam, void *pSysPar
 		}
 	}	
 }
+QSH_FUN_REG(Q_GotoPage,SYS_MSG Q_GotoPage(PAGE_ACTION PageAction,u8 *Name,int IntParam,void *pSysParam))
 
 //设置系统事件对应位
 void Q_SetPeripEvt(u32 RegID,u32 PeripEvtCon)

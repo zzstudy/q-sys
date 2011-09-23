@@ -346,7 +346,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F10X_HD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\Drivers\Lib;..\..\Drivers\Lib\inc;..\..\Q_Sys_Core;..\..\Drivers;..\..\Q_Sys_Core\Pages;..\..\Q_Sys_Core\Resources;..\..\FatFS;..\..\uCos;..\..\uCos\Cpu;..\..\uCos\Ports;..\..\uCos\Lib;..\..\Q_Sys_Core\Q_Gui;..\..\Q_Sys_Core\Q_Heap;..\..\Drivers\UsbLib\inc;..\..\Drivers\Usb\inc;..\..\Q_Sys_Core\Q_Web;..\..\Q_Sys_Core\CtrlObj;..\..\Os_Wrap;..\..\FreeRTOS\include;..\..\FreeRTOS\portable;..\..\Q_Sys_Core\Q_Database;..\..\Q_Sys_Core\Q_Music</IncludePath>
+              <IncludePath>..\..\Drivers\Lib;..\..\Drivers\Lib\inc;..\..\Q_Sys_Core;..\..\Drivers;..\..\Q_Sys_Core\Pages;..\..\Q_Sys_Core\Resources;..\..\FatFS;..\..\uCos;..\..\uCos\Cpu;..\..\uCos\Ports;..\..\uCos\Lib;..\..\Q_Sys_Core\Q_Gui;..\..\Q_Sys_Core\Q_Heap;..\..\Drivers\UsbLib\inc;..\..\Drivers\Usb\inc;..\..\Q_Sys_Core\Q_Web;..\..\Q_Sys_Core\CtrlObj;..\..\Os_Wrap;..\..\FreeRTOS\include;..\..\FreeRTOS\portable;..\..\Q_Sys_Core\Q_Database;..\..\Q_Sys_Core\Q_Music;..\..\Q_Sys_Core\Q_Shell</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -830,6 +830,11 @@
               <FileName>Q_Database.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Q_Sys_Core\Q_Database\Q_Database.c</FilePath>
+            </File>
+            <File>
+              <FileName>Q_Shell.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Q_Sys_Core\Q_Shell\Q_Shell.c</FilePath>
             </File>
           </Files>
         </Group>

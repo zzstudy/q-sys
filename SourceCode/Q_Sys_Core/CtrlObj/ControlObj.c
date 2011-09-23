@@ -19,7 +19,7 @@ static u8 *gRepKeyNameCon[MAX_CHAR_KEY_NUM];
 static const IMG_TCH_OBJ *gpCurImgTchCon=NULL; //当前按键区域集合
 static const CHAR_TCH_OBJ *gpCurCharTchCon=NULL; //当前按键区域集合
 
-//动态控件存储实体
+//动态控件存储实体指针
 static void *gCtrlObjPtrBuf[MAX_DYN_CTRL_OBJ_NUM];//用来存储下列控件指针的实体
 //IMG_TCH_OBJ **gpDynImgTchCon=NULL; //动态图片按键集合
 //CHAR_TCH_OBJ **gpDynCharTchCon=NULL;//动态文字按键集合
