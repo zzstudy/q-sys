@@ -1,7 +1,7 @@
 #ifndef QSYS_Q_SHELL_H  
 #define QSYS_Q_SHELL_H
 
-#define USE_Q_SHELL_FUNCTION 0//选择是否使用Q_Shell组件 1:使用 0:不使用
+#define USE_Q_SHELL_FUNCTION 1//选择是否使用Q_Shell组件 1:使用 0:不使用
 
 #if USE_Q_SHELL_FUNCTION
 /*-----------------------------------------------------------------------

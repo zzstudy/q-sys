@@ -163,10 +163,10 @@ static unsigned int Q_Sh_AnalyCmdStr(char *CmdStr)
 /*-----------------------------------------------------------------------
 由链接器赋值，不占据实际内存
 ------------------------------------------------------------------------*/
-extern int QShellFunTab$$Base;	 //qShellFunTab段首地址
-extern int QShellFunTab$$Limit;	 //qShellFunTab段尾地址
-extern int QShellVarTab$$Base;	 //qShellVarTab段首地址
-extern int QShellVarTab$$Limit;	 //qShellVarTab段尾地址
+extern int qShellFunTab$$Base;	 //qShellFunTab段首地址
+extern int qShellFunTab$$Limit;	 //qShellFunTab段尾地址
+extern int qShellVarTab$$Base;	 //qShellVarTab段首地址
+extern int qShellVarTab$$Limit;	 //qShellVarTab段尾地址
 
 /*-----------------------------------------------------------------------
 记录shell表段范围信息
@@ -330,10 +330,10 @@ static unsigned int Q_Sh_Str2num(char*Str,unsigned int *Res)
 ------------------------------------------------------------------------*/
 void Q_Shell_Init(void)
 {	
-	qsh_fun_table_begin = (QSH_RECORD*) &QShellFunTab$$Base;
-	qsh_fun_table_end   = (QSH_RECORD*) &QShellFunTab$$Limit;
-	qsh_var_table_begin = (QSH_RECORD*) &QShellVarTab$$Base;
-	qsh_var_table_end   = (QSH_RECORD*) &QShellVarTab$$Limit;
+	qsh_fun_table_begin = (QSH_RECORD*) &qShellFunTab$$Base;
+	qsh_fun_table_end   = (QSH_RECORD*) &qShellFunTab$$Limit;
+	qsh_var_table_begin = (QSH_RECORD*) &qShellVarTab$$Base;
+	qsh_var_table_end   = (QSH_RECORD*) &qShellVarTab$$Limit;
 }
 
 /*-----------------------------------------------------------------------
