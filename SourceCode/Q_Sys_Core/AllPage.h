@@ -43,11 +43,13 @@
 #include "TouchCheckPage.h"
 #include "ChatPage.h"
 #include "NewsPage.h"
+#include "NumBoxPage.h"
 
 const PAGE_CONGREGATION AllPage[]={//页面总数不得大于255，RID不能为零
 	{0x1,&MainPage},// 1
 	{0x11,&MusicPage},// 1.1
 	{0x111,&FileListPage},// 1.1.1
+	{0x112,&NumBoxPage},
 	{0x12,&EBookPage},// 1.2
 	{0x13,&PicturePage},// 1.3
 	{0x14,&SettingsPage},// 1.4

@@ -82,9 +82,10 @@ typedef TCH_MSG (*StrInputBoxHandlerFunc)(u8 ,TCH_EVT ,bool ,TOUCH_INFO *);
 #define BinMsk		(1<<5) //当采用时，不再使用bmp文件，而是使用bin文件画图标，此时图标必须和区域一样大
 #define DbgMsk	(1<<6) //调试模式，用于显示触摸区域，图片按键则不会显示图片，只显示区域
 #define F16Msk	(1<<7) //改变文字大小为16x16
-#define PathMsk (1<<8) //该掩码位有效时，BmpPathPrefix指定的字符串代表整个图片的路径前缀；该位无效时，BmpPathPrefix配合theme路径才为图标路径。
-#define RoueMsk (1<<9) //Round Edge 圆边
-//#define CirbMsk 	(1<<10) //Circular Bead 圆角，暂不支持
+#define B14Msk	(1<<8) //改变文字为B14粗体，仅对Ascii字符有效
+#define PathMsk (1<<9) //该掩码位有效时，BmpPathPrefix指定的字符串代表整个图片的路径前缀；该位无效时，BmpPathPrefix配合theme路径才为图标路径。
+#define RoueMsk (1<<10) //Round Edge 圆边
+//#define CirbMsk 	(1<<11) //Circular Bead 圆角，暂不支持
 
 typedef struct {
 	u8 *Name;//键名，图标按键下用于不能显示图标时的提示。文字按键下用于文字显示。
@@ -151,7 +152,7 @@ typedef struct {
 	
 	u8 CharX;// 触摸区域文字的显示起点x值,相对于区域左上角的相对值
 	u8 CharY;//触摸区域文字的显示起点y值,相对于区域左上角的相对值
-	u8 Margin;//高四位表示背景左右的区域旁白，低四位表示背景上下的区域旁白。留此值是为了让触摸区域大于背景区域。
+	u8 Margin;//高四位表示背景左右的区域旁白，低四位表示背景上下的区域旁白。留此值是为了让触摸区域大于背景区域。h和w减去对应的Margin等于背景色实际的h和w。
 	u8 Space;//高四位表示字间距，低四位表示行间距
 
 	//TRANSPARENT表示使用透明色

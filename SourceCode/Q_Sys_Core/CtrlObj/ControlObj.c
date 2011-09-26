@@ -397,6 +397,8 @@ static bool ImgTchDisplay(u8 Index,INPUT_EVT_TYPE InType,bool IsDyn)
 				BmpRegion.Space=0;
 				if(pTouchRegion->OptionsMask&F16Msk)
 					Gui_DrawFont(GBK16_FONT,(void *)pTouchRegion->Name,&BmpRegion);
+				else if(pTouchRegion->OptionsMask&B14Msk)
+					Gui_DrawFont(ASC14B_FONT,(void *)pTouchRegion->Name,&BmpRegion);
 				else
 					Gui_DrawFont(GBK12_FONT,(void *)pTouchRegion->Name,&BmpRegion);
 			}
@@ -608,6 +610,8 @@ static bool CharTchDisplay(u8 Index,INPUT_EVT_TYPE InType,bool IsDyn)
 			CharRegion.Color=CharColor;
 			if(pTouchRegion->OptionsMask&F16Msk)
 				Gui_DrawFont(GBK16_FONT,(void *)pName,&CharRegion);
+			else if(pTouchRegion->OptionsMask&B14Msk)
+				Gui_DrawFont(ASC14B_FONT,(void *)pName,&CharRegion);
 			else
 				Gui_DrawFont(GBK12_FONT,(void *)pName,&CharRegion);
 		}
