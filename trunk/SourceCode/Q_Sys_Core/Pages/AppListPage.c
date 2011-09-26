@@ -337,7 +337,8 @@ static void SetAlarm(void *OptionsBuf)
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam)
 {
 	GUI_REGION DrawRegion;
-	
+
+	Debug("## AppListPage %d\n\r",SysEvent);
 	switch(SysEvent)
 	{
 		case Sys_PreGotoPage:
@@ -563,7 +564,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 			Q_GotoPage(GotoNewPage,"SnakePage",0,NULL);
 			break;		
 		case HomeKV:
-			Q_GotoPage(GotoNewPage,"MainPage",0,NULL);
+			Q_GotoPage(GotoSubPage,"NumBoxPage",0,NULL);
 			break;
 		case MessageKV:
 		case MusicKV:

@@ -38,7 +38,8 @@ GOBAL_PERIPEVT_RECORD gGobalPeripEvtRecord[MAX_GOBAL_SYSEVT];//º«¬ºÀ˘”–“≥√Êµƒ»´æ
 u32 gGobalPeripEvtBitFlag;//»´æ÷ ¬º˛±Í÷æ
 QSH_VAR_REG(gGobalPeripEvtBitFlag,u32 gGobalPeripEvtBitFlag)
 
-u8 gHeapLayer=0;//º«¬º”√ªß“≥√Ê∂—’ª≤„ ˝µƒ±‰¡ø
+SYS_MSG gCurrSysMsg=SM_State_OK;//º«¬º“≥√Êcase∑µªÿµƒ–≈œ¢
+u8 gPageHeapRecord=0;//º«¬º”√ªß“≥√Ê∂—’ª∑÷≈‰ ˝ƒøµƒ±‰¡ø
 #endif 
 
 #if 1 //control obj 
@@ -108,7 +109,7 @@ static SYS_MSG OldPageClean(INPUT_EVT_TYPE EventType,u8 NewPageIndex)
 			LayerNum=GetCurLayerNum();
 			for(;LayerNum;LayerNum--)//∂‘…œ“ªº∂“≥√Ê÷∏ˆ¥¶¿Ì
 			{
-				SysMsg=Q_GetPageByLayer(LayerNum)->SysEvtHandler(Sys_PageClean,GetRegIdByIdx(NewPageIndex),
+				SysMsg|=Q_GetPageByLayer(LayerNum)->SysEvtHandler(Sys_PageClean,GetRegIdByIdx(NewPageIndex),
 					(void *)GetPageByIdx(NewPageIndex));
 			}
 			break;
@@ -153,7 +154,6 @@ void ExtiKeyHandler(u8 KeyId,u8 KeyStaus)
 
 static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam, void *pSysParam)
 {
-	SYS_MSG SysMsg=SM_State_OK;
 	u32 TimeMsRecord;
 	u8 i;
 	OS_DeclareCritical();
@@ -164,8 +164,8 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 	//‘⁄Œﬁ ‰»Î◊¥Ã¨œ¬Clean“≥√Ê
 	if(gpCurrentPage)
 	{
-		//»Áπ˚“™Ω¯»Îµƒ“≥√Ê «POP_PAGE“≥√Ê£¨æÕ≤ª–Ë“™Ω¯»Îµ±«∞µƒ«Â≥˝case
-		if(GetPageByIdx(PageIdx)->Type!=POP_PAGE) OldPageClean(EventType,PageIdx);
+		if(!(gCurrSysMsg&SM_NoPageClean)) //Q_GotoPage∑µªÿ÷µ∏ÊÀﬂœµÕ≥≤ª“™÷¥––Sys_PageCleanªÚSys_PreSubPage ¬º˛
+			gCurrSysMsg|=OldPageClean(EventType,PageIdx);
 		Debug("°ƒ°ƒ°ƒ°ƒ°ƒ°ƒ Leave %s °ƒ°ƒ°ƒ°ƒ°ƒ°ƒ\n\r",gpCurrentPage->Name);
 	}
 	else	//√ª”–…œ“ª∏ˆ“≥√Ê
@@ -199,9 +199,9 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 		InsertPageLayer(PageIdx);//‘ˆº”“ª≤„
 
 		//“≥√Ê∂—ºÏ≤È
-		if(gHeapLayer)
+		if(gPageHeapRecord)
 		{
-			Debug("gHeapLayer:%d\n\r",gHeapLayer);
+			Debug("gPageHeapRecord:%d\n\r",gPageHeapRecord);
 			Q_ErrorStopScreen("!!!Warnning!!! Page momery don't be freed!");
 		}
 	}
@@ -229,18 +229,20 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 	Debug("##Page Layers:");
 	for(i=1;i<GetCurLayerNum();i++) Debug("%s->",GetPageByIdx(PageLayers[i])->Name); 
 	Debug("%s\n\r",GetPageByIdx(PageLayers[i])->Name); 
-	
-	SysMsg=CurrentPageInit(EventType,IntParam,pSysParam);
-	if((!(SysMsg&SM_NoTouchInit))&&(Q_GetPageByTrack(1)->Type!=POP_PAGE))	 
+
+	if(!(gCurrSysMsg&SM_NoPageInit)) //Q_GotoPage∑µªÿ÷µ∏ÊÀﬂœµÕ≥≤ª“™÷¥––page init
+		gCurrSysMsg|=CurrentPageInit(EventType,IntParam,pSysParam);
+
+	if((!(gCurrSysMsg&SM_NoTouchInit))&&(Q_GetPageByTrack(1)->Type!=POP_PAGE))	 
 	{
-		SysMsg|=CurrPageCtrlObjInit(EventType,IntParam,pSysParam);	
+		gCurrSysMsg|=CurrPageCtrlObjInit(EventType,IntParam,pSysParam);	
 		while((OS_GetCurrentSysMs()-TimeMsRecord)<300) OS_TaskDelayMs(50);//—≠ª∑—” ±300ms£¨“‘±‹√‚¥•√˛œÏ”¶ªÏ¬“
 	}
 
 	Q_EnableInput();
 	
 	Input_Debug("%s end: %s\n\r",__FUNCTION__,gpCurrentPage->Name);
-	return SysMsg;
+	return gCurrSysMsg;
 }
 
 //”√”⁄¥¶¿ÌTouch Type ¬º˛

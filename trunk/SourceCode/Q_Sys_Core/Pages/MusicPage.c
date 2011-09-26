@@ -76,7 +76,7 @@ const PAGE_ATTRIBUTE MusicPage={
 	SystemEventHandler,
 	PeripheralsHandler,
 	Bit(Perip_KeyPress)|Bit(Perip_KeyRelease)|Bit(Perip_RtcMin)|Bit(Perip_MscPlay)|Bit(Perip_MscPause)|
-	Bit(Perip_MscContinue)|Bit(Perip_Timer),
+	Bit(Perip_MscContinue)|Bit(Perip_Timer)|Bit(Perip_RtcAlarm),
 	TouchEventHandler,
 };
 
@@ -957,6 +957,9 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 			Lrc_Intf_Show(Q_MusicGetPlayMs()-PauseTime);
 			//MU_CalTimMs(MU_CAL_TIME_END,"Lrc_Intf_Show()");
 			break;	
+		case Perip_RtcAlarm:
+			Debug("Alarm\n\r");
+			break;
 	}
 
 	return 0;

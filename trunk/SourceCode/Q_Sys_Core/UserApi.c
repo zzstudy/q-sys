@@ -8,7 +8,8 @@ extern u16 gEntriesOfPage[];//记录每个页面进入的次数
 extern u32 gPagePeripEvtFlag[];//记录每个页面的外围事件响应标志
 extern GOBAL_PERIPEVT_RECORD gGobalPeripEvtRecord[];//记录所有页面的全局事件表
 extern u32 gGobalPeripEvtBitFlag;//全局事件标志
-extern u8 gHeapLayer;//记录用户页面堆栈层数的变量
+extern SYS_MSG gCurrSysMsg;//记录页面case返回的信息
+extern u8 gPageHeapRecord;//记录用户页面堆栈分配数目的变量
 
 extern const PAGE_ATTRIBUTE *GetPageByIdx(u8);
 extern u32 GetRegIdByIdx(u8);
@@ -25,7 +26,7 @@ void *_Q_PageMallco(u16 Size,u8 *pFuncName,u32 Lines)
 void *_Q_PageMallco(u16 Size)
 #endif
 {
-	gHeapLayer++;
+	gPageHeapRecord++;
 #if Q_HEAP_TRACK_DEBUG ==1
 	return QS_Mallco(Size,pFuncName,Lines);
 #else
@@ -40,7 +41,7 @@ void _Q_PageFree(void *Ptr,u8 *pFuncName,u32 Lines)
 void _Q_PageFree(void *Ptr)
 #endif
 {
-	gHeapLayer--;
+	gPageHeapRecord--;
 #if Q_HEAP_TRACK_DEBUG ==1
 	QS_Free(Ptr,pFuncName,Lines);
 #else
@@ -131,7 +132,6 @@ u16 Q_GetPageEntries(void)
 SYS_MSG Q_GotoPage(PAGE_ACTION PageAction, u8 *Name, int IntParam, void *pSysParam)
 {
 	INPUT_EVENT InEventParam;
-	SYS_MSG SysMsg;
 	u8 PageIdx;
 	u8 Result;
 	
@@ -139,29 +139,43 @@ SYS_MSG Q_GotoPage(PAGE_ACTION PageAction, u8 *Name, int IntParam, void *pSysPar
 		UA_Debug("%s : %s->%s\n\r",__FUNCTION__,gpCurrentPage->Name,Name);
 	else
 		UA_Debug("%s : NULL->%s\n\r",__FUNCTION__,Name);
-
+	
 	//查找对应页面
-	SysMsg=FindPage(Name,0,&PageIdx);
-	if(SysMsg!=SM_State_OK)//没找到对应页面
+	if(PageAction==SubPageReturn) //如果是子页面返回，则找到上一级页面
 	{
-		if(PageAction==SubPageReturn) PageIdx=GetPageIdxByLayerOffset(1);//如果是子页面返回，则找到上一级页面
-		else return SysMsg;
+		gCurrSysMsg=SM_State_OK;
+		PageIdx=GetPageIdxByLayerOffset(1);
+	}
+	else
+	{
+		gCurrSysMsg=FindPage(Name,0,&PageIdx);//初始化页面回传信息
+		if(gCurrSysMsg!=SM_State_OK)//没找到对应页面
+		{
+			return gCurrSysMsg;
+		}
 	}
 	
 	//POP页面只允许以进入子页面的形式进入
 	if((GetPageByIdx(PageIdx)->Type==POP_PAGE)&&(PageAction!=GotoSubPage))
 	{
-		Debug("Pop Page not allow entry by \"GotoNewPage\" param!");
+		Q_ErrorStopScreen("Pop Page not allow entry by \"GotoNewPage\" param!");
 		return SM_State_Faile;
 	}
 
-	SysMsg=GetPageByIdx(PageIdx)->SysEvtHandler(Sys_PreGotoPage, IntParam,pSysParam);
+	//POP页面只允许以子页面返回的形式退出
+	if((Q_GetPageByTrack(0)->Type==POP_PAGE)&&(PageAction!=SubPageReturn))
+	{
+		Q_ErrorStopScreen("Pop Page only allow quit by \"SubPageReturn\" param!");
+		return SM_State_Faile;
+	}
+
+	gCurrSysMsg=GetPageByIdx(PageIdx)->SysEvtHandler(Sys_PreGotoPage, IntParam,pSysParam);
 
 	//Debug("GotoPage Return 0x%x\n\r",SysMsg);
 	
-	if(SysMsg&SM_NoGoto)//页面的Sys_Goto_Page传递回的信息
+	if(gCurrSysMsg&SM_NoGoto)//页面的Sys_Goto_Page传递回的信息
 	{//新页面的Sys_PreGotoPage传递回SM_NoGoto信息表示不需要进入此页面了。
-		return SysMsg;
+		return gCurrSysMsg;
 	}
 	else
 	{
@@ -181,7 +195,7 @@ SYS_MSG Q_GotoPage(PAGE_ACTION PageAction, u8 *Name, int IntParam, void *pSysPar
 		//Debug("New Page Index:%d\n\r",PageIdx);
 		if((Result=OS_MsgBoxSend(gInputHandler_Queue,&InEventParam,100,FALSE))==OS_ERR_NONE)
 		{
-			return SysMsg;
+			return gCurrSysMsg;
 		}
 		else
 		{
@@ -190,7 +204,6 @@ SYS_MSG Q_GotoPage(PAGE_ACTION PageAction, u8 *Name, int IntParam, void *pSysPar
 		}
 	}	
 }
-QSH_FUN_REG(Q_GotoPage,SYS_MSG Q_GotoPage(PAGE_ACTION PageAction,u8 *Name,int IntParam,void *pSysParam))
 
 //设置系统事件对应位
 void Q_SetPeripEvt(u32 RegID,u32 PeripEvtCon)
@@ -355,6 +368,8 @@ void Q_ErrorStop(const char *FileName,const char *pFuncName,const u32 Line,const
 	GUI_REGION DrawRegion;
 	u8 ErrorMsg[256];
 
+	Debug(Msg);
+
 	for(y=0;y<LCD_HIGHT;y++)
 		for(x=0;x<LCD_WIDTH;x++)
 		{
@@ -398,7 +413,6 @@ void Q_ErrorStop(const char *FileName,const char *pFuncName,const u32 Line,const
 	DrawRegion.Color=FatColor(0xff0000);
 	Gui_DrawFont(ASC14B_FONT,ErrorMsg,&DrawRegion);
 
-	Debug(Msg);
 	while(1);
 }
 
