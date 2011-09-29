@@ -195,7 +195,6 @@ CopyEnd:
 
 //本函数将屏幕显示存放成bmp文件到Snapshot目录
 //请注意tf卡Snapshot目录下要放一张空白的240 320 bmp图片Blank.bmp
-QSH_FUN_REG(PrtScreen,bool PrtScreen(void))
 #define BUF_PIX_NUM	60 //每次读60个像素的信息
 bool PrtScreen(void)
 {
@@ -260,7 +259,7 @@ PrtScnEnd:
 		FS_FClose(pSnapBmpObj);
 	return Ret;
 }
-
+QSH_FUN_REG(PrtScreen,"bool PrtScreen(void)");
 //读取屏幕的某块区域到文件
 //支持的最大区域宽度应小于PRINT_SRC_BUF_LEN的一半!!!
 #define PRINT_SRC_BUF_LEN 4096
