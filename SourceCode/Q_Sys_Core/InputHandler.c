@@ -36,7 +36,7 @@ u32 gPagePeripEvtFlag[PAGE_TOTAL];//记录每个页面的外围事件响应标志
 
 GOBAL_PERIPEVT_RECORD gGobalPeripEvtRecord[MAX_GOBAL_SYSEVT];//记录所有页面的全局事件表
 u32 gGobalPeripEvtBitFlag;//全局事件标志
-QSH_VAR_REG(gGobalPeripEvtBitFlag,u32 gGobalPeripEvtBitFlag)
+QSH_VAR_REG(gGobalPeripEvtBitFlag,"u32 gGobalPeripEvtBitFlag","u32");
 
 SYS_MSG gCurrSysMsg=SM_State_OK;//记录页面case返回的信息
 u8 gPageHeapRecord=0;//记录用户页面堆栈分配数目的变量

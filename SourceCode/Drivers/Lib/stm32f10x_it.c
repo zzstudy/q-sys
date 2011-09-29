@@ -788,9 +788,7 @@ void USART1_IRQHandler(void)
 				while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);//等待发送结束
 				USART_SendData(USART1,'\r');//回显
 				while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);//等待发送结束
-				USART_SendData(USART1,'$');//回显
-				while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);//等待发送结束
-				
+
 				Idx=0;
 			}
 			else if(IE.Num==0x08)//回删

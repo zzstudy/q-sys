@@ -75,7 +75,6 @@ int main(void)
 //	COM3_Init();	
 	
 	OS_WrapInit();
-	Q_Shell_Init();
 	//UndefinedInstruction();
 	//BadAlignedLDM();
 
