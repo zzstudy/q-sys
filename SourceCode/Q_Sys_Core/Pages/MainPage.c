@@ -68,8 +68,7 @@ const PAGE_ATTRIBUTE MainPage={
 	{
 		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
 		0,//sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
-		0,
-		0,
+		0,0,0,1
 	},
 	
 	ImgTchRegCon, //touch region array
@@ -120,6 +119,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent,int IntParam,void *pSysParam)
 {
 	GUI_REGION DrawRegion;
 	int Time;
+	Debug("## MainPage %d\n\r",SysEvent);
 
 	switch(SysEvent)
 	{
@@ -163,6 +163,10 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent,int IntParam,void *pSysParam)
 	return 0;
 }
 
+			//NUM_BOX_OBJ NumBoxObj;
+			NUM_LIST_OBJ NumBoxObj;
+			//NUM_ENUM_OBJ NumBoxObj;
+			
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam)
 {
 	switch(PeripEvent)
@@ -265,8 +269,19 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 			Q_GotoPage(GotoNewPage,"CalculatorPage",0,NULL);
 			break;
  		case HomeKV:
-
- 			Gui_SetBgLight(0);
+			NumBoxObj.ObjID=100;
+			NumBoxObj.Type=NBT_NumList;
+			NumBoxObj.x=100;
+			NumBoxObj.y=200;
+			NumBoxObj.w=100;
+			NumBoxObj.Value=50;
+			NumBoxObj.Min=0;
+			NumBoxObj.Max=100;
+			NumBoxObj.Step=10;
+			Q_SetNumList(1,&NumBoxObj);
+			//Q_GotoPage(GotoSubPage,"NumBoxPage",0,&NumBoxObj);
+			
+ 			//Gui_SetBgLight(0);
  			break;
 		case MailKV:
 			Gui_SetBgLight(50);

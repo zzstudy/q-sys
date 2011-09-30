@@ -136,7 +136,7 @@ const PAGE_ATTRIBUTE AppListPage={
 	"YuanYin",
 	"Page Description",
 	NORMAL_PAGE,
-	0,//THREAD_PAGE需要的堆栈大小项
+	0,//
 	{
 		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
 		sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
@@ -338,7 +338,6 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 {
 	GUI_REGION DrawRegion;
 
-	Debug("## AppListPage %d\n\r",SysEvent);
 	switch(SysEvent)
 	{
 		case Sys_PreGotoPage:
@@ -456,6 +455,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 
 	return 0;
 }
+
 //当使用者按下本页TouchRegionSet里定义的按键时，会触发这个函数里的对应事件
 static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 {		
@@ -564,7 +564,6 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 			Q_GotoPage(GotoNewPage,"SnakePage",0,NULL);
 			break;		
 		case HomeKV:
-			Q_GotoPage(GotoSubPage,"NumBoxPage",0,NULL);
 			break;
 		case MessageKV:
 		case MusicKV:

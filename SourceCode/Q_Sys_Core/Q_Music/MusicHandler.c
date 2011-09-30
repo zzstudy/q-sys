@@ -760,7 +760,7 @@ HandleEvent:
 					FS_FSeek(fp,gNowMusicInfo.AudioOffset,FS_SEEK_SET);//移到音频处
 
 					//发送事件
-					if(Q_InspectPeripEvt(0,Perip_MscPlay))//检查是否需要触发
+					if(Q_InspectPeripEvt(PRID_Current,Perip_MscPlay))//检查是否需要触发
 					{
 						EventParam.uType=SingleNum_Type;
 						EventParam.EventType=Input_MscPlay;
@@ -798,7 +798,7 @@ HandleEvent:
 					gNowState=MusicContinue;
 					OS_SemaphoreTake(gVsDreq_Sem,OS_MAX_DELAY);
 					
-					if(Q_InspectPeripEvt(0,Perip_MscContinue))
+					if(Q_InspectPeripEvt(PRID_Current,Perip_MscContinue))
 					{
 						EventParam.uType=SingleNum_Type;
 						EventParam.EventType=Input_MscContinue;
@@ -901,7 +901,7 @@ HandleEvent:
 				{
 					gNowState=MusicPause;
 					
-					if(Q_InspectPeripEvt(0,Perip_MscPause))
+					if(Q_InspectPeripEvt(PRID_Current,Perip_MscPause))
 					{
 						EventParam.uType=SingleNum_Type;
 						EventParam.EventType=Input_MscPause;
@@ -945,7 +945,7 @@ HandleEvent:
 	      			} 
 	      			VsStop();
 	      			
-					if(Q_InspectPeripEvt(0,Perip_MscStop))//发送停止事件
+					if(Q_InspectPeripEvt(PRID_Current,Perip_MscStop))//发送停止事件
 					{
 						EventParam.uType=SingleNum_Type;
 						EventParam.EventType=Input_MscStop;

@@ -31,6 +31,6 @@
 //211:LCM V1.1 2.2'
 //212:LCM V1.2 2.2'
 //220:LCM V2.0 2.8'
-#define QXW_LCM_ID 211
+#define QXW_LCM_ID 212
 
 #endif

@@ -12,7 +12,7 @@ extern SYS_MSG gCurrSysMsg;//记录页面case返回的信息
 extern u8 gPageHeapRecord;//记录用户页面堆栈分配数目的变量
 
 extern const PAGE_ATTRIBUTE *GetPageByIdx(u8);
-extern u32 GetRegIdByIdx(u8);
+extern PAGE_RID GetRegIdByIdx(u8);
 extern u8 GetPageIdxByTrack(u8);
 extern u8 GetPageIdxByLayerOffset(u8);
 extern u8 GetPageIdxByLayer(u8);
@@ -94,7 +94,7 @@ const PAGE_ATTRIBUTE *Q_GetPageByLayer(u8 LayerNum)
 
 //通过页面名称找页面的RegID
 //如果入口参数为NULL则返回当前页面的RegID
-u32 Q_FindRidByPageName(u8 *PageName)
+PAGE_RID Q_FindRidByPageName(u8 *PageName)
 {
 	u8 PageIdx;
 
@@ -110,7 +110,7 @@ u32 Q_FindRidByPageName(u8 *PageName)
 	}
 
 	Debug("No Such Page PageName:%s ,may be this is a RID\n\r",PageName);
-	return 0;
+	return PRID_Null;
 }
 
 //获取当前页面名称
@@ -206,7 +206,7 @@ SYS_MSG Q_GotoPage(PAGE_ACTION PageAction, u8 *Name, int IntParam, void *pSysPar
 }
 
 //设置系统事件对应位
-void Q_SetPeripEvt(u32 RegID,u32 PeripEvtCon)
+void Q_SetPeripEvt(PAGE_RID RegID,u32 PeripEvtCon)
 {
 	u8 PageIdx;
 	OS_DeclareCritical();
@@ -229,7 +229,7 @@ void Q_SetPeripEvt(u32 RegID,u32 PeripEvtCon)
 }
 
 //清楚系统事件对应位
-void Q_ClrPeripEvt(u32 RegID,u32 PeripEvtCon)
+void Q_ClrPeripEvt(PAGE_RID RegID,u32 PeripEvtCon)
 {
 	u8 PageIdx;
 	OS_DeclareCritical();
@@ -249,7 +249,7 @@ void Q_ClrPeripEvt(u32 RegID,u32 PeripEvtCon)
 }
 
 //打开系统事件标志
-void Q_EnablePeripEvt(u32 RegID,PERIP_EVT PeripEvt)
+void Q_EnablePeripEvt(PAGE_RID RegID,PERIP_EVT PeripEvt)
 {
 	u8 PageIdx;
 	OS_DeclareCritical();
@@ -269,7 +269,7 @@ void Q_EnablePeripEvt(u32 RegID,PERIP_EVT PeripEvt)
 }
 
 //关闭系统事件标志
-void Q_DisablePeripEvt(u32 RegID,PERIP_EVT PeripEvt)
+void Q_DisablePeripEvt(PAGE_RID RegID,PERIP_EVT PeripEvt)
 {
 	u8 PageIdx;
 	OS_DeclareCritical();
@@ -289,7 +289,8 @@ void Q_DisablePeripEvt(u32 RegID,PERIP_EVT PeripEvt)
 }
 
 //查看系统事件
-INSPECT_SYSEVT_RET Q_InspectPeripEvt(u32 RegID,PERIP_EVT PeripEvt)
+//如果RegID为0，返回当前页面的事件标志
+INSPECT_SYSEVT_RET Q_InspectPeripEvt(PAGE_RID RegID,PERIP_EVT PeripEvt)
 {
 	u8 PageIdx;
 	

@@ -136,11 +136,32 @@ typedef enum{
 
 #endif
 //2									全局线程优先级	结束									
+
 //1														宏定义 结束                              
 
 
 
 //1														类型声明																		
+typedef enum{
+	PRID_Null=-1,
+	PRID_Current=0,
+	PRID_MainPage,
+	PRID_MusicPage,
+	PRID_FileListPage,
+	PRID_NumBoxPage,
+	PRID_EBookPage,
+	PRID_PicturePage,
+	PRID_SettingsPage,
+	PRID_TestPage,
+	PRID_KeyBoardPage,
+	PRID_QWebPage,
+	PRID_ChatPage,
+	PRID_NewsPage,
+	PRID_AppListPage,
+	PRID_SnakePage,
+	PRID_TouchCheckPage,
+}PAGE_RID;//4 	页面RID
+
 typedef enum {
 	// 普通页面
 	NORMAL_PAGE=0,
@@ -346,7 +367,7 @@ const PAGE_ATTRIBUTE *Q_GetPageByLayer(u8 LayerNum);
 //输入一个页面名称，可以返回其对应的RID
 //如果没找到，返回0
 //如果Name==NULL或者Name[0]=0，则返回当前页面的RID
-u32 Q_FindRidByPageName(u8 *PageName);
+PAGE_RID Q_FindRidByPageName(u8 *PageName);
 
 //返回当前页面的名字
 u8 *Q_GetCurrPageName(void);
@@ -361,11 +382,11 @@ void Q_EnableInput(void);
 void Q_DisableInput(void);
 
 //下面这一组函数用于控制响应事件开关
-void Q_SetPeripEvt(u32 RegID,u32 SysEvtCon);//开启多个事件响应，如SetSysEvt((1<<Sys_TouchSetOk)|(1<<Perip_RtcSec));
-void Q_ClrPeripEvt(u32 RegID,u32 SysEvtCon);//关闭多个事件响应，如ClrSysEvt((1<<Sys_TouchSetOk)|(1<<Perip_RtcSec));
-void Q_EnablePeripEvt(u32 RegID,PERIP_EVT SysEvent);//开启一个事件响应，如EnableSysEvt(Perip_RtcSec);
-void Q_DisablePeripEvt(u32 RegID,PERIP_EVT SysEvent);//关闭一个事件响应，如DisableSysEvt(Perip_RtcSec);
-INSPECT_SYSEVT_RET Q_InspectPeripEvt(u32 RegID,PERIP_EVT SysEvent);//检查指定事件是否可以被响应，如InspectSysEvt(Perip_RtcSec);
+void Q_SetPeripEvt(PAGE_RID RegID,u32 SysEvtCon);//开启多个事件响应，如SetSysEvt((1<<Sys_TouchSetOk)|(1<<Perip_RtcSec));
+void Q_ClrPeripEvt(PAGE_RID RegID,u32 SysEvtCon);//关闭多个事件响应，如ClrSysEvt((1<<Sys_TouchSetOk)|(1<<Perip_RtcSec));
+void Q_EnablePeripEvt(PAGE_RID RegID,PERIP_EVT SysEvent);//开启一个事件响应，如EnableSysEvt(Perip_RtcSec);
+void Q_DisablePeripEvt(PAGE_RID RegID,PERIP_EVT SysEvent);//关闭一个事件响应，如DisableSysEvt(Perip_RtcSec);
+INSPECT_SYSEVT_RET Q_InspectPeripEvt(PAGE_RID RegID,PERIP_EVT SysEvent);//检查指定事件是否可以被响应，如InspectSysEvt(Perip_RtcSec);
 
 //设置全局事件，任何页面下，都会触发事件的处理函数PeripEvtHandler
 void Q_EnableGobalPeripEvent(PERIP_EVT PeripEvt,PeripheralsHandlerFunc PeripEvtHandler);

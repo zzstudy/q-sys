@@ -785,7 +785,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 			if(IfReady==TRUE){
 				Lrc_Intf_Init();
 				Q_TimSet(Q_TIM1,DELAYTIME,100,(bool)1);
-				Q_SetPeripEvt(0,Bit(Perip_RtcSec));//开启事件响应
+				Q_SetPeripEvt(PRID_Current,Bit(Perip_RtcSec));//开启事件响应
 				Lrc_Intf_ObscShow(Q_MusicGetPlayMs()-PauseTime);
 			}
 			//画标题栏
@@ -937,7 +937,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 			DispPlayInfo(&gpMusicPath[++i]);
 			DispPlayBtn();
 			Q_TimSet(Q_TIM1,DELAYTIME,100,(bool)1);
-			Q_SetPeripEvt(0,Bit(Perip_RtcSec));//开启事件响应
+			Q_SetPeripEvt(PRID_Current,Bit(Perip_RtcSec));//开启事件响应
 			break;
 		case Perip_MscPause:
 			Debug("Perip_MscPause\n\r");

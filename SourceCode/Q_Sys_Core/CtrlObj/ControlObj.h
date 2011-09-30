@@ -175,7 +175,7 @@ typedef struct {
 }YES_NO_OBJ;//4		yes no控件定义
 
 typedef enum{
-	NBT_Num,
+	NBT_NumBox,
 	NBT_NumList,
 	NBT_NumEnum,
 }NUM_BOX_TYPE;
@@ -203,7 +203,7 @@ typedef struct{
 	s32 Max;
 	s32 Min;
 	s32 Step;
-}NUM_LIST_BOX_OBJ;//4		数字输入框
+}NUM_LIST_OBJ;//4		数字输入框
 
 typedef struct{
 	u8 ObjID;//标识符，页面内必须唯一，以区分其他控件对象
@@ -217,7 +217,7 @@ typedef struct{
 	u8 Num;//当前值个数
 	u8 Total;//可容纳总数
 	s32 EnumList[1];
-}NUM_ENUM_BOX_OBJ;//4		数字输入框
+}NUM_ENUM_OBJ;//4		数字输入框
 
 typedef struct{
 	u8 ObjID;//标识符，页面内必须唯一，以区分其他控件对象
@@ -263,7 +263,20 @@ bool Q_SetDynamicImgTch(u8 Idx,IMG_TCH_OBJ *pTchReg);
 bool Q_SetDynamicCharTch(u8 Idx,CHAR_TCH_OBJ *pTchReg);
 
 #ifdef QSYS_FRAME_FULL
+//设置yes no选项，pYesNo指向的内存在调用完函数后不可注销
+//一旦设置，当进入页面时，会用到此内存
+//所以当页面还存在时，必须保证此内存存在
+//Idx从1开始
 bool Q_SetYesNo(u8 Idx,YES_NO_OBJ *pYesNo);
+
+//设置num box选项，pNumBox指向的内存在调用完函数后不可注销
+//一旦设置，当进入页面时，会用到此内存
+//所以当页面还存在时，必须保证此内存存在
+//Idx从1开始
+bool Q_SetNumBox(u8 Idx,NUM_BOX_OBJ *pNumBox);
+#define Q_SetNumList(Idx,pNumList) Q_SetNumBox(Idx,(NUM_BOX_OBJ *)pNumList)
+#define Q_SetNumEnum(Idx,pNumEnum) Q_SetNumBox(Idx,(NUM_BOX_OBJ *)pNumEnum)
+
 #endif
 
 #endif

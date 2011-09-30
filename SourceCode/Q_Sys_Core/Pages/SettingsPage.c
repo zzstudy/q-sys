@@ -89,7 +89,7 @@ const PAGE_ATTRIBUTE SettingsPage={
 	"YuanYin",
 	"Page Description",
 	NORMAL_PAGE,
-	0,//THREAD_PAGE需要的堆栈大小项
+	0,//
 
 	{
 		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
@@ -102,7 +102,7 @@ const PAGE_ATTRIBUTE SettingsPage={
 	
 	SystemEventHandler,
 	PeripheralsHandler,
-	0,
+	Bit(Perip_KeyPress)|Bit(Perip_KeyRelease),
 	TouchEventHandler,
 };
 

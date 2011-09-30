@@ -360,7 +360,7 @@ void InputHandler_Task( void *Task_Parameters )
 				else if(Input_UartInput==InEventParam.EventType)//处理串口输入
 				{
 					MyGobalPeripEvtHandler(Perip_UartInput,InEventParam.Info.SyncInfo.IntParam,InEventParam.Info.SyncInfo.pParam);
-					if(Q_InspectPeripEvt(0,Perip_UartInput)==HasPagePeripEvt)//检查是否允许触发
+					if(Q_InspectPeripEvt(PRID_Current,Perip_UartInput)==HasPagePeripEvt)//检查是否允许触发
 						SysMsg=gpCurrentPage->PeripEvtHandler(Perip_UartInput,InEventParam.Info.SyncInfo.IntParam,InEventParam.Info.SyncInfo.pParam);
 				}
 				else if(Input_QWebEvt==InEventParam.EventType)//处理q网事件
@@ -369,40 +369,40 @@ void InputHandler_Task( void *Task_Parameters )
 					{
 						case QWE_NewJoin:
 							MyGobalPeripEvtHandler(Perip_QWebJoin,InEventParam.Info.SyncInfo.IntParam,InEventParam.Info.SyncInfo.pParam);
-							if(Q_InspectPeripEvt(0,Perip_QWebJoin)==HasPagePeripEvt)//检查是否允许触发
+							if(Q_InspectPeripEvt(PRID_Current,Perip_QWebJoin)==HasPagePeripEvt)//检查是否允许触发
 								SysMsg=gpCurrentPage->PeripEvtHandler(Perip_QWebJoin,InEventParam.Info.SyncInfo.IntParam,InEventParam.Info.SyncInfo.pParam);
 							QWA_CopyDataFinish(InEventParam.Info.SyncInfo.pParam);//收回q网内存
 							break;
 						case QWE_Recv:
 							MyGobalPeripEvtHandler(Perip_QWebRecv,InEventParam.Info.SyncInfo.IntParam,InEventParam.Info.SyncInfo.pParam);
-							if(Q_InspectPeripEvt(0,Perip_QWebRecv)==HasPagePeripEvt)//检查是否允许触发
+							if(Q_InspectPeripEvt(PRID_Current,Perip_QWebRecv)==HasPagePeripEvt)//检查是否允许触发
 								SysMsg=gpCurrentPage->PeripEvtHandler(Perip_QWebRecv,InEventParam.Info.SyncInfo.IntParam,InEventParam.Info.SyncInfo.pParam);
 							QWA_CopyDataFinish(InEventParam.Info.SyncInfo.pParam);//收回q网内存
 							break;
 						case QWE_SendOk:
 							MyGobalPeripEvtHandler(Perip_QWebSendOk,InEventParam.Info.SyncInfo.IntParam,InEventParam.Info.SyncInfo.pParam);
-							if(Q_InspectPeripEvt(0,Perip_QWebSendOk)==HasPagePeripEvt)//检查是否允许触发
+							if(Q_InspectPeripEvt(PRID_Current,Perip_QWebSendOk)==HasPagePeripEvt)//检查是否允许触发
 								SysMsg=gpCurrentPage->PeripEvtHandler(Perip_QWebSendOk,InEventParam.Info.SyncInfo.IntParam,InEventParam.Info.SyncInfo.pParam);
 							break;
 						case QWE_SendFailed:
 							MyGobalPeripEvtHandler(Perip_QWebSendFailed,InEventParam.Info.SyncInfo.IntParam,InEventParam.Info.SyncInfo.pParam);
-							if(Q_InspectPeripEvt(0,Perip_QWebSendFailed)==HasPagePeripEvt)//检查是否允许触发
+							if(Q_InspectPeripEvt(PRID_Current,Perip_QWebSendFailed)==HasPagePeripEvt)//检查是否允许触发
 								SysMsg=gpCurrentPage->PeripEvtHandler(Perip_QWebSendFailed,InEventParam.Info.SyncInfo.IntParam,InEventParam.Info.SyncInfo.pParam);
 							break;
 						case QWE_HostConflict:
 							MyGobalPeripEvtHandler(Perip_QWebHostConflict,InEventParam.Info.SyncInfo.IntParam,InEventParam.Info.SyncInfo.pParam);
-							if(Q_InspectPeripEvt(0,Perip_QWebHostConflict)==HasPagePeripEvt)//检查是否允许触发
+							if(Q_InspectPeripEvt(PRID_Current,Perip_QWebHostConflict)==HasPagePeripEvt)//检查是否允许触发
 								SysMsg=gpCurrentPage->PeripEvtHandler(Perip_QWebHostConflict,InEventParam.Info.SyncInfo.IntParam,InEventParam.Info.SyncInfo.pParam);
 							break;
 						case QWE_QueryAck:
 							MyGobalPeripEvtHandler(Perip_QWebQueryName,InEventParam.Info.SyncInfo.IntParam,InEventParam.Info.SyncInfo.pParam);
-							if(Q_InspectPeripEvt(0,Perip_QWebQueryName)==HasPagePeripEvt)//检查是否允许触发
+							if(Q_InspectPeripEvt(PRID_Current,Perip_QWebQueryName)==HasPagePeripEvt)//检查是否允许触发
 								SysMsg=gpCurrentPage->PeripEvtHandler(Perip_QWebQueryName,InEventParam.Info.SyncInfo.IntParam,InEventParam.Info.SyncInfo.pParam);
 							QWA_CopyDataFinish(InEventParam.Info.SyncInfo.pParam);//收回q网内存
 							break;
 						case QWE_Error:
 							MyGobalPeripEvtHandler(Perip_QWebError,InEventParam.Info.SyncInfo.IntParam,InEventParam.Info.SyncInfo.pParam);
-							if(Q_InspectPeripEvt(0,Perip_QWebError)==HasPagePeripEvt)//检查是否允许触发
+							if(Q_InspectPeripEvt(PRID_Current,Perip_QWebError)==HasPagePeripEvt)//检查是否允许触发
 								SysMsg=gpCurrentPage->PeripEvtHandler(Perip_QWebError,InEventParam.Info.SyncInfo.IntParam,InEventParam.Info.SyncInfo.pParam);
 							break;
 					}
@@ -418,7 +418,7 @@ void InputHandler_Task( void *Task_Parameters )
 						TickStamp[ExtiKeyNum]=OS_GetCurrentTick();
 						ExtiKeyInfo[ExtiKeyNum].TimeStamp=0;
 						MyGobalPeripEvtHandler(Perip_KeyPress,ExtiKeyNum+EXTI_KEY_VALUE_START,&ExtiKeyInfo[ExtiKeyNum]);
-						if(Q_InspectPeripEvt(0,Perip_KeyPress)==HasPagePeripEvt)//检查是否允许触发
+						if(Q_InspectPeripEvt(PRID_Current,Perip_KeyPress)==HasPagePeripEvt)//检查是否允许触发
 							if(gpCurrentPage->PeripEvtHandler)//这里要检查是因为按键可能在还没进入第一个页面的时候就按下了。
 								TchMsg=gpCurrentPage->PeripEvtHandler(Perip_KeyPress,ExtiKeyNum+EXTI_KEY_VALUE_START,&ExtiKeyInfo[ExtiKeyNum]);
 					}
@@ -426,7 +426,7 @@ void InputHandler_Task( void *Task_Parameters )
 					{
 						ExtiKeyInfo[ExtiKeyNum].TimeStamp=(OS_GetCurrentTick()-TickStamp[ExtiKeyNum])*OS_TICK_RATE_MS;
 						MyGobalPeripEvtHandler(Perip_KeyRelease,ExtiKeyNum+EXTI_KEY_VALUE_START,&ExtiKeyInfo[ExtiKeyNum]);
-						if(Q_InspectPeripEvt(0,Perip_KeyRelease)==HasPagePeripEvt)//检查是否允许触发
+						if(Q_InspectPeripEvt(PRID_Current,Perip_KeyRelease)==HasPagePeripEvt)//检查是否允许触发
 							if(gpCurrentPage->PeripEvtHandler)//这里要检查是因为按键可能在还没进入第一个页面的时候就按下了。
 								TchMsg=gpCurrentPage->PeripEvtHandler(Perip_KeyRelease,ExtiKeyNum+EXTI_KEY_VALUE_START,&ExtiKeyInfo[ExtiKeyNum]);
 					}
@@ -435,37 +435,37 @@ void InputHandler_Task( void *Task_Parameters )
 				else if(Input_Timer==InEventParam.EventType)
 				{
 					MyGobalPeripEvtHandler(Perip_Timer,InEventParam.Num,NULL);
-					if(Q_InspectPeripEvt(0,Perip_Timer)==HasPagePeripEvt)
+					if(Q_InspectPeripEvt(PRID_Current,Perip_Timer)==HasPagePeripEvt)
 						SysMsg=gpCurrentPage->PeripEvtHandler(Perip_Timer,InEventParam.Num,NULL);
 				}
 				else if(Input_LcdOn==InEventParam.EventType)
 				{
 					MyGobalPeripEvtHandler(Perip_LcdOn,-1,NULL);
-					if(Q_InspectPeripEvt(0,Perip_LcdOn)==HasPagePeripEvt)
+					if(Q_InspectPeripEvt(PRID_Current,Perip_LcdOn)==HasPagePeripEvt)
 						SysMsg=gpCurrentPage->PeripEvtHandler(Perip_LcdOn,-1,NULL);
 				}
 				else if(Input_MscPlay==InEventParam.EventType)
 				{
 					MyGobalPeripEvtHandler(Perip_MscPlay,InEventParam.Num,(void *)Q_MusicGetPath());
-					if(Q_InspectPeripEvt(0,Perip_MscPlay)==HasPagePeripEvt)
+					if(Q_InspectPeripEvt(PRID_Current,Perip_MscPlay)==HasPagePeripEvt)
 						SysMsg=gpCurrentPage->PeripEvtHandler(Perip_MscPlay,InEventParam.Num,(void *)Q_MusicGetPath());
 				}
 				else if(Input_MscPause==InEventParam.EventType)
 				{
 					MyGobalPeripEvtHandler(Perip_MscPause,InEventParam.Num,(void *)Q_MusicGetPath());
-					if(Q_InspectPeripEvt(0,Perip_MscPause)==HasPagePeripEvt)
+					if(Q_InspectPeripEvt(PRID_Current,Perip_MscPause)==HasPagePeripEvt)
 						SysMsg=gpCurrentPage->PeripEvtHandler(Perip_MscPause,InEventParam.Num,(void *)Q_MusicGetPath());
 				}
 				else if(Input_MscContinue==InEventParam.EventType)
 				{
 					MyGobalPeripEvtHandler(Perip_MscContinue,InEventParam.Num,(void *)Q_MusicGetPath());
-					if(Q_InspectPeripEvt(0,Perip_MscContinue)==HasPagePeripEvt)
+					if(Q_InspectPeripEvt(PRID_Current,Perip_MscContinue)==HasPagePeripEvt)
 						SysMsg=gpCurrentPage->PeripEvtHandler(Perip_MscContinue,InEventParam.Num,(void *)Q_MusicGetPath());
 				}
 				else if(Input_MscStop==InEventParam.EventType)
 				{
 					MyGobalPeripEvtHandler(Perip_MscStop,InEventParam.Num,(void *)Q_MusicGetPath());
-					if(Q_InspectPeripEvt(0,Perip_MscStop)==HasPagePeripEvt)
+					if(Q_InspectPeripEvt(PRID_Current,Perip_MscStop)==HasPagePeripEvt)
 						SysMsg=gpCurrentPage->PeripEvtHandler(Perip_MscStop,InEventParam.Num,(void *)Q_MusicGetPath());
 				}
 				break;
@@ -478,25 +478,25 @@ void InputHandler_Task( void *Task_Parameters )
 						if(Input_RtcSec==InEventParam.Info.Items[ItemsNum])
 						{
 							MyGobalPeripEvtHandler(Perip_RtcSec,InEventParam.Num,NULL);
-							if(Q_InspectPeripEvt(0,Perip_RtcSec)==HasPagePeripEvt)
+							if(Q_InspectPeripEvt(PRID_Current,Perip_RtcSec)==HasPagePeripEvt)
 								SysMsg=gpCurrentPage->PeripEvtHandler(Perip_RtcSec,InEventParam.Num,NULL);
 						}
 						else if(Input_RtcMin==InEventParam.Info.Items[ItemsNum])
 						{
 							MyGobalPeripEvtHandler(Perip_RtcMin,InEventParam.Num,NULL);
-							if(Q_InspectPeripEvt(0,Perip_RtcMin)==HasPagePeripEvt)
+							if(Q_InspectPeripEvt(PRID_Current,Perip_RtcMin)==HasPagePeripEvt)
 								SysMsg=gpCurrentPage->PeripEvtHandler(Perip_RtcMin,InEventParam.Num,NULL);
 						}
 						else if(Input_RtcAlarm==InEventParam.Info.Items[ItemsNum])
 						{
 							MyGobalPeripEvtHandler(Perip_RtcAlarm,InEventParam.Num,NULL);
-							if(Q_InspectPeripEvt(0,Perip_RtcAlarm)==HasPagePeripEvt)
+							if(Q_InspectPeripEvt(PRID_Current,Perip_RtcAlarm)==HasPagePeripEvt)
 								SysMsg=gpCurrentPage->PeripEvtHandler(Perip_RtcAlarm,InEventParam.Num,NULL);
 						}	
 						else if(Input_LcdOff==InEventParam.Info.Items[ItemsNum])
 						{
 							MyGobalPeripEvtHandler(Perip_LcdOff,0,NULL);
-							if(Q_InspectPeripEvt(0,Perip_LcdOff)==HasPagePeripEvt)
+							if(Q_InspectPeripEvt(PRID_Current,Perip_LcdOff)==HasPagePeripEvt)
 								SysMsg=gpCurrentPage->PeripEvtHandler(Perip_LcdOff,0,NULL);
 						}
 						ItemsNum++;
