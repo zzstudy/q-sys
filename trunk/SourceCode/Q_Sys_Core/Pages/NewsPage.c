@@ -80,7 +80,7 @@ const PAGE_ATTRIBUTE NewsPage={
 	"Author",
 	"Page Description",
 	NORMAL_PAGE,
-	0,//THREAD_PAGE需要的堆栈大小项
+	0,//
 
 	{
 		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array

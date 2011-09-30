@@ -244,7 +244,7 @@ void RTC_IRQHandler(void)
 			LCD_Light_Counter=0;
 		}
 
-		if(Q_InspectPeripEvt(0,Perip_RtcAlarm))//检查是否需要触发
+		if(Q_InspectPeripEvt(PRID_Current,Perip_RtcAlarm))//检查是否需要触发
 		{
 			EventParam.Info.Items[ItemsTotal++]=Input_RtcAlarm;//加到事件列表
 		}
@@ -259,7 +259,7 @@ void RTC_IRQHandler(void)
 				{					
 					Gui_SetBgLight(0);
 					LCD_Light_Counter=0;
-					if(Q_InspectPeripEvt(0,Perip_LcdOff))//检查是否需要触发
+					if(Q_InspectPeripEvt(PRID_Current,Perip_LcdOff))//检查是否需要触发
 					{
 						EventParam.Info.Items[ItemsTotal++]=Input_LcdOff;//加到事件列表
 					}
@@ -270,12 +270,12 @@ void RTC_IRQHandler(void)
 		if(RTC_GetCounter()==RTC_Counter)
 		{
 			RTC_Counter+=60;
-			if(Q_InspectPeripEvt(0,Perip_RtcMin))//检查是否需要触发
+			if(Q_InspectPeripEvt(PRID_Current,Perip_RtcMin))//检查是否需要触发
 			{
 				EventParam.Info.Items[ItemsTotal++]=Input_RtcMin;
 			}
 		}
-		else if(Q_InspectPeripEvt(0,Perip_RtcSec))//检查是否需要触发
+		else if(Q_InspectPeripEvt(PRID_Current,Perip_RtcSec))//检查是否需要触发
 		{
 			EventParam.Info.Items[ItemsTotal++]=Input_RtcSec;
 		}
@@ -615,7 +615,7 @@ void TIM2_IRQHandler(void)
 	{
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 		
-		if(Q_InspectPeripEvt(0,Perip_Timer))//检查是否需要触发
+		if(Q_InspectPeripEvt(PRID_Current,Perip_Timer))//检查是否需要触发
 		{
 			EventParam.uType=SingleNum_Type;
 			EventParam.EventType=Input_Timer;
@@ -654,7 +654,7 @@ void TIM4_IRQHandler(void)
 	{
 		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
 		
-		if(Q_InspectPeripEvt(0,Perip_Timer))//检查是否需要触发
+		if(Q_InspectPeripEvt(PRID_Current,Perip_Timer))//检查是否需要触发
 		{
 			EventParam.uType=SingleNum_Type;
 			EventParam.EventType=Input_Timer;
@@ -953,7 +953,7 @@ void EXTI15_10_IRQHandler(void)
 			{
 				Gui_SetBgLight(Q_DB_GetValue(Setting_BgLightScale,NULL));
 
-				if(Q_InspectPeripEvt(0,Perip_LcdOn))//检查是否需要触发
+				if(Q_InspectPeripEvt(PRID_Current,Perip_LcdOn))//检查是否需要触发
 				{
 					//发送触摸屏点亮事件
 					EventParam.uType=SingleNum_Type;
@@ -1095,7 +1095,7 @@ void TIM5_IRQHandler(void)
 	{
 		TIM_ClearITPendingBit(TIM5, TIM_IT_Update);
 		
-		if(Q_InspectPeripEvt(0,Perip_Timer))//检查是否需要触发
+		if(Q_InspectPeripEvt(PRID_Current,Perip_Timer))//检查是否需要触发
 		{
 			EventParam.uType=SingleNum_Type;
 			EventParam.EventType=Input_Timer;

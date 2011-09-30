@@ -666,7 +666,7 @@ const PAGE_ATTRIBUTE SnakePage={
 	"Chenyu",
 	"greedy snake 1.0",
 	NORMAL_PAGE,
-	0,//THREAD_PAGE需要的堆栈大小项
+	0,//
 	{
 		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
 		0,//sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,

@@ -10,6 +10,7 @@
 #include "User.h"
 #include "Theme.h"
 #include "NumBoxPage.h"
+#include "CtrlObjImg.h"
 
 //函数声明
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
@@ -67,7 +68,7 @@ static const IMG_TCH_OBJ ImgTchRegCon[]={
 	{"",PepoleKV,RelMsk,180,320,60,30,0,0,"",FatColor(NO_TRANS)},
 };
 
-static const CHAR_TCH_OBJ CharTchRegCon[]={
+static const CHAR_TCH_OBJ NumTchRegCon[]={
 	//KeyName,ObjID,OptionMask,Tch_x,Tch_y,Tch_w,Tch_h,
 		//Char_x,Char_y,MarginXY,SpaceXY,NormalColor,NormalBG,PressColor,PressBG,ReleaseColor,ReleaseBG},
 	{"1",Key1KV,B14Msk|RelMsk,4,4,24,24,
@@ -101,20 +102,29 @@ static const CHAR_TCH_OBJ CharTchRegCon[]={
 		8,5,0x22,0x00,FatColor(0x555555),FatColor(0xcccccc),FatColor(0xffffff),FatColor(0xfc9400),FatColor(0x555555),FatColor(0xcccccc)},
 };
 
+static const CHAR_TCH_OBJ ArrowTchRegCon[]={
+	//KeyName,ObjID,OptionMask,Tch_x,Tch_y,Tch_w,Tch_h,
+		//Char_x,Char_y,MarginXY,SpaceXY,NormalColor,NormalBG,PressColor,PressBG,ReleaseColor,ReleaseBG},
+	{"<",Key1KV,B14Msk|RelMsk,4,4,24,24,
+		8,5,0x22,0x00,FatColor(0x555555),FatColor(0xcccccc),FatColor(0xffffff),FatColor(0xfc9400),FatColor(0x555555),FatColor(0xcccccc)},
+	{">",Key2KV,B14Msk|RelMsk,28,4,24,24,
+		8,5,0x22,0x00,FatColor(0x555555),FatColor(0xcccccc),FatColor(0xffffff),FatColor(0xfc9400),FatColor(0x555555),FatColor(0xcccccc)},
+};
+
 //定义页面或者应用的属性集
 const PAGE_ATTRIBUTE NumBoxPage={
 	"NumBoxPage",
 	"Author",
 	"Page Description",
 	NORMAL_PAGE,
-	0,//THREAD_PAGE需要的堆栈大小项
+	0,//
 
 	{
 		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
-		sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
+		0//sizeof(NumTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
 	},
 	ImgTchRegCon, //touch region array
-	CharTchRegCon,
+	NumTchRegCon,
 	
 	SystemEventHandler,
 	PeripheralsHandler,
@@ -123,6 +133,14 @@ const PAGE_ATTRIBUTE NumBoxPage={
 };
 
 //-----------------------本页自定义变量声明-----------------------
+typedef struct{
+	NUM_BOX_TYPE HandlerType;
+	u8 ObjHandler[32];// 成员个数必须大于num obj存储需要的最大字节数
+	u16 LeftDispBuf[CO_NUM_BOX_ARROW_W*CO_NUM_BOX_H];
+	u16 RightDispBuf[CO_NUM_BOX_ARROW_W*CO_NUM_BOX_H];
+	
+}NUM_BOX_PAGE_VARS;
+static NUM_BOX_PAGE_VARS *gpNbpVars;//只需要定义一个指针，减少全局变量的使用
 
 //-----------------------本页自定义函数-----------------------
 
@@ -131,38 +149,120 @@ const PAGE_ATTRIBUTE NumBoxPage={
 //发生某些事件时，会触发的函数
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam)
 {
+	NUM_BOX_OBJ *pNumBoxObj;
+	NUM_LIST_OBJ *pNumListObj;
+	NUM_ENUM_OBJ *pNumEnumObj;
 	GUI_REGION DrawRegion;
 	
 	switch(SysEvent)
 	{
 		case Sys_PreGotoPage:
+			if((pNumBoxObj->Type == NBT_NumBox) &&(Q_DB_GetStatus(Status_FsInitFinish,NULL)==FALSE)) //文件系统没有挂载
+			{
+				Debug("File system not mount!!!\n\r");
+				return SM_State_Faile|SM_NoGoto;
+			}			
 			return SM_NoPageClean;
-		case Sys_PageInit:		//系统每次打开这个页面，会处理这个事件				
-		case Sys_SubPageReturn:	//如果从子页面返回,就不会触发Sys_Page_Init事件,而是Sys_SubPage_Return
+		case Sys_PageInit:		//系统每次打开这个页面，会处理这个事件		
+			pNumBoxObj=pSysParam;
+			pNumListObj=pSysParam;
+			pNumEnumObj=pSysParam;
+			gpNbpVars=Q_PageMallco(sizeof(NUM_BOX_PAGE_VARS));
+			gpNbpVars->HandlerType=pNumBoxObj->Type;
+			if(pNumBoxObj->Type == NBT_NumBox)
+			{
+				PrtScreenToBin("/NumBoxPS.buf",0,0,176,56);
+				DrawRegion.x=0;
+				DrawRegion.y=0;
+				DrawRegion.w=176;
+				DrawRegion.h=56;
+				DrawRegion.Color=FatColor(0xffffff);
+				Gui_FillBlock(&DrawRegion);
 
-			PrtScreenToBin("/NumBoxPS.buf",0,0,176,56);
-			
-			//画背景
-			DrawRegion.x=0;
-			DrawRegion.y=0;
-			DrawRegion.w=176;
-			DrawRegion.h=56;
-			DrawRegion.Color=FatColor(0xffffff);
-			Gui_FillBlock(&DrawRegion);
+				MemCpy(gpNbpVars->ObjHandler,pNumBoxObj,sizeof(NUM_BOX_OBJ));
+			}
+			else if(pNumListObj->Type == NBT_NumList)
+			{
+				DrawRegion.x=pNumListObj->x;
+				DrawRegion.y=pNumListObj->y;
+				DrawRegion.w=CO_NUM_BOX_ARROW_W;
+				DrawRegion.h=CO_NUM_BOX_H;
+				Gui_ReadRegion16Bit(gpNbpVars->LeftDispBuf,&DrawRegion);
 
+				DrawRegion.x=pNumListObj->x+pNumListObj->w-CO_NUM_BOX_ARROW_W;
+				DrawRegion.y=pNumListObj->y;
+				DrawRegion.w=CO_NUM_BOX_ARROW_W;
+				DrawRegion.h=CO_NUM_BOX_H;
+				Gui_ReadRegion16Bit(gpNbpVars->RightDispBuf,&DrawRegion);
+
+				DrawRegion.x=pNumListObj->x;
+				DrawRegion.y=pNumListObj->y;
+				DrawRegion.w=CO_NUM_BOX_ARROW_W;
+				DrawRegion.h=CO_NUM_BOX_H;
+				DrawRegion.Color=CO_NUM_BOX_TRAN_COLOR;
+				Gui_DrawImgArray(gCtrlObj_NumBoxLeftArrow,&DrawRegion);
+
+				DrawRegion.x=pNumListObj->x+pNumListObj->w-CO_NUM_BOX_ARROW_W;
+				DrawRegion.y=pNumListObj->y;
+				DrawRegion.w=CO_NUM_BOX_ARROW_W;
+				DrawRegion.h=CO_NUM_BOX_H;
+				DrawRegion.Color=CO_NUM_BOX_TRAN_COLOR;
+				Gui_DrawImgArray(gCtrlObj_NumBoxRightArrow,&DrawRegion);
+
+				MemCpy(gpNbpVars->ObjHandler,pNumListObj,sizeof(NUM_LIST_OBJ));
+			}
+			else if(pNumEnumObj->Type == NBT_NumEnum)
+			{
+
+			}
+			else
+			{
+			}
 			break;
 		case Sys_TouchSetOk:
 		case Sys_TouchSetOk_SR:
 
 			break;
 		case Sys_PageClean:
-		case Sys_PreSubPage:
-			DrawRegion.x=0;
-			DrawRegion.y=0;
-			DrawRegion.w=176;
-			DrawRegion.h=56;
-			DrawRegion.Color=FatColor(NO_TRANS);
-			Gui_DrawImgBin("/NumBoxPS.buf",&DrawRegion);
+			if(gpNbpVars!=NULL)
+			{
+				if(gpNbpVars->HandlerType==NBT_NumBox)
+				{
+					pNumBoxObj=(void *)gpNbpVars->ObjHandler;
+					
+					DrawRegion.x=0;
+					DrawRegion.y=0;
+					DrawRegion.w=176;
+					DrawRegion.h=56;
+					DrawRegion.Color=FatColor(NO_TRANS);
+					Gui_DrawImgBin("/NumBoxPS.buf",&DrawRegion);
+				}
+				else if(gpNbpVars->HandlerType==NBT_NumList)
+				{
+					pNumListObj=(void *)gpNbpVars->ObjHandler;
+					
+					DrawRegion.x=pNumListObj->x;
+					DrawRegion.y=pNumListObj->y;
+					DrawRegion.w=CO_NUM_BOX_ARROW_W;
+					DrawRegion.h=CO_NUM_BOX_H;
+					DrawRegion.Color=CO_NUM_BOX_TRAN_COLOR;
+					Gui_DrawImgArray((void *)gpNbpVars->LeftDispBuf,&DrawRegion);
+
+					DrawRegion.x=pNumListObj->x+pNumListObj->w-CO_NUM_BOX_ARROW_W;
+					DrawRegion.y=pNumListObj->y;
+					DrawRegion.w=CO_NUM_BOX_ARROW_W;
+					DrawRegion.h=CO_NUM_BOX_H;
+					DrawRegion.Color=CO_NUM_BOX_TRAN_COLOR;
+					Gui_DrawImgArray((void *)gpNbpVars->RightDispBuf,&DrawRegion);
+				}
+				else if(gpNbpVars->HandlerType==NBT_NumEnum)
+				{
+
+				}
+				else
+				{
+				}
+			}
 			return SM_NoPageInit |SM_NoTouchInit;
 		default:
 			//需要响应的事件未定义
@@ -190,7 +290,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 			break;
 		case Perip_KeyRelease:
 			if(IntParam==ExtiKeyEnter)
-			{
+			{PrtScreen();
 			}
 			else if(IntParam==ExtiKeyUp)
 			{

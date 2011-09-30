@@ -18,7 +18,7 @@ typedef u32 FILELIST_CMD;
 
 
 typedef struct {
-	u32 CallBackRid;//完成后返回的页面RID
+	PAGE_RID CallBackRid;//完成后返回的页面RID
 	
 	//通过此内存传递读取路径，并返回选择文件的路径到此内存
 	//所以此指针指向的内存在FileList页面没有返回之前一定不能被注销

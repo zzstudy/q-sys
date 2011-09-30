@@ -52,7 +52,7 @@ typedef struct{
 //传入gInputHandler_Queue队列的类型结束
 
 typedef struct {
-	u32 RegID;//RegID不允许为0，且每个页面必须唯一。
+	PAGE_RID RegID;//RegID不允许为0，且每个页面必须唯一。
 	const PAGE_ATTRIBUTE *pPage;
 }PAGE_CONGREGATION;//记录页面
 

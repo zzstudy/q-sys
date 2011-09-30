@@ -2040,7 +2040,7 @@ GUI_RESULT Gui_FillImgArray(const u8 * pImageBuf,u16 width,u16 hight,const GUI_R
 
 //将一个数组格式的图片横向填充到指定区域
 //pImageBuf通过Image2Lcd工具获取,请参照Gui_DrawImageArray函数
-//pRegion需指定x y w h参数来描述图片
+//pRegion需指定x y w h参数来描述图片和起点
 //width指定填充区域的宽度
 GUI_RESULT Gui_FillImgArray_H(const u8 * pImageBuf,u16 width,const GUI_REGION *pRegion)
 {
@@ -2084,7 +2084,7 @@ GUI_RESULT Gui_FillImgArray_H(const u8 * pImageBuf,u16 width,const GUI_REGION *p
 
 //将一个数组格式的图片纵向填充到指定区域
 //pImageBuf通过Image2Lcd工具获取,请参照Gui_DrawImageArray函数
-//pRegion需指定x y w h参数来描述图片信息
+//pRegion需指定x y w h参数来描述图片信息和起点
 //hight指定填充区域的高度
 GUI_RESULT Gui_FillImgArray_V(const u8 * pImageBuf,u16 hight,const GUI_REGION *pRegion)
 {

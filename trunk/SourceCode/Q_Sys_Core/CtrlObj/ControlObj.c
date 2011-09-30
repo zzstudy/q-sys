@@ -720,10 +720,10 @@ TCH_MSG TchCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
 
 #ifdef QSYS_FRAME_FULL	
 //有触摸输入时，处理yesno选框事件
+//Idx为所有触摸区域集合的索引
 TCH_MSG YesNoCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx)
 {
-	YES_NO_OBJ *pYesNo=(void *)gCtrlObjPtrBuf[Idx
-										-gpCtrlObjNum->ImgTchNum+gpCtrlObjNum->CharTchNum];
+	YES_NO_OBJ *pYesNo=(void *)gCtrlObjPtrBuf[Idx-gpCtrlObjNum->ImgTchNum-gpCtrlObjNum->CharTchNum];
 	GUI_REGION DrawRegion;
 	TCH_MSG TchMsg=TM_State_OK;
 	u8 ObjID=GetTouchInfoByIdx(Idx)->ObjID;//键值
@@ -732,7 +732,7 @@ TCH_MSG YesNoCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx)
 	DrawRegion.y=pYesNo->y;
 	DrawRegion.w=CO_YES_NO_W;
 	DrawRegion.h=CO_YES_NO_H;
-	DrawRegion.Color=FatColor(0x0000ff);
+	DrawRegion.Color=CO_YES_NO_TRAN_COLOR;
 			
 	switch(InType)//判断事件
 	{
@@ -759,8 +759,25 @@ TCH_MSG YesNoCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx)
 }
 
 //有触摸输入时，处理NumBox事件
+//Idx为所有触摸区域集合的索引
 TCH_MSG NumBoxCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
 {
+	NUM_BOX_OBJ *pNumBox=(void *)gCtrlObjPtrBuf[Idx-gpCtrlObjNum->ImgTchNum-gpCtrlObjNum->CharTchNum];
+
+	switch(InType)
+	{
+		case Input_TchPress:
+			break;
+		case Input_TchRelease:
+			Q_GotoPage(GotoSubPage,"NumBoxPage",0,pNumBox);//交给NumBoxPage处理
+			Allow_Touch_Input();
+			break;
+		case Input_TchReleaseVain:
+			Allow_Touch_Input();
+			break;
+	}
+
+	
 	return 0;
 }
 
@@ -1059,6 +1076,7 @@ bool Q_SetDynamicCharTch(u8 Idx,CHAR_TCH_OBJ *pTchReg)
 //设置yes no选项，pYesNo指向的内存在调用完函数后不可注销
 //一旦设置，当进入页面时，会用到此内存
 //所以当页面还存在时，必须保证此内存存在
+//Idx从1开始
 bool Q_SetYesNo(u8 Idx,YES_NO_OBJ *pYesNo)
 {
 	YES_NO_OBJ **pYesNoCon=(void *)&gCtrlObjPtrBuf[gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum];
@@ -1073,28 +1091,28 @@ bool Q_SetYesNo(u8 Idx,YES_NO_OBJ *pYesNo)
 		GUI_REGION DrawRegion;
 		u8 Num=gpCtrlObjNum->ImgTchNum+gpCtrlObjNum->CharTchNum
 			+gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum+Idx;
-		gpTouchRegions[Num].x=pYesNoCon[Idx]->x;
-		gpTouchRegions[Num].y=pYesNoCon[Idx]->y;
+		gpTouchRegions[Num].x=pYesNo->x;
+		gpTouchRegions[Num].y=pYesNo->y;
 		gpTouchRegions[Num].w=CO_YES_NO_W;
 		gpTouchRegions[Num].h=CO_YES_NO_H;
-		gpTouchRegions[Num].ObjID=pYesNoCon[Idx]->ObjID;
+		gpTouchRegions[Num].ObjID=pYesNo->ObjID;
 		gpTouchRegions[Num].Type=COT_YesNo;
 		gpTouchRegions[Num].Index=Idx;
 		gpTouchRegions[Num].OptionsMask=(u8)(PrsMsk|RelMsk|ReVMsk);
 		
 		//draw
-		DrawRegion.x=pYesNoCon[Idx]->x;
-		DrawRegion.y=pYesNoCon[Idx]->y;
+		DrawRegion.x=pYesNo->x;
+		DrawRegion.y=pYesNo->y;
 		DrawRegion.w=CO_YES_NO_W;
 		DrawRegion.h=CO_YES_NO_H;
-		DrawRegion.Color=FatColor(0x0000ff);
+		DrawRegion.Color=CO_YES_NO_TRAN_COLOR;
 		if(pYesNo->DefVal==FALSE)
 			Gui_DrawImgArray(gCtrlObj_Off,&DrawRegion);
 		else 
 			Gui_DrawImgArray(gCtrlObj_On,&DrawRegion);
 	}
 	else
-	{
+	{//清空触摸区域记录
 		MemSet(&gpTouchRegions[gpCtrlObjNum->ImgTchNum+gpCtrlObjNum->CharTchNum
 			+gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum+Idx],0,sizeof(TOUCH_REGION));
 	}
@@ -1102,10 +1120,75 @@ bool Q_SetYesNo(u8 Idx,YES_NO_OBJ *pYesNo)
 	return FALSE;
 }
 
-//设置yes no选项，pYesNo指向的内存在调用完函数后不可注销
+//设置num box选项，pNumBox指向的内存在调用完函数后不可注销
+//一旦设置，当进入页面时，会用到此内存
+//所以当页面还存在时，必须保证此内存存在
+//Idx从1开始
 bool Q_SetNumBox(u8 Idx,NUM_BOX_OBJ *pNumBox)
 {
+	NUM_BOX_OBJ **pNumBoxCon=(void *)&gCtrlObjPtrBuf[gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum
+																								+gpCtrlObjNum->YesNoNum];
+	if(Idx>gpCtrlObjNum->NumBoxNum) return FALSE;
+	Idx--;
+	
+	pNumBoxCon[Idx]=pNumBox;
 
+	if(pNumBox!=NULL)
+	{
+		GUI_REGION DrawRegion;
+		u8 Num=gpCtrlObjNum->ImgTchNum+gpCtrlObjNum->CharTchNum
+			+gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum
+			+gpCtrlObjNum->YesNoNum+Idx;
+		gpTouchRegions[Num].x=pNumBox->x;
+		gpTouchRegions[Num].y=pNumBox->y;
+		gpTouchRegions[Num].w=pNumBox->w;
+		gpTouchRegions[Num].h=CO_NUM_BOX_H;
+		gpTouchRegions[Num].ObjID=pNumBox->ObjID;
+		gpTouchRegions[Num].Type=COT_NumBox;
+		gpTouchRegions[Num].Index=Idx;
+		gpTouchRegions[Num].OptionsMask=(u8)(PrsMsk|RelMsk|ReVMsk);
+		
+		{//draw
+			u8 NumStr[32];
+			DrawRegion.x=pNumBox->x+CO_NUM_BOX_ARROW_W-CO_NUM_BOX_FRAME_W;
+			DrawRegion.y=pNumBox->y;
+			DrawRegion.w=CO_NUM_BOX_FRAME_W;
+			DrawRegion.h=CO_NUM_BOX_H;
+			DrawRegion.Color=CO_NUM_BOX_TRAN_COLOR;
+			Gui_DrawImgArray(gCtrlObj_NumBoxLeft,&DrawRegion);
+
+			DrawRegion.x=pNumBox->x+CO_NUM_BOX_ARROW_W;
+			DrawRegion.y=pNumBox->y;
+			DrawRegion.w=CO_NUM_BOX_MIDDLE_W;
+			DrawRegion.h=CO_NUM_BOX_H;
+			DrawRegion.Color=CO_NUM_BOX_TRAN_COLOR;
+			Gui_FillImgArray_H(gCtrlObj_NumBoxMiddle,pNumBox->w-(CO_NUM_BOX_ARROW_W<<1),&DrawRegion);	
+
+			DrawRegion.x=pNumBox->x+pNumBox->w-CO_NUM_BOX_ARROW_W;
+			DrawRegion.y=pNumBox->y;
+			DrawRegion.w=CO_NUM_BOX_FRAME_W;
+			DrawRegion.h=CO_NUM_BOX_H;
+			DrawRegion.Color=CO_NUM_BOX_TRAN_COLOR;
+			Gui_DrawImgArray(gCtrlObj_NumBoxRight,&DrawRegion);
+			
+			sprintf((void *)NumStr,"%d",pNumBox->Value);
+			DrawRegion.x=pNumBox->x+((pNumBox->w-strlen((void *)NumStr)*CO_NUM_BOX_FONT_W)>>1);
+			DrawRegion.y=pNumBox->y+3;
+			DrawRegion.w=pNumBox->w-(CO_NUM_BOX_ARROW_W<<1);
+			DrawRegion.h=CO_NUM_BOX_H;
+			DrawRegion.Color=CO_NUM_BOX_FONT_COLOR;
+			DrawRegion.Space=CO_NUM_BOX_FONT_SPACE;
+			Gui_DrawFont(CO_NUM_BOX_FONT_STYLE,NumStr,&DrawRegion);
+		}
+	}
+	else
+	{//清空触摸区域记录
+		MemSet(&gpTouchRegions[gpCtrlObjNum->ImgTchNum+gpCtrlObjNum->CharTchNum
+			+gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum
+			+gpCtrlObjNum->YesNoNum+Idx],0,sizeof(TOUCH_REGION));
+	}
+	
+	return FALSE;
 
 }
 

@@ -6,7 +6,7 @@ const PAGE_ATTRIBUTE *GetPageByIdx(u8 PageIdx)
 }
 
 //根据页面在AllPage中的索引获取页面RID
-u32 GetRegIdByIdx(u8 PageIdx)
+PAGE_RID GetRegIdByIdx(u8 PageIdx)
 {
 	return AllPage[PageIdx].RegID;
 }
@@ -108,7 +108,7 @@ static void DeletePageLayer(u8 Num)
 }
 
 //通过pPageIdx返回找到的页面在AllPage中的索引
-SYS_MSG FindPage(u8 *Name, u32 RegID,u8 *pPageIdx)
+SYS_MSG FindPage(u8 *Name, PAGE_RID RegID,u8 *pPageIdx)
 {
 	u8 PageIdx;
 	

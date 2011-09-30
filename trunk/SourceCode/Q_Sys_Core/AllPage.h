@@ -5,10 +5,9 @@
 
 需要注意的是:
 1.AllPage中每个页面必须有单独的id，即第一个成员，
-此id我们称之为注册id(RegID or RID)，RID包含了层结构信息在里面，是树结构
-比如0是第一层，0.1就是第二层第一个节点，0.1.2就是第三层第二个节点
-目前RegID的唯一作用就是用来标注和查找页面，所以只需要唯一性即可
-我们将其定义为树结构是为了以后框架扩展的需要
+此id我们称之为注册id(RegID or RID)，RegID的唯一
+作用就是用来标注和查找页面，所以只需要唯一性即可。
+RegID必须为非零值。
 
 2.系统中每个页面都必须是独立的，即一个页面的源码不能调用另一个
 页面的函数，这样就保证了就算你的页面删除，也不会影响其他页面。
@@ -46,21 +45,21 @@
 #include "NumBoxPage.h"
 
 const PAGE_CONGREGATION AllPage[]={//页面总数不得大于255，RID不能为零
-	{0x1,&MainPage},// 1
-	{0x11,&MusicPage},// 1.1
-	{0x111,&FileListPage},// 1.1.1
-	{0x112,&NumBoxPage},
-	{0x12,&EBookPage},// 1.2
-	{0x13,&PicturePage},// 1.3
-	{0x14,&SettingsPage},// 1.4
-	{0x15,&TestPage},
-	{0x16,&KeyBoardPage},
-	{0x17,&QWebPage},
-	{0x18,&ChatPage},
-	{0x19,&NewsPage},
-	{0x2,&AppListPage},
-	{0x21,&SnakePage},
-	{0x23,&TouchCheckPage},
+	{PRID_MainPage,&MainPage},
+	{PRID_MusicPage,&MusicPage},
+	{PRID_FileListPage,&FileListPage},
+	{PRID_NumBoxPage,&NumBoxPage},
+	{PRID_EBookPage,&EBookPage},
+	{PRID_PicturePage,&PicturePage},
+	{PRID_SettingsPage,&SettingsPage},
+	{PRID_TestPage,&TestPage},
+	{PRID_KeyBoardPage,&KeyBoardPage},
+	{PRID_QWebPage,&QWebPage},
+	{PRID_ChatPage,&ChatPage},
+	{PRID_NewsPage,&NewsPage},
+	{PRID_AppListPage,&AppListPage},
+	{PRID_SnakePage,&SnakePage},
+	{PRID_TouchCheckPage,&TouchCheckPage},
 };
 
 #define PAGE_TOTAL (sizeof(AllPage)/sizeof(PAGE_CONGREGATION))//页面总数，不大于255
