@@ -79,12 +79,12 @@ typedef TCH_MSG (*StrInputBoxHandlerFunc)(u8 ,TCH_EVT ,bool ,TOUCH_INFO *);
 
 //非按键事件掩码可放高位
 #define LandMsk (1<<4) //用于决定按键是否用横屏模式显示文字或者图片
-#define BinMsk		(1<<5) //当采用时，不再使用bmp文件，而是使用bin文件画图标，此时图标必须和区域一样大
-#define DbgMsk	(1<<6) //调试模式，用于显示触摸区域，图片按键则不会显示图片，只显示区域
-#define F16Msk	(1<<7) //改变文字大小为16x16
-#define B14Msk	(1<<8) //改变文字为B14粗体，仅对Ascii字符有效
-#define PathMsk (1<<9) //该掩码位有效时，BmpPathPrefix指定的字符串代表整个图片的路径前缀；该位无效时，BmpPathPrefix配合theme路径才为图标路径。
-#define RoueMsk (1<<10) //Round Edge 圆边
+#define BinMsk		(1<<5) //当采用时，不再使用bmp文件，而是使用bin文件画图标，此时图标尺寸等于w-2*ImgX,h-2*ImgY
+#define DbgMsk	(1<<7) //调试模式，用于显示触摸区域，图片按键则不会显示图片，只显示区域
+#define F16Msk	(1<<8) //改变文字大小为16x16
+#define B14Msk	(1<<9) //改变文字为B14粗体，仅对Ascii字符有效
+#define PathMsk (1<<10) //该掩码位有效时，BmpPathPrefix指定的字符串代表整个图片的路径前缀；该位无效时，BmpPathPrefix配合theme路径才为图标路径。
+#define RoueMsk (1<<11) //Round Edge 圆边
 //#define CirbMsk 	(1<<11) //Circular Bead 圆角，暂不支持
 
 typedef struct {
@@ -118,7 +118,7 @@ typedef struct {
 	//三种图标的相同前缀，再指定每种动作对应的后缀字母
 	//例如:如果BmpPathprefix="Dir/SubDir/Button",NormalSuffix='N',
 	//则得到普通状态按键路径为"Dir/SubDir/ButtonN.bmp"
-	u8 *BmpPathPrefix;//最长不要超过60个字符
+	u8 *ImgPathPrefix;//最长不要超过60个字符
 	//u8 NormalSuffix;//普通状态后缀，单字节，如果指定为0，则不显示
 	//u8 PressSuffix;//按下状态后缀，单字节，如果指定为0，则不显示
 	//u8 ReleaseSuffix;//释放状态后缀，单字节，如果指定为0，则不显示
@@ -188,21 +188,22 @@ typedef struct{
 	u16 y;	//触摸区域起点的y值
 	u16 w; //触摸区域宽度,如果按键是横屏模式,注意横过显示屏来定义
 	
-	s32 Value;
+	s32 Value;//当前值
 }NUM_BOX_OBJ;//4		数字输入框
 
 typedef struct{
 	u8 ObjID;//标识符，页面内必须唯一，以区分其他控件对象
 	NUM_BOX_TYPE Type;//num box类型
 
-	u16 x; 	//触摸区域起点的x值，屏幕左上点为0，0坐标。如果是横屏模式，则需要横过显示屏，指定显示区域的左上点。
-	u16 y;	//触摸区域起点的y值
-	u16 w; //触摸区域宽度,如果按键是横屏模式,注意横过显示屏来定义
+	u16 x; 	//控件含箭头的区域起点的x值，屏幕左上点为0，0坐标。如果是横屏模式，则需要横过显示屏，指定显示区域的左上点。
+	u16 y;	//控件含箭头的区域域起点的y值
+	u16 w; //控件含箭头的区域的宽度,如果按键是横屏模式,注意横过显示屏来定义
 
-	s32 Value;
-	s32 Max;
-	s32 Min;
-	s32 Step;
+	s32 Value;//当前值
+	
+	s32 Max;//最大值
+	s32 Min;//最小值
+	s32 Step;//步进
 }NUM_LIST_OBJ;//4		数字输入框
 
 typedef struct{
@@ -213,10 +214,12 @@ typedef struct{
 	u16 y;	//触摸区域起点的y值
 	u16 w; //触摸区域宽度,如果按键是横屏模式,注意横过显示屏来定义
 
+	s32 Value;//当前值
+	
 	u8 Idx;//当前值索引
 	u8 Num;//当前值个数
 	u8 Total;//可容纳总数
-	s32 EnumList[1];
+	s32 *pEnumList;//指向枚举数的存储空间，在控件有效时，此指针指向的内存也应有效
 }NUM_ENUM_OBJ;//4		数字输入框
 
 typedef struct{
@@ -273,9 +276,10 @@ bool Q_SetYesNo(u8 Idx,YES_NO_OBJ *pYesNo);
 //一旦设置，当进入页面时，会用到此内存
 //所以当页面还存在时，必须保证此内存存在
 //Idx从1开始
-bool Q_SetNumBox(u8 Idx,NUM_BOX_OBJ *pNumBox);
-#define Q_SetNumList(Idx,pNumList) Q_SetNumBox(Idx,(NUM_BOX_OBJ *)pNumList)
-#define Q_SetNumEnum(Idx,pNumEnum) Q_SetNumBox(Idx,(NUM_BOX_OBJ *)pNumEnum)
+bool Q_SetNumCtrlObj(u8 Idx,NUM_BOX_OBJ *pNumBox);
+#define Q_SetNumBox(Idx,pNumBox) Q_SetNumCtrlObj(Idx,pNumBox)
+#define Q_SetNumList(Idx,pNumList) Q_SetNumCtrlObj(Idx,(NUM_BOX_OBJ *)pNumList)
+#define Q_SetNumEnum(Idx,pNumEnum) Q_SetNumCtrlObj(Idx,(NUM_BOX_OBJ *)pNumEnum)
 
 #endif
 

@@ -68,7 +68,7 @@ const PAGE_ATTRIBUTE MainPage={
 	{
 		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
 		0,//sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
-		0,0,0,1
+		0,0,0,3
 	},
 	
 	ImgTchRegCon, //touch region array
@@ -163,9 +163,10 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent,int IntParam,void *pSysParam)
 	return 0;
 }
 
-			//NUM_BOX_OBJ NumBoxObj;
-			NUM_LIST_OBJ NumBoxObj;
-			//NUM_ENUM_OBJ NumBoxObj;
+			NUM_BOX_OBJ NumBoxObj;
+			NUM_LIST_OBJ NumListObj;
+			NUM_ENUM_OBJ NumEnumObj;
+			s32 gEnumList[100];
 			
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam)
 {
@@ -269,18 +270,41 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 			Q_GotoPage(GotoNewPage,"CalculatorPage",0,NULL);
 			break;
  		case HomeKV:
-			NumBoxObj.ObjID=100;
-			NumBoxObj.Type=NBT_NumList;
+			NumListObj.ObjID=100;
+			NumListObj.Type=NBT_NumList;
+			NumListObj.x=100;
+			NumListObj.y=150;
+			NumListObj.w=100;
+			NumListObj.Value=50;
+			NumListObj.Min=0;
+			NumListObj.Max=100;
+			NumListObj.Step=10;
+			Q_SetNumList(1,&NumListObj);
+
+			NumEnumObj.ObjID=101;
+			NumEnumObj.Type=NBT_NumEnum;
+			NumEnumObj.x=100;
+			NumEnumObj.y=200;
+			NumEnumObj.w=100;
+			NumEnumObj.Value=0;
+			NumEnumObj.Idx=0;
+			NumEnumObj.Num=3;
+			NumEnumObj.Total=4;
+			NumEnumObj.pEnumList=gEnumList;
+			NumEnumObj.pEnumList[0]=0;
+			NumEnumObj.pEnumList[1]=1;
+			NumEnumObj.pEnumList[2]=2;
+			NumEnumObj.pEnumList[3]=3;
+			Q_SetNumEnum(2,&NumEnumObj);
+
+			
+			NumBoxObj.ObjID=102;
+			NumBoxObj.Type=NBT_NumBox;
 			NumBoxObj.x=100;
-			NumBoxObj.y=200;
+			NumBoxObj.y=250;
 			NumBoxObj.w=100;
 			NumBoxObj.Value=50;
-			NumBoxObj.Min=0;
-			NumBoxObj.Max=100;
-			NumBoxObj.Step=10;
-			Q_SetNumList(1,&NumBoxObj);
-			//Q_GotoPage(GotoSubPage,"NumBoxPage",0,&NumBoxObj);
-			
+			Q_SetNumBox(3,&NumBoxObj);
  			//Gui_SetBgLight(0);
  			break;
 		case MailKV:

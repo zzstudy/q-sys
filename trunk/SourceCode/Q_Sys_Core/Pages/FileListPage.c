@@ -56,7 +56,7 @@ const PAGE_ATTRIBUTE FileListPage={
 	
 	(SystemHandlerFunc)SystemEventHandler,
 	PeripheralsHandler,
-	0,
+	Bit(Perip_KeyPress)|Bit(Perip_KeyRelease)|Bit(Perip_UartInput),
 	TouchEventHandler,
 
 };
@@ -366,7 +366,7 @@ static bool PrefetchDir(FLIELIST_PAGE_VARS *pVars)
 	{
 		if(pVars->pd->d_name[0]==0) break;//读完文件退出
 
-		//Debug("ZCL: scan file:%s\r\n",pVars->pd->d_name);
+		//Debug("scan file:%s\r\n",pVars->pd->d_name);
 
 		if(S_ISDIR(pVars->pd->st_mode)) //读到的是目录
 		{
@@ -395,7 +395,7 @@ static bool PrefetchDir(FLIELIST_PAGE_VARS *pVars)
 
 	pVars->CurTotal=pVars->Unit.N.CurFileTotal+pVars->Unit.N.CurSubDirTotal;//算总数
 
-	Debug("ZCL: CurToal = %d %d %d!\r\n",pVars->CurTotal,pVars->Unit.N.CurFileTotal,pVars->Unit.N.CurSubDirTotal);
+	Debug("CurToal = %d %d %d!\r\n",pVars->CurTotal,pVars->Unit.N.CurFileTotal,pVars->Unit.N.CurSubDirTotal);
 
 	return TRUE;
 }
@@ -1133,7 +1133,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,FILELIST_CMD Cmd, FILELIST_S
 			gpFpVars->CallerPageRid=pFLS->CallBackRid;		//记录返回页面	
 			strcpy((void *)gpFpVars->SuffixStr,(void *)pFLS->pSuffixStr);//复制后缀名字符串
 
-			Debug("ZCL: SuffixStr %s\r\n",gpFpVars->SuffixStr);
+			Debug("SuffixStr %s\r\n",gpFpVars->SuffixStr);
 			
 			//文件系统
 			gpFpVars->fp =0 ;
@@ -1214,7 +1214,14 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 							DisplayFiles(gpFpVars);
 						}
 						break; 
-				}break;
+				}
+			break;
+		case Perip_UartInput:
+			if((IntParam>>16)==1)//串口1
+			{
+				Q_Sh_CmdHandler(IntParam&0xffff,pParam);
+			}
+			break;
 	} 
 	return 0;
 }

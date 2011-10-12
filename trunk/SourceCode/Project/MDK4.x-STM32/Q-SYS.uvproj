@@ -160,7 +160,7 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4100</DriverSelection>
+            <DriverSelection>4098</DriverSelection>
           </Flash1>
           <Flash2>Segger\JL2CM3.dll</Flash2>
           <Flash3>"" ()</Flash3>
@@ -977,9 +977,9 @@
               <FilePath>..\..\Q_Sys_Core\Pages\NewsPage.c</FilePath>
             </File>
             <File>
-              <FileName>NumBoxPage.c</FileName>
+              <FileName>NumCtrlObjPage.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\Q_Sys_Core\Pages\NumBoxPage.c</FilePath>
+              <FilePath>..\..\Q_Sys_Core\Pages\NumCtrlObjPage.c</FilePath>
             </File>
           </Files>
         </Group>

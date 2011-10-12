@@ -142,6 +142,8 @@ static SYS_MSG CurrentPageInit(INPUT_EVT_TYPE EventType,int IntParam,void *pSysP
 	return SysMsg;
 }
 
+//KeyId - 按键序号
+//KeyStaus - 状态值 0(release) or 1(press)
 void ExtiKeyHandler(u8 KeyId,u8 KeyStaus)
 {
 	INPUT_EVENT EventParam;
@@ -164,7 +166,8 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 	//在无输入状态下Clean页面
 	if(gpCurrentPage)
 	{
-		if(!(gCurrSysMsg&SM_NoPageClean)) //Q_GotoPage返回值告诉系统不要执行Sys_PageClean或Sys_PreSubPage事件
+		if((!(gCurrSysMsg&SM_NoPageClean)) //Q_GotoPage返回值告诉系统不要执行Sys_PageClean或Sys_PreSubPage事件
+			&& (GetPageByIdx(PageIdx)->Type != POP_PAGE)) //如果是pop页面，也不需要clean
 			gCurrSysMsg|=OldPageClean(EventType,PageIdx);
 		Debug("∧∧∧∧∧∧ Leave %s ∧∧∧∧∧∧\n\r",gpCurrentPage->Name);
 	}
@@ -230,10 +233,12 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 	for(i=1;i<GetCurLayerNum();i++) Debug("%s->",GetPageByIdx(PageLayers[i])->Name); 
 	Debug("%s\n\r",GetPageByIdx(PageLayers[i])->Name); 
 
-	if(!(gCurrSysMsg&SM_NoPageInit)) //Q_GotoPage返回值告诉系统不要执行page init
+	if((!(gCurrSysMsg&SM_NoPageInit)) //Q_GotoPage返回值告诉系统不要执行page init
+		&&(Q_GetPageByTrack(1)->Type!=POP_PAGE)) //从pop页面返回，也不需要page init
 		gCurrSysMsg|=CurrentPageInit(EventType,IntParam,pSysParam);
 
-	if((!(gCurrSysMsg&SM_NoTouchInit))&&(Q_GetPageByTrack(1)->Type!=POP_PAGE))	 
+	if((!(gCurrSysMsg&SM_NoTouchInit))//Q_GotoPage或页面SystemEventHandler函数返回值告诉系统不需要touch init
+		&&(Q_GetPageByTrack(1)->Type!=POP_PAGE))	 //从pop页面返回，也不需要touch init
 	{
 		gCurrSysMsg|=CurrPageCtrlObjInit(EventType,IntParam,pSysParam);	
 		while((OS_GetCurrentSysMs()-TimeMsRecord)<300) OS_TaskDelayMs(50);//循环延时300ms，以避免触摸响应混乱
@@ -307,13 +312,11 @@ static void QSYS_DataInit(void)
 }
 
 extern void QSYS_Init(void);
-//本任务负责对触摸触发的事件进行处理，过程中会调用
-//当前页面的TouchEventHandler函数。如下函数为本任务专属
+//本任务负责对触摸触发的事件进行处理，过程中会调用当前页面的TouchEventHandler函数。
+//如下函数为本任务专属
 // 1.本页下的所有函数
-// 2.当前页面的SystemEventHandler 函数和TouchEventHandler函数
-//所以，其他函数请不要调用这些函数
-//如果一定要用，请用如下方式间接调用
-//向gInputHandler_Queue队列发虚拟事件(虚拟键要先注册)
+// 2.当前页面的SystemEventHandler 函数和TouchEventHandler函数及各种控件函数
+//所以，其他线程请不要调用这些函数
 extern void *KeysHandler_Task_Handle;
 void InputHandler_Task( void *Task_Parameters )
 {

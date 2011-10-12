@@ -703,7 +703,7 @@ void MusicHandler_Task(void *Task_Parameters)
 	OS_DeclareCritical();
 #endif
 	
-////ZCL ad for fs test
+////ad for fs test
 /*{
 	int	Time;
 	GUI_REGION DrawRegion;
@@ -721,7 +721,7 @@ void MusicHandler_Task(void *Task_Parameters)
 		Gui_FillBlock(&DrawRegion); 
 	}
 
-	Debug("ZCL:write lcd Time:%d \n\r",(OS_GetCurrentTick()-Time)<<1);
+	Debug("write lcd Time:%d \n\r",(OS_GetCurrentTick()-Time)<<1);
 }
 */
 ///

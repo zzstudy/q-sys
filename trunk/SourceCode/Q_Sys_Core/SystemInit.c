@@ -40,21 +40,6 @@ void GPIO_Config(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA |
 												  RCC_APB2Periph_GPIOE | 
 												  RCC_APB2Periph_AFIO, ENABLE);
-	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;//外部按键1
-	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-	GPIO_Init(GPIOE, &GPIO_InitStructure);
-
-#if(QXW_PRODUCT_ID==116)
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;//外部按键2
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-	GPIO_Init(GPIOE, &GPIO_InitStructure);
-
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;//外部按键3
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-#endif
 
 #if 1//initailize pc13 for rtc hardware bug
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);

@@ -176,7 +176,7 @@ static void CopyCtrlObjTouchReg(TOUCH_REGION *TouchRegsBuf)
 			TouchRegsBuf[Cnt].x=pNumBoxCon[Idx]->x;
 			TouchRegsBuf[Cnt].y=pNumBoxCon[Idx]->y;
 			TouchRegsBuf[Cnt].w=pNumBoxCon[Idx]->w;
-			TouchRegsBuf[Cnt].h=CO_NUM_BOX_H;
+			TouchRegsBuf[Cnt].h=CO_NUM_H;
 			TouchRegsBuf[Cnt].ObjID=pNumBoxCon[Idx]->ObjID;
 			TouchRegsBuf[Cnt].Type=COT_NumBox;
 			TouchRegsBuf[Cnt].Index=Idx;
@@ -329,28 +329,28 @@ static bool ImgTchDisplay(u8 Index,INPUT_EVT_TYPE InType,bool IsDyn)
 		}
 	}
 	
-	if(pTouchRegion->BmpPathPrefix[0])//指定了路径前缀，说明需要显示按键图标
+	if(pTouchRegion->ImgPathPrefix[0])//指定了路径前缀，说明需要显示按键图标
 	{
 		if(pTouchRegion->OptionsMask&PathMsk)//使用自定义路径，只需叠加主题路径
 		{
-			if(strlen((void *)Q_GetNowThemePath())+strlen((void *)pTouchRegion->BmpPathPrefix)>=(MAX_BMP_PATH_LEN-7))
+			if(strlen((void *)Q_GetNowThemePath())+strlen((void *)pTouchRegion->ImgPathPrefix)>=(MAX_BMP_PATH_LEN-7))
 			{
 				Debug("!!!Error:Path is too long!!!");
 				return FALSE;//路径太长
 			}
-			if(RepSuffix) sprintf((void *)PathBuf,"%s%s%c%c",Q_GetNowThemePath(),pTouchRegion->BmpPathPrefix,RepSuffix,ImgSuffix);
-			else sprintf((void *)PathBuf,"%s%s%c",Q_GetNowThemePath(),pTouchRegion->BmpPathPrefix,ImgSuffix);
+			if(RepSuffix) sprintf((void *)PathBuf,"%s%s%c%c",Q_GetNowThemePath(),pTouchRegion->ImgPathPrefix,RepSuffix,ImgSuffix);
+			else sprintf((void *)PathBuf,"%s%s%c",Q_GetNowThemePath(),pTouchRegion->ImgPathPrefix,ImgSuffix);
 		}
 		else //不使用自定义路径，则叠加主题路径及页面名文件夹
 		{
 			if((strlen((void *)Q_GetNowThemePath())+strlen((void *)gpCurrentPage->Name)
-				+strlen((void *)pTouchRegion->BmpPathPrefix))>=(MAX_BMP_PATH_LEN-7))
+				+strlen((void *)pTouchRegion->ImgPathPrefix))>=(MAX_BMP_PATH_LEN-7))
 			{
 				Debug("!!!Error:Path is too long!!!");
 				return FALSE;//路径太长
 			}
-			if(RepSuffix) sprintf((void *)PathBuf,"%s%s/Btn/%s%c%c",Q_GetNowThemePath(),gpCurrentPage->Name,pTouchRegion->BmpPathPrefix,RepSuffix,ImgSuffix);//得到路径
-			else sprintf((void *)PathBuf,"%s%s/Btn/%s%c",Q_GetNowThemePath(),gpCurrentPage->Name,pTouchRegion->BmpPathPrefix,ImgSuffix);//得到路径
+			if(RepSuffix) sprintf((void *)PathBuf,"%s%s/Btn/%s%c%c",Q_GetNowThemePath(),gpCurrentPage->Name,pTouchRegion->ImgPathPrefix,RepSuffix,ImgSuffix);//得到路径
+			else sprintf((void *)PathBuf,"%s%s/Btn/%s%c",Q_GetNowThemePath(),gpCurrentPage->Name,pTouchRegion->ImgPathPrefix,ImgSuffix);//得到路径
 		}
 		
 		if(pTouchRegion->OptionsMask&BinMsk)//是否采用bin文件做图标文件
@@ -769,7 +769,7 @@ TCH_MSG NumBoxCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo
 		case Input_TchPress:
 			break;
 		case Input_TchRelease:
-			Q_GotoPage(GotoSubPage,"NumBoxPage",0,pNumBox);//交给NumBoxPage处理
+			Q_GotoPage(GotoSubPage,"NumCtrlObjPage",0,pNumBox);//交给NumBoxPage处理
 			Allow_Touch_Input();
 			break;
 		case Input_TchReleaseVain:
@@ -1083,7 +1083,7 @@ bool Q_SetYesNo(u8 Idx,YES_NO_OBJ *pYesNo)
 
 	if(Idx>gpCtrlObjNum->YesNoNum) return FALSE;
 	Idx--;
-	
+
 	pYesNoCon[Idx]=pYesNo;
 
 	if(pYesNo!=NULL)
@@ -1124,7 +1124,7 @@ bool Q_SetYesNo(u8 Idx,YES_NO_OBJ *pYesNo)
 //一旦设置，当进入页面时，会用到此内存
 //所以当页面还存在时，必须保证此内存存在
 //Idx从1开始
-bool Q_SetNumBox(u8 Idx,NUM_BOX_OBJ *pNumBox)
+bool Q_SetNumCtrlObj(u8 Idx,NUM_BOX_OBJ *pNumBox)
 {
 	NUM_BOX_OBJ **pNumBoxCon=(void *)&gCtrlObjPtrBuf[gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum
 																								+gpCtrlObjNum->YesNoNum];
@@ -1142,7 +1142,7 @@ bool Q_SetNumBox(u8 Idx,NUM_BOX_OBJ *pNumBox)
 		gpTouchRegions[Num].x=pNumBox->x;
 		gpTouchRegions[Num].y=pNumBox->y;
 		gpTouchRegions[Num].w=pNumBox->w;
-		gpTouchRegions[Num].h=CO_NUM_BOX_H;
+		gpTouchRegions[Num].h=CO_NUM_H;
 		gpTouchRegions[Num].ObjID=pNumBox->ObjID;
 		gpTouchRegions[Num].Type=COT_NumBox;
 		gpTouchRegions[Num].Index=Idx;
@@ -1150,35 +1150,35 @@ bool Q_SetNumBox(u8 Idx,NUM_BOX_OBJ *pNumBox)
 		
 		{//draw
 			u8 NumStr[32];
-			DrawRegion.x=pNumBox->x+CO_NUM_BOX_ARROW_W-CO_NUM_BOX_FRAME_W;
+			DrawRegion.x=pNumBox->x+CO_NUM_ARROW_W-CO_NUM_FRAME_W;
 			DrawRegion.y=pNumBox->y;
-			DrawRegion.w=CO_NUM_BOX_FRAME_W;
-			DrawRegion.h=CO_NUM_BOX_H;
-			DrawRegion.Color=CO_NUM_BOX_TRAN_COLOR;
-			Gui_DrawImgArray(gCtrlObj_NumBoxLeft,&DrawRegion);
+			DrawRegion.w=CO_NUM_FRAME_W;
+			DrawRegion.h=CO_NUM_H;
+			DrawRegion.Color=CO_NUM_TRAN_COLOR;
+			Gui_DrawImgArray(gCtrlObj_NumLeft,&DrawRegion);//左边框
 
-			DrawRegion.x=pNumBox->x+CO_NUM_BOX_ARROW_W;
+			DrawRegion.x=pNumBox->x+CO_NUM_ARROW_W;
 			DrawRegion.y=pNumBox->y;
-			DrawRegion.w=CO_NUM_BOX_MIDDLE_W;
-			DrawRegion.h=CO_NUM_BOX_H;
-			DrawRegion.Color=CO_NUM_BOX_TRAN_COLOR;
-			Gui_FillImgArray_H(gCtrlObj_NumBoxMiddle,pNumBox->w-(CO_NUM_BOX_ARROW_W<<1),&DrawRegion);	
+			DrawRegion.w=CO_NUM_MIDDLE_W;
+			DrawRegion.h=CO_NUM_H;
+			DrawRegion.Color=CO_NUM_TRAN_COLOR;
+			Gui_FillImgArray_H(gCtrlObj_NumMiddle,pNumBox->w-(CO_NUM_ARROW_W<<1),&DrawRegion);	
 
-			DrawRegion.x=pNumBox->x+pNumBox->w-CO_NUM_BOX_ARROW_W;
+			DrawRegion.x=pNumBox->x+pNumBox->w-CO_NUM_ARROW_W;
 			DrawRegion.y=pNumBox->y;
-			DrawRegion.w=CO_NUM_BOX_FRAME_W;
-			DrawRegion.h=CO_NUM_BOX_H;
-			DrawRegion.Color=CO_NUM_BOX_TRAN_COLOR;
-			Gui_DrawImgArray(gCtrlObj_NumBoxRight,&DrawRegion);
+			DrawRegion.w=CO_NUM_FRAME_W;
+			DrawRegion.h=CO_NUM_H;
+			DrawRegion.Color=CO_NUM_TRAN_COLOR;
+			Gui_DrawImgArray(gCtrlObj_NumRight,&DrawRegion);//右边框
 			
 			sprintf((void *)NumStr,"%d",pNumBox->Value);
-			DrawRegion.x=pNumBox->x+((pNumBox->w-strlen((void *)NumStr)*CO_NUM_BOX_FONT_W)>>1);
+			DrawRegion.x=pNumBox->x+((pNumBox->w-strlen((void *)NumStr)*CO_NUM_FONT_W)>>1);
 			DrawRegion.y=pNumBox->y+3;
-			DrawRegion.w=pNumBox->w-(CO_NUM_BOX_ARROW_W<<1);
-			DrawRegion.h=CO_NUM_BOX_H;
-			DrawRegion.Color=CO_NUM_BOX_FONT_COLOR;
-			DrawRegion.Space=CO_NUM_BOX_FONT_SPACE;
-			Gui_DrawFont(CO_NUM_BOX_FONT_STYLE,NumStr,&DrawRegion);
+			DrawRegion.w=pNumBox->w-(CO_NUM_ARROW_W<<1);
+			DrawRegion.h=CO_NUM_H;
+			DrawRegion.Color=CO_NUM_FONT_COLOR;
+			DrawRegion.Space=CO_NUM_FONT_SPACE;
+			Gui_DrawFont(CO_NUM_FONT_STYLE,NumStr,&DrawRegion);
 		}
 	}
 	else
@@ -1189,7 +1189,6 @@ bool Q_SetNumBox(u8 Idx,NUM_BOX_OBJ *pNumBox)
 	}
 	
 	return FALSE;
-
 }
 
 
