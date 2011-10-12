@@ -305,13 +305,14 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 			NumEnumObj.pEnumList[3]=3;
 			Q_SetNumEnum(2,&NumEnumObj);
 
-			
 			NumBoxObj.ObjID=102;
 			NumBoxObj.Type=NCOT_NumBox;
 			NumBoxObj.x=20;
 			NumBoxObj.y=250;
 			NumBoxObj.w=100;
 			NumBoxObj.Value=50;
+			NumBoxObj.Max=1000;
+			NumBoxObj.Min=40;
 			Q_SetNumBox(3,&NumBoxObj);
  			//Gui_SetBgLight(0);
  			break;
@@ -346,7 +347,9 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 static TCH_MSG NumCtrlObjHander(u8 OID,s32 Value,void *pNumCtrlObj)
 {
 	Debug("NumCtrlObj:%d,%d\n\r",OID,Value);
+	return 0;
 }
+
 
 
 

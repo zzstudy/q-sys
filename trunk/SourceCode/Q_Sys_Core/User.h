@@ -174,7 +174,8 @@ typedef enum {
 	// 3.进入弹出页面时，不会触发子页面的Clean事件
 	// 4.从弹出页面返回时，不会触发主页面的Sys_PreGotoPage、Sys_SubPageReturn等case
 	// 5.从弹出页面返回时，不会对主页面的控件进行绘画，但会还原控件触碰区域的有效性，因此不会触发Sys_TouchSetOk、Sys_TouchSetOk_SR等case
-	// 6.实际上，可以将弹出页面看做是主页面的所以控件的临时失效
+	// 6.从弹出页面返回时，只会触发主页面的Sys_PopPageReturn事件
+	// 7.实际上，可以将弹出页面看做是主页面的所以控件的临时失效
 	POP_PAGE,
 }PAGE_TYPE;//4		页面类型
 
@@ -194,12 +195,13 @@ typedef enum {
 #define SM_CMD_OFFSET 16
 #define SM_NoGoto (1<<16)//从Sys_GotoPage返回到Q_GotoPage，可以不触发GotoPage动作
 #define SM_NoPageClean (1<<17)//从Sys_GotoPage返回到Q_GotoPage，可以不触发调用页面的Sys_PageClean或Sys_PreSubPage事件，慎用!!!
-#define SM_NoPageInit (1<<18)	//从Sys_GotoPage返回到Q_GotoPage，可以不触发调用页面的Sys_PageInit或Sys_SubPageReturn事件，慎用!!!
-#define SM_NoTouchInit (1<<19)//从Sys_GotoPage/Sys_Page_Init/Sys_SubPage_Return情况下返回此值，可以停止页面按键区域的绘制
-#define SM_TouchOff (1<<20)//在SystemEventHandler返回此值，将不开启页面的触摸响应
-#define SM_TouchOn (1<<21)//在SystemEventHandler返回此值，将不开启页面的触摸响应
-#define SM_ExtiKeyOff (1<<22) //在SystemEventHandler返回此值，关闭外部按键输入
-#define SM_ExtiKeyOn (1<<23) //在SystemEventHandler返回此值，开启外部按键输入
+#define SM_NoPageInit (1<<18)	//从Sys_GotoPage/Sys_PageClean返回，可以不触发调用页面的Sys_PageInit或Sys_SubPageReturn事件，慎用!!!
+#define SM_NoTouchInit (1<<19) //从Sys_GotoPage/Sys_PageClean/Sys_Page_Init/Sys_SubPage_Return情况下返回此值，可以停止页面按键区域的绘制
+#define SM_NoPopReturn (1<<20) //从Sys_GotoPage/Sys_PageClean/Sys_Page_Init/Sys_SubPage_Return/Sys_TouchSetOk情况下返回此值，可以停止页面响应Sys_PopPageReturn事件
+#define SM_TouchOff (1<<21)//在SystemEventHandler返回此值，将不开启页面的触摸响应
+#define SM_TouchOn (1<<22)//在SystemEventHandler返回此值，将不开启页面的触摸响应
+#define SM_ExtiKeyOff (1<<23) //在SystemEventHandler返回此值，关闭外部按键输入
+#define SM_ExtiKeyOn (1<<24) //在SystemEventHandler返回此值，开启外部按键输入
 
 //bit31 用于回传状态给系统
 #define SM_STATE_MASK 0x80000000
@@ -217,6 +219,8 @@ typedef enum {
 	
 	Sys_TouchSetOk,//页面打开后，按键描绘结束，会触发此事件。
 	Sys_TouchSetOk_SR,//和Sys_TouchSetOk相对，只不过本页是从子页面返回的。
+
+	Sys_PopPageReturn,//弹出页面返回
 	
 	Sys_PageSync,		//当用户线程发出同步信息时，会触发此事件。
 	

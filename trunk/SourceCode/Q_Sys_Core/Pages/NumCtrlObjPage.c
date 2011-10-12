@@ -108,6 +108,8 @@ const PAGE_ATTRIBUTE NumCtrlObjPage={
 //功能选项
 #define TOUCH_REGION_MARGIN 4//margin可增加可点击区域范围
 #define KEY_BOARD_BG_COLOR FatColor(0xffffff)
+#define KEY_BOARD_LCD_BUF_PATH "/Temp/NumBoxPS.buf"
+
 //动态按键模板
 const IMG_TCH_OBJ ArrowTchTmp={"",0,PrsMsk|RelMsk|ReVMsk,0,0,CO_NUM_ARROW_W,CO_NUM_H,0,0,"",FatColor(NO_TRANS)};
 const IMG_TCH_OBJ NumTchTmp={"",0,RelMsk,0,0,0,CO_NUM_H,0,0,"",FatColor(NO_TRANS)};
@@ -191,7 +193,10 @@ static void DrawNumCtrlObj(NUM_BOX_OBJ *pNumBoxObj,DRAW_NL_ACT Left,DRAW_NL_ACT 
 		if(Middle != DNA_Null)//中间数字部分
 		{
 			sprintf((void *)NumStr,"%d",pNumBoxObj->Value);
-			DrawRegion.x=pNumBoxObj->x+((pNumBoxObj->w-strlen((void *)NumStr)*CO_NUM_FONT_W)>>1);
+			if(strlen((void *)NumStr)*CO_NUM_FONT_W < (pNumBoxObj->w-(CO_NUM_ARROW_W<<1)))
+				DrawRegion.x=pNumBoxObj->x+((pNumBoxObj->w-strlen((void *)NumStr)*CO_NUM_FONT_W)>>1);
+			else //显示长度超出方框
+				DrawRegion.x=pNumBoxObj->x+CO_NUM_ARROW_W;
 			DrawRegion.y=pNumBoxObj->y+3;
 			DrawRegion.w=pNumBoxObj->w-(CO_NUM_ARROW_W<<1);
 			DrawRegion.h=CO_NUM_H;
@@ -309,7 +314,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 				if(pNumBoxObj->Type == NCOT_NumBox)
 				{
 					CalculateKeyBoardPosition(pNumBoxObj,&DrawRegion);//计算小键盘区域
-					PrtScreenToBin("/Temp/NumBoxPS.buf",DrawRegion.x,DrawRegion.y,DrawRegion.w,DrawRegion.h);
+					PrtScreenToBin(KEY_BOARD_LCD_BUF_PATH,DrawRegion.x,DrawRegion.y,DrawRegion.w,DrawRegion.h);
 					DrawAndRegKeyBoard(&DrawRegion);
 				}
 				
@@ -382,16 +387,20 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 					DrawRegion.Color=FatColor(NO_TRANS);
 					Gui_DrawImgArray((void *)gpNbpVars->RightDispBuf,&DrawRegion);//还原
 
+					if((gpNbpVars->HandlerType==NCOT_NumBox)//num box要检查值的范围
+						&&((pNumBoxObj->Value<pNumBoxObj->Min)||(pNumBoxObj->Value>pNumBoxObj->Max)) )
+						pNumBoxObj->Value=gpNbpVars->DefValue;//不符合范围则返回原值
+
 					if(gpNbpVars->DefValue == pNumBoxObj->Value)
 						DrawNumCtrlObj((void *)pNumBoxObj,DNA_Normal,DNA_Normal,DNA_Normal);//未改变原有值
 					else
 						DrawNumCtrlObj((void *)pNumBoxObj,DNA_HiLight,DNA_HiLight,DNA_HiLight);//改变了原有值
 
-					if(gpNbpVars->HandlerType==NCOT_NumBox)
+					if(gpNbpVars->HandlerType==NCOT_NumBox)//num box要恢复小键盘区域
 					{
 						pNumBoxObj=(void *)gpNbpVars->ObjHandler;
 						CalculateKeyBoardPosition(pNumBoxObj,&DrawRegion);//计算小键盘区域
-						Gui_DrawImgBin("/Temp/NumBoxPS.buf",&DrawRegion);
+						Gui_DrawImgBin(KEY_BOARD_LCD_BUF_PATH,&DrawRegion);
 					}
 				}
 				else
@@ -400,7 +409,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 
 				Q_PageFree(gpNbpVars);
 			}
-			return SM_State_OK;
+			return SM_NoPopReturn|SM_State_OK;//不允许主页面pop page return事件
 		default:
 			//需要响应的事件未定义
 			Debug("%s SystemEventHandler:This System Event Handler case unfinish! SysEvent:%d\n\r",Q_GetCurrPageName(),SysEvent);
@@ -469,7 +478,10 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 				{
 					if(pNumBox->Type == NCOT_NumBox)
 					{
-						pNumBox->Value-=1;
+						if((pNumBox->Value-1)<pNumBox->Min)
+							pNumBox->Value=pNumBox->Max;
+						else
+							pNumBox->Value-=1;
 					}
 					else if(pNumList->Type == NCOT_NumList)
 					{
@@ -502,7 +514,10 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 				{
 					if(pNumBox->Type == NCOT_NumBox)
 					{
-						pNumBox->Value+=1;
+						if((pNumBox->Value+1)>pNumBox->Max)
+							pNumBox->Value=pNumBox->Min;
+						else
+							pNumBox->Value+=1;
 					}
 					else if(pNumList->Type == NCOT_NumList)
 					{
@@ -526,7 +541,6 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 				NUM_BOX_OBJ *pNumBox=(void *)gpNbpVars->ObjHandler;
 				Key-=Key0KV;
 				pNumBox->Value=pNumBox->Value*10+Key;
-				
 				DrawNumCtrlObj(pNumBox,DNA_Null,DNA_HiLight,DNA_Null);//画新图
 			}
 			break;
