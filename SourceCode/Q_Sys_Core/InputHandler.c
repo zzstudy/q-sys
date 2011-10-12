@@ -243,6 +243,10 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 		&&(Q_GetPageByTrack(1)->Type!=POP_PAGE))	 //从pop页面返回，也不需要touch init
 		gCurrSysMsg|=CurrPageCtrlObjInit(EventType,IntParam,pSysParam);	
 
+	if(!(gCurrSysMsg&SM_NoPopReturn)//从前面的函数返回掩码
+		&&(Q_GetPageByTrack(1)->Type==POP_PAGE))//前一个页面是pop页面
+		gCurrSysMsg|=gpCurrentPage->SysEvtHandler(Sys_PopPageReturn,IntParam,pSysParam);
+	
 #ifdef QSYS_FRAME_FULL	
 	if(GetRegIdByIdx(GetPageIdxByTrack(1)) == PRID_NumCtrlObjPage)//从num控件页返回
 	{

@@ -191,6 +191,9 @@ typedef struct{
 	u16 w; //触摸区域宽度,如果按键是横屏模式,注意横过显示屏来定义
 	
 	s32 Value;//当前值
+
+	s32 Max;
+	s32 Min;
 }NUM_BOX_OBJ;//4		数字输入框
 
 typedef struct{
