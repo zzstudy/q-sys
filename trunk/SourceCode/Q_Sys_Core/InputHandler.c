@@ -42,6 +42,8 @@ SYS_MSG gCurrSysMsg=SM_State_OK;//记录页面case返回的信息
 u8 gPageHeapRecord=0;//记录用户页面堆栈分配数目的变量
 #endif 
 
+extern TOUCH_REGION *GetTouchInfoByIdx(u8 Idx);
+
 #if 1 //control obj 
 extern void ControlObjInit(void);
 extern void PageSwithcCtrlObjDataHandler(const PAGE_ATTRIBUTE *pNewPage);
@@ -219,7 +221,7 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 	gpCurrentPage=Q_GetPageByTrack(0);
 	gEntriesOfPage[PageIdx]++;//进页面一次自加一次
 
-	PageSwithcCtrlObjDataHandler(gpCurrentPage);//控件处理
+	PageSwithcCtrlObjDataHandler(gpCurrentPage);//控件数据处理
 	
 	OS_ExitCritical();
 	//4-------------------------数据处理完成--------------------------
@@ -239,11 +241,21 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 
 	if((!(gCurrSysMsg&SM_NoTouchInit))//Q_GotoPage或页面SystemEventHandler函数返回值告诉系统不需要touch init
 		&&(Q_GetPageByTrack(1)->Type!=POP_PAGE))	 //从pop页面返回，也不需要touch init
-	{
 		gCurrSysMsg|=CurrPageCtrlObjInit(EventType,IntParam,pSysParam);	
-		while((OS_GetCurrentSysMs()-TimeMsRecord)<300) OS_TaskDelayMs(50);//循环延时300ms，以避免触摸响应混乱
-	}
 
+#ifdef QSYS_FRAME_FULL	
+	if(GetRegIdByIdx(GetPageIdxByTrack(1)) == PRID_NumCtrlObjPage)//从num控件页返回
+	{
+		NUM_BOX_OBJ *pNumBoxObj=pSysParam;
+		if(gpCurrentPage->NumCtrlObjHander)
+			gpCurrentPage->NumCtrlObjHander(pNumBoxObj->ObjID,pNumBoxObj->Value,pSysParam);
+		else 
+			Debug("!!!Not Define Handler Function In Page Struct!!!\n\r");
+	}
+	else
+#endif
+		while((OS_GetCurrentSysMs()-TimeMsRecord)<300) OS_TaskDelayMs(50);//循环延时300ms，以避免触摸响应混乱
+	
 	Q_EnableInput();
 	
 	Input_Debug("%s end: %s\n\r",__FUNCTION__,gpCurrentPage->Name);
@@ -256,28 +268,35 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 //				Input_TchContinue,//保持触摸状态，用于传递长按时的实时坐标
 //				Input_TchRelease,//在有效区域触摸松开,有效区域指Press时的已注册区域
 //				Input_TchReleaseVain,//在非有效区域松开
-//Num:usb by GetTouchInfoByIdx(Num)
+//Idx:usb by GetTouchInfoByIdx(Num)
 //pTouchInfo:touch info
-static TCH_MSG TouchTypeHandler(INPUT_EVT_TYPE InType,u16 Num,TOUCH_INFO *pTouchInfo)
+static TCH_MSG TouchTypeHandler(INPUT_EVT_TYPE InType,u16 Idx,TOUCH_INFO *pTouchInfo)
 {	
 	TCH_MSG TchMsg=TM_State_OK;
-	u16 MiniCtrlObjNum=gpCurrentPage->CtrlObjNum.ImgTchNum+gpCurrentPage->CtrlObjNum.CharTchNum
-											+gpCurrentPage->CtrlObjNum.DynImgTchNum+gpCurrentPage->CtrlObjNum.DynCharTchNum;
-	
-	if(Num<MiniCtrlObjNum)
-		TchMsg=TchCtrlObjHandler(InType,Num&0xff,pTouchInfo);
+
+	switch(GetTouchInfoByIdx(Idx)->Type)
+	{
+		case COT_ImgTch:
+		case COT_CharTch:
+		case COT_DynImg:
+		case COT_DynChar:
+			TchMsg=TchCtrlObjHandler(InType,Idx,pTouchInfo);
+			break;
 #ifdef QSYS_FRAME_FULL	
-	else if(Num<(MiniCtrlObjNum+gpCurrentPage->CtrlObjNum.YesNoNum))
-		TchMsg=YesNoCtrlObjHandler(InType,Num&0xff);
-	else if(Num<(MiniCtrlObjNum+gpCurrentPage->CtrlObjNum.YesNoNum+gpCurrentPage->CtrlObjNum.NumBoxNum))
-		TchMsg=NumBoxCtrlObjHandler(InType,Num&0xff,pTouchInfo);
-	else if(Num<(MiniCtrlObjNum+gpCurrentPage->CtrlObjNum.YesNoNum+gpCurrentPage->CtrlObjNum.NumBoxNum
-							+gpCurrentPage->CtrlObjNum.StrOptBoxNum))
-		TchMsg=StrOptCtrlObjHandler(InType,Num&0xff,pTouchInfo);
-	else if(Num<(MiniCtrlObjNum+gpCurrentPage->CtrlObjNum.YesNoNum+gpCurrentPage->CtrlObjNum.NumBoxNum
-							+gpCurrentPage->CtrlObjNum.StrOptBoxNum+gpCurrentPage->CtrlObjNum.StrInputBoxNum))
-		TchMsg=StrInputCtrlObjHandler(InType,Num&0xff,pTouchInfo);
+		case COT_YesNo:
+			TchMsg=YesNoCtrlObjHandler(InType,Idx);
+			break;
+		case COT_Num:
+			TchMsg=NumBoxCtrlObjHandler(InType,Idx,pTouchInfo);
+			break;
+		case COT_StrOpt:
+			TchMsg=StrOptCtrlObjHandler(InType,Idx,pTouchInfo);
+			break;
+		case COT_StrInput:
+			TchMsg=StrInputCtrlObjHandler(InType,Idx,pTouchInfo);
+			break;
 #endif
+	}
 	return TchMsg;
 }
 
@@ -348,7 +367,7 @@ void InputHandler_Task( void *Task_Parameters )
 		{
 			case Touch_Type:
 				TchMsg=TouchTypeHandler(InEventParam.EventType,InEventParam.Num,&InEventParam.Info.TouchInfo);
-				break;
+				break; 
 			case Sync_Type:
 				if(Input_PageSync==InEventParam.EventType)//处理页面同步
 				{

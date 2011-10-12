@@ -7,8 +7,8 @@ typedef struct{
 	u16 w;//触摸区域w
 	u16 h;//触摸区域h
 	u8 ObjID;//触摸区域所属控件的id号，用户在页面中指定，需唯一
-	u8 Type;//触摸区域所属控件类型，见CTRL_OBJ_TYPE
-	u8 Index;//触摸区域在所属控件组中的相对索引
+	CTRL_OBJ_TYPE Type;//触摸区域所属控件类型，见CTRL_OBJ_TYPE
+	u8 Index;//触摸区域在所属控件组中的相对索引，暂无用
 	u8 OptionsMask;//功能响应掩码
 }TOUCH_REGION;
 //对于touch handler而言，它只负责对应触摸点到注册的区域中

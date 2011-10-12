@@ -15,6 +15,7 @@
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
 static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static TCH_MSG NumCtrlObjHander(u8 OID,s32 Value,void *pNumCtrlObj);
 
 //定义互斥信号量，为系统和页面或应用之间协调
 enum
@@ -68,7 +69,10 @@ const PAGE_ATTRIBUTE MainPage={
 	{
 		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
 		0,//sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
-		0,0,0,3
+		0,0,
+#ifdef QSYS_FRAME_FULL	
+		0,3
+#endif
 	},
 	
 	ImgTchRegCon, //touch region array
@@ -79,6 +83,10 @@ const PAGE_ATTRIBUTE MainPage={
 	Bit(Perip_RtcMin)|Bit(Perip_LcdOff)|Bit(Perip_LcdOn)|Bit(Perip_UartInput)|
 	Bit(Perip_Timer)|Bit(Perip_RtcAlarm)|Bit(Perip_KeyPress)|Bit(Perip_KeyRelease),
 	TouchEventHandler, //touch input event handler function
+#ifdef QSYS_FRAME_FULL
+	NULL,
+	NumCtrlObjHander,
+#endif
 };
 
 static const char Week[][4]={"一","二","三","四","五","六","天"};
@@ -271,7 +279,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 			break;
  		case HomeKV:
 			NumListObj.ObjID=100;
-			NumListObj.Type=NBT_NumList;
+			NumListObj.Type=NCOT_NumList;
 			NumListObj.x=100;
 			NumListObj.y=150;
 			NumListObj.w=100;
@@ -282,7 +290,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 			Q_SetNumList(1,&NumListObj);
 
 			NumEnumObj.ObjID=101;
-			NumEnumObj.Type=NBT_NumEnum;
+			NumEnumObj.Type=NCOT_NumEnum;
 			NumEnumObj.x=100;
 			NumEnumObj.y=200;
 			NumEnumObj.w=100;
@@ -299,8 +307,8 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 
 			
 			NumBoxObj.ObjID=102;
-			NumBoxObj.Type=NBT_NumBox;
-			NumBoxObj.x=100;
+			NumBoxObj.Type=NCOT_NumBox;
+			NumBoxObj.x=20;
 			NumBoxObj.y=250;
 			NumBoxObj.w=100;
 			NumBoxObj.Value=50;
@@ -333,6 +341,11 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 	}
 	
 	return 0;
+}
+
+static TCH_MSG NumCtrlObjHander(u8 OID,s32 Value,void *pNumCtrlObj)
+{
+	Debug("NumCtrlObj:%d,%d\n\r",OID,Value);
 }
 
 

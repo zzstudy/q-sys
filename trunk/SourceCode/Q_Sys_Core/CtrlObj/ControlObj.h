@@ -9,7 +9,7 @@ typedef enum{
 	COT_DynChar,
 #ifdef QSYS_FRAME_FULL	
 	COT_YesNo,
-	COT_NumBox,
+	COT_Num,
 	COT_StrOpt,
 	COT_StrInput,
 #endif
@@ -60,12 +60,13 @@ typedef struct {//sizeof=8
 	u16 TimeStamp;//每个动作的时间，相对值，单位ms
 }TOUCH_INFO;//4		传入TouchEventHandler的参数
 
-//第一参数为键值，第二参数为按键事件，第三参数为触摸信息
+//第一参数为键值(标识符)，第二参数为按键事件，第三参数为触摸信息
 typedef TCH_MSG (*TouchHandlerFunc)(u8 ,TCH_EVT , TOUCH_INFO *);
 #ifdef QSYS_FRAME_FULL	
-//第一个参数为键值，第二个参数为当前值，当值变化时触发
+//第一个参数为键值(标识符)，第二个参数为当前值，当值变化时触发
 typedef TCH_MSG (*YesNoHandlerFunc)(u8 ,bool );
-typedef TCH_MSG (*NumBoxHanderFunc)(u8 ,TCH_EVT ,bool ,TOUCH_INFO *);
+//第一个参数为键值(标识符)，第二个参数为当前值，第三个值为控件本体指针，当控件返回时触发
+typedef TCH_MSG (*NumCtrlObjHanderFunc)(u8 ,s32,void *);
 typedef TCH_MSG (*StrOptBoxHandlerFunc)(u8 ,TCH_EVT ,bool ,TOUCH_INFO *);
 typedef TCH_MSG (*StrInputBoxHandlerFunc)(u8 ,TCH_EVT ,bool ,TOUCH_INFO *);
 #endif	
@@ -175,14 +176,15 @@ typedef struct {
 }YES_NO_OBJ;//4		yes no控件定义
 
 typedef enum{
-	NBT_NumBox,
-	NBT_NumList,
-	NBT_NumEnum,
-}NUM_BOX_TYPE;
+	NCOT_NumBox,
+	NCOT_NumList,
+	NCOT_NumEnum,
+}NUM_CTRL_OBJ_TYPE;
 
+//注:NUM_BOX_OBJ、NUM_LIST_OBJ、NUM_ENUM_OBJ三者前面几个元素的定义必须一致!!!
 typedef struct{
 	u8 ObjID;//标识符，页面内必须唯一，以区分其他控件对象
-	NUM_BOX_TYPE Type;//num box类型
+	NUM_CTRL_OBJ_TYPE Type;//num box类型
 
 	u16 x; 	//触摸区域起点的x值，屏幕左上点为0，0坐标。如果是横屏模式，则需要横过显示屏，指定显示区域的左上点。
 	u16 y;	//触摸区域起点的y值
@@ -193,7 +195,7 @@ typedef struct{
 
 typedef struct{
 	u8 ObjID;//标识符，页面内必须唯一，以区分其他控件对象
-	NUM_BOX_TYPE Type;//num box类型
+	NUM_CTRL_OBJ_TYPE Type;//num box类型
 
 	u16 x; 	//控件含箭头的区域起点的x值，屏幕左上点为0，0坐标。如果是横屏模式，则需要横过显示屏，指定显示区域的左上点。
 	u16 y;	//控件含箭头的区域域起点的y值
@@ -208,7 +210,7 @@ typedef struct{
 
 typedef struct{
 	u8 ObjID;//标识符，页面内必须唯一，以区分其他控件对象
-	NUM_BOX_TYPE Type;//num box类型
+	NUM_CTRL_OBJ_TYPE Type;//num box类型
 
 	u16 x; 	//触摸区域起点的x值，屏幕左上点为0，0坐标。如果是横屏模式，则需要横过显示屏，指定显示区域的左上点。
 	u16 y;	//触摸区域起点的y值

@@ -9,8 +9,10 @@ typedef struct{
 
 const EXTI_KEY_DEFINE gExtiKeyDefine[EXTI_KEY_MAX_NUM]={
 	{RCC_APB2Periph_GPIOE, GPIOE, GPIO_Pin_2, GPIO_Mode_IPD},
+#if(QXW_PRODUCT_ID==116)
 	{RCC_APB2Periph_GPIOE, GPIOE, GPIO_Pin_3, GPIO_Mode_IPD},
 	{RCC_APB2Periph_GPIOA, GPIOA, GPIO_Pin_8, GPIO_Mode_IPD},
+#endif
 	//更多的外部按键定义放这里
 
 };

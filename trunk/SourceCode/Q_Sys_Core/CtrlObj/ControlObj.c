@@ -178,7 +178,7 @@ static void CopyCtrlObjTouchReg(TOUCH_REGION *TouchRegsBuf)
 			TouchRegsBuf[Cnt].w=pNumBoxCon[Idx]->w;
 			TouchRegsBuf[Cnt].h=CO_NUM_H;
 			TouchRegsBuf[Cnt].ObjID=pNumBoxCon[Idx]->ObjID;
-			TouchRegsBuf[Cnt].Type=COT_NumBox;
+			TouchRegsBuf[Cnt].Type=COT_Num;
 			TouchRegsBuf[Cnt].Index=Idx;
 			TouchRegsBuf[Cnt].OptionsMask=0;//(u8)(pNumBoxCon[Idx]->OptionsMask&0xff);
 		}
@@ -769,7 +769,7 @@ TCH_MSG NumBoxCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo
 		case Input_TchPress:
 			break;
 		case Input_TchRelease:
-			Q_GotoPage(GotoSubPage,"NumCtrlObjPage",0,pNumBox);//交给NumBoxPage处理
+			Q_GotoPage(GotoSubPage,"NumCtrlObjPage",PRID_NumCtrlObjPage,pNumBox);//交给NumBoxPage处理
 			Allow_Touch_Input();
 			break;
 		case Input_TchReleaseVain:
@@ -1144,10 +1144,10 @@ bool Q_SetNumCtrlObj(u8 Idx,NUM_BOX_OBJ *pNumBox)
 		gpTouchRegions[Num].w=pNumBox->w;
 		gpTouchRegions[Num].h=CO_NUM_H;
 		gpTouchRegions[Num].ObjID=pNumBox->ObjID;
-		gpTouchRegions[Num].Type=COT_NumBox;
+		gpTouchRegions[Num].Type=COT_Num;
 		gpTouchRegions[Num].Index=Idx;
 		gpTouchRegions[Num].OptionsMask=(u8)(PrsMsk|RelMsk|ReVMsk);
-		
+
 		{//draw
 			u8 NumStr[32];
 			DrawRegion.x=pNumBox->x+CO_NUM_ARROW_W-CO_NUM_FRAME_W;

@@ -160,6 +160,8 @@ typedef enum{
 	PRID_AppListPage,
 	PRID_SnakePage,
 	PRID_TouchCheckPage,
+	//新页面的RID定义到这里
+	
 }PAGE_RID;//4 	页面RID
 
 typedef enum {
@@ -297,7 +299,7 @@ typedef struct PAGE_ATTRIBUTE{
 	TouchHandlerFunc TchEvtHandler;//页面的TouchEventHandler实体。不能为空
 #ifdef QSYS_FRAME_FULL	
 	YesNoHandlerFunc YesNoHandler;//处理YesNo控件
-	NumBoxHanderFunc NumCtrlObjHander;//处理Num控件
+	NumCtrlObjHanderFunc NumCtrlObjHander;//处理Num控件
 	StrOptBoxHandlerFunc StrOptBoxHandler;//处理StrOpt控件
 	StrInputBoxHandlerFunc StrInputBoxHandler;//处理Input控件
 #endif	
