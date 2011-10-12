@@ -71,23 +71,37 @@ static const CHAR_TCH_OBJ CharTchRegCon[]={
 
 //定义页面或者应用的属性集
 const PAGE_ATTRIBUTE TestPage={
-	"TestPage",
-	"Author",
-	"Page Description",
-	NORMAL_PAGE,
-	0,//页面功能掩码
+	"TestPage",//page name
+	"Author",//page author name
+	"Page Description",//page description
+	NORMAL_PAGE,//page type
+	0,//page function mask bit.
 
-	{
-		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
-		0,//sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
+	{//control object num records.
+		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //number of image touch control object
+		0,//sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //number of char touch control object,
+		0,//number of dynamic image touch control object
+		0,//number of dynamic char touch control object
+#ifdef QSYS_FRAME_FULL	
+		0,//number of yes no control object
+		0,//number of num box control object
+		0,//number of string option control object
+		0,//number of string input frame control object
+#endif
 	},
-	ImgTchRegCon, //touch region array
-	CharTchRegCon,
+	ImgTchRegCon, //image touch ctrl obj
+	CharTchRegCon,//char touch ctrl obj
 	
-	SystemEventHandler,
-	PeripheralsHandler,
-	Bit(Perip_KeyPress)|Bit(Perip_KeyRelease)|Bit(Perip_UartInput),
-	TouchEventHandler,
+	SystemEventHandler,//handler of system event
+	PeripheralsHandler,//handler of Peripherals event
+	Bit(Perip_KeyPress)|Bit(Perip_KeyRelease)|Bit(Perip_UartInput),//mask bits of peripherals event
+	TouchEventHandler,//handler of all touch control object
+#ifdef QSYS_FRAME_FULL	
+	NULL,//handler of yes no control object
+	NULL,//handler of num box control object
+	NULL,//handler of string option control object
+	NULL,//handler of string input control object
+#endif
 };
 
 //-----------------------本页自定义变量声明-----------------------

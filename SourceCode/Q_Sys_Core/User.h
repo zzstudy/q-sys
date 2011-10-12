@@ -148,7 +148,7 @@ typedef enum{
 	PRID_MainPage,
 	PRID_MusicPage,
 	PRID_FileListPage,
-	PRID_NumBoxPage,
+	PRID_NumCtrlObjPage,
 	PRID_EBookPage,
 	PRID_PicturePage,
 	PRID_SettingsPage,
@@ -169,8 +169,11 @@ typedef enum {
 	//弹出页面，和普通页面相比有如下不同
 	// 1.进入弹出页面，只能以子页面的身份进入，即通过调用GotoPage(GotoSubPage)进入
 	// 2.在弹出页面内，不能用GotoPage进入任何其他页面，只能用GotoPage(SubPageReturn)返回之前的主页面
-	// 3.从弹出页面返回时，不会对主页面的控件进行绘画，但会还原控件触碰区域的有效性，因此不会触发Sys_TouchSetOk、Sys_TouchSetOk_SR等case
-	POP_PAGE=1,
+	// 3.进入弹出页面时，不会触发子页面的Clean事件
+	// 4.从弹出页面返回时，不会触发主页面的Sys_PreGotoPage、Sys_SubPageReturn等case
+	// 5.从弹出页面返回时，不会对主页面的控件进行绘画，但会还原控件触碰区域的有效性，因此不会触发Sys_TouchSetOk、Sys_TouchSetOk_SR等case
+	// 6.实际上，可以将弹出页面看做是主页面的所以控件的临时失效
+	POP_PAGE,
 }PAGE_TYPE;//4		页面类型
 
 typedef enum {
@@ -293,10 +296,10 @@ typedef struct PAGE_ATTRIBUTE{
 	u32 PeripEvtInitMask;
 	TouchHandlerFunc TchEvtHandler;//页面的TouchEventHandler实体。不能为空
 #ifdef QSYS_FRAME_FULL	
-	YesNoHandlerFunc YesNoHandler;
-	NumBoxHanderFunc NumBoxHander;
-	StrOptBoxHandlerFunc StrOptBoxHandler;
-	StrInputBoxHandlerFunc StrInputBoxHandler;
+	YesNoHandlerFunc YesNoHandler;//处理YesNo控件
+	NumBoxHanderFunc NumCtrlObjHander;//处理Num控件
+	StrOptBoxHandlerFunc StrOptBoxHandler;//处理StrOpt控件
+	StrInputBoxHandlerFunc StrInputBoxHandler;//处理Input控件
 #endif	
 }PAGE_ATTRIBUTE;//4	每个页面都会定义的属性结构体
 
@@ -343,7 +346,7 @@ void _Q_PageFree(void *Ptr);
 //页面跳转函数,入口参数Name为页面名称
 //在新页面，也要迅速复制入口指针指向的内容
 //因为入口指针指向的内存随时会被注销
-//成功返回TRUE
+//成功会返回新页面Sys_PreGotoPage这个case所返回的SYS_MSG值
 //只能在页面的SystemEventHandler和TouchEventHandler函数中调用，否则可能会引起一些非预料的错误
 SYS_MSG Q_GotoPage(PAGE_ACTION PageAction, u8 *Name, int IntParam, void *pSysParam);
 

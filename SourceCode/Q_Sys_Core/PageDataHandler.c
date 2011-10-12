@@ -147,3 +147,4 @@ SYS_MSG FindPage(u8 *Name, PAGE_RID RegID,u8 *pPageIdx)
 	*pPageIdx=PageIdx;
 	return SM_State_OK;
 }
+

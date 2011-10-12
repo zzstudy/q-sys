@@ -42,13 +42,13 @@ RegID必须为非零值。
 #include "TouchCheckPage.h"
 #include "ChatPage.h"
 #include "NewsPage.h"
-#include "NumBoxPage.h"
+#include "NumCtrlObjPage.h"
 
 const PAGE_CONGREGATION AllPage[]={//页面总数不得大于255，RID不能为零
 	{PRID_MainPage,&MainPage},
 	{PRID_MusicPage,&MusicPage},
 	{PRID_FileListPage,&FileListPage},
-	{PRID_NumBoxPage,&NumBoxPage},
+	{PRID_NumCtrlObjPage,&NumCtrlObjPage},
 	{PRID_EBookPage,&EBookPage},
 	{PRID_PicturePage,&PicturePage},
 	{PRID_SettingsPage,&SettingsPage},

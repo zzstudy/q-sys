@@ -1,38 +1,53 @@
 #include "System.h"
 
-enum{ //请依次为外部按键分配不同的号码
-	ExtiKey0KV=0,
-	ExtiKey1KV,
-	ExtiKey2KV,
+typedef struct{
+	uint32_t RccId;
+	GPIO_TypeDef* GpioGroup;
+	uint16_t GpioPin;
+	GPIOMode_TypeDef GpioMode;
+}EXTI_KEY_DEFINE;
+
+const EXTI_KEY_DEFINE gExtiKeyDefine[EXTI_KEY_MAX_NUM]={
+	{RCC_APB2Periph_GPIOE, GPIOE, GPIO_Pin_2, GPIO_Mode_IPD},
+	{RCC_APB2Periph_GPIOE, GPIOE, GPIO_Pin_3, GPIO_Mode_IPD},
+	{RCC_APB2Periph_GPIOA, GPIOA, GPIO_Pin_8, GPIO_Mode_IPD},
+	//更多的外部按键定义放这里
+
 };
+
 extern void ExtiKeyHandler(u8 KeyId,u8 KeyStaus);
 
 //用于查询外部按键状态
 void KeysHandler_Task(void *Task_Parameters )
 {
+	GPIO_InitTypeDef GPIO_InitStructure;
 	u32 KeyMap=0;
-	
+	u8 i;
+
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+	for(i=0;i<EXTI_KEY_MAX_NUM;i++)
+	{
+		RCC_APB2PeriphClockCmd(gExtiKeyDefine[i].RccId,ENABLE);
+		GPIO_InitStructure.GPIO_Pin = gExtiKeyDefine[i].GpioPin;
+		GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
+		GPIO_InitStructure.GPIO_Mode = gExtiKeyDefine[i].GpioMode;
+		GPIO_Init(gExtiKeyDefine[i].GpioGroup, &GPIO_InitStructure);
+	}
+
 	while(1)
 	{
-		if(GPIO_ReadInputDataBit(GPIOE,GPIO_Pin_2)!=ReadBit(KeyMap,ExtiKey0KV))//有变化
+		for(i=0;i<EXTI_KEY_MAX_NUM;i++)
 		{
-			KeyMap^=(1<<(ExtiKey0KV));
-			ExtiKeyHandler(ExtiKey0KV,GPIO_ReadInputDataBit(GPIOE,GPIO_Pin_2));
-		}			
-
-#if(QXW_PRODUCT_ID==116)
-		if(GPIO_ReadInputDataBit(GPIOE,GPIO_Pin_3)!=ReadBit(KeyMap,ExtiKey1KV))//有变化
-		{
-			KeyMap^=(1<<(ExtiKey1KV));
-			ExtiKeyHandler(ExtiKey1KV,GPIO_ReadInputDataBit(GPIOE,GPIO_Pin_3));
-		}		
-
-		if(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_8)!=ReadBit(KeyMap,ExtiKey2KV))//有变化
-		{
-			KeyMap^=(1<<(ExtiKey2KV));
-			ExtiKeyHandler(ExtiKey2KV,GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_8));
-		}		
-#endif				
+			if(GPIO_ReadInputDataBit(gExtiKeyDefine[i].GpioGroup,gExtiKeyDefine[i].GpioPin)!=ReadBit(KeyMap,i))//有变化
+			{
+				KeyMap^=(1<<(i));
+				if(gExtiKeyDefine[i].GpioMode == GPIO_Mode_IPD)//下拉输入
+					ExtiKeyHandler(i,GPIO_ReadInputDataBit(gExtiKeyDefine[i].GpioGroup,gExtiKeyDefine[i].GpioPin));
+				else if(gExtiKeyDefine[i].GpioMode == GPIO_Mode_IPU)//上拉输入
+					ExtiKeyHandler(i,!GPIO_ReadInputDataBit(gExtiKeyDefine[i].GpioGroup,gExtiKeyDefine[i].GpioPin));
+			}
+		}
+	
 		OS_TaskDelayMs(100);
 	}
 }

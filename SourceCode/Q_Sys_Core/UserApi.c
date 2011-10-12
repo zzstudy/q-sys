@@ -169,7 +169,8 @@ SYS_MSG Q_GotoPage(PAGE_ACTION PageAction, u8 *Name, int IntParam, void *pSysPar
 		return SM_State_Faile;
 	}
 
-	gCurrSysMsg=GetPageByIdx(PageIdx)->SysEvtHandler(Sys_PreGotoPage, IntParam,pSysParam);
+	if(Q_GetPageByTrack(0)->Type!=POP_PAGE) //如果从pop页面返回，那么不需要执行这个goto case
+		gCurrSysMsg=GetPageByIdx(PageIdx)->SysEvtHandler(Sys_PreGotoPage, IntParam,pSysParam);
 
 	//Debug("GotoPage Return 0x%x\n\r",SysMsg);
 	
