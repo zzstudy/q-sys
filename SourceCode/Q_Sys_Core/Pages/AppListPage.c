@@ -563,6 +563,9 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 		case GameKV:
 			Q_GotoPage(GotoNewPage,"SnakePage",0,NULL);
 			break;		
+		case CommandKV:
+			Q_GotoPage(GotoNewPage,"CtrlObjDemoPage",0,NULL);
+			break;
 		case HomeKV:
 			break;
 		case MessageKV:
