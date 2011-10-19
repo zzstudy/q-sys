@@ -87,3 +87,4 @@ void assert_failed(u8* file, u32 line)
 #define  BSP_INT_ID_DMA2_CH4_5                            59    /* DMA2 Channel 4 and DMA2 Channel 5 global Interrupt   */
 
 #endif
+

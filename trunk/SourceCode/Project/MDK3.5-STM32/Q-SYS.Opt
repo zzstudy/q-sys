@@ -100,7 +100,7 @@ OPTFFF 9,73,1,0,0,0,0,0,<..\..\Q_Sys_Core\SystemInit.c><SystemInit.c>
 OPTFFF 9,74,1,0,0,0,0,0,<..\..\Q_Sys_Core\Theme.c><Theme.c> 
 OPTFFF 9,75,1,0,0,0,0,0,<..\..\Q_Sys_Core\TouchHandler.c><TouchHandler.c> 
 OPTFFF 9,76,1,0,0,0,0,0,<..\..\Q_Sys_Core\UserApi.c><UserApi.c> 
-OPTFFF 9,77,1,2,0,86,93,0,<..\..\Q_Sys_Core\CtrlObj\ControlObj.c><ControlObj.c> { 44,0,0,0,2,0,0,0,3,0,0,0,255,255,255,255,255,255,255,255,248,255,255,255,226,255,255,255,50,0,0,0,50,0,0,0,58,3,0,0,66,1,0,0 }
+OPTFFF 9,77,1,0,0,89,93,0,<..\..\Q_Sys_Core\CtrlObj\ControlObj.c><ControlObj.c> { 44,0,0,0,0,0,0,0,1,0,0,0,255,255,255,255,255,255,255,255,248,255,255,255,226,255,255,255,50,0,0,0,50,0,0,0,58,3,0,0,66,1,0,0 }
 OPTFFF 9,78,1,134217728,0,0,0,0,<..\..\Q_Sys_Core\Q_Gui\Q_Gui.c><Q_Gui.c> 
 OPTFFF 9,79,1,0,0,0,0,0,<..\..\Q_Sys_Core\Q_Heap\Q_Heap.c><Q_Heap.c> 
 OPTFFF 9,80,1,0,0,0,0,0,<..\..\Q_Sys_Core\Q_Database\Q_Database.c><Q_Database.c> 

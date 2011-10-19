@@ -536,3 +536,4 @@ void        CPU_BitBandSet   (CPU_ADDR    addr,
 */
 
 #endif                                                          /* End of CPU cfg module inclusion.                     */
+
