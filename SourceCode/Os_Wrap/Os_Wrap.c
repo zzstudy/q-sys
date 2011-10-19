@@ -275,7 +275,7 @@ void *QMBMemGet(QSYS_MSG_BOX_MEM *pQMBMem)
 u8 QMBMemPut(QSYS_MSG_BOX_MEM *pQMBMem,void *pblk)
 {
     OS_CPU_SR  cpu_sr = 0;
-	if(pQMBMem==NULL || pblk==NULL) return NULL;
+	if(pQMBMem==NULL || pblk==NULL) return 0;
     OS_ENTER_CRITICAL();//¹ØÖÐ¶Ï
     if (pQMBMem->QMBMemNFree >= pQMBMem->QMBMemBlks) 
 	{  
@@ -363,7 +363,7 @@ u8 OS_MsgBoxSend(OS_MsgBoxHandle pMsgBox,void *Msg, u16 WaitTicks,bool IfPostFro
 	void *pTempMsg;
 	if(WaitTicks==OS_NO_DELAY)
 	{
-		if(OSSemAccept(pMsgBox->Sem)==NULL) 
+		if(OSSemAccept(pMsgBox->Sem)==0) 
 		{
 			Debug("OS_MsgBoxSend failed when WaitTicks==OS_NO_DELAY\r\n");
 			return OS_ERR_MBOX_FULL;

@@ -525,7 +525,7 @@ bool Lrc_Priv_LrcParse(void){//½âÎölrcÎÄ¼þ
 		j=0;
 		while(gpMpVar->LRC.LyricBuf[k+j]!='\r')		
 			j++;
-		gpMpVar->LRC.LyricBuf[k+j]=NULL;
+		gpMpVar->LRC.LyricBuf[k+j]=0;
 		gpMpVar->LRC.TimeToText[i][1]=(u32)&gpMpVar->LRC.LyricBuf[k];
 		Debug("LRC.TimeToText[%d][0] :%d\n\r",i,(u8 *)gpMpVar->LRC.TimeToText[i][0]);
 		Debug("LRC.TimeToText[%d][1] :%s\n\r",i,(u8 *)gpMpVar->LRC.TimeToText[i][1]);
