@@ -11,3 +11,4 @@ void Tim4_Set(u16 Val,u16 uS_Base,bool AutoReload);
 void Tim5_Set(u16 Val,u16 uS_Base,bool AutoReload);
 
 #endif
+
