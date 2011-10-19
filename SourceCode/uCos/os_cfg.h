@@ -154,3 +154,4 @@
 #define OS_TMR_CFG_TICKS_PER_SEC 10    /*     Rate at which timer management task runs (Hz)            */
 
 #endif
+

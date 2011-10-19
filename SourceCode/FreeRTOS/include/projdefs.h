@@ -79,5 +79,3 @@ typedef void (*pdTASK_CODE)( void * );
 
 #endif /* PROJDEFS_H */
 
-
-
