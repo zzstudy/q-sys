@@ -8,7 +8,7 @@
 #define FS_i16          signed   short      /* 16 bit signed */
 #define FS_i8           signed   char       /* 8 bit  signed */
 #define FS_u8           unsigned char       /* 8 bit  unsigned */
-#define NULL 			0
+//#define NULL 			0
 
 typedef void FS_FILE;
 typedef void FS_DIR;

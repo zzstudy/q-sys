@@ -512,23 +512,23 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 }
 
 /*******************************************************************************
-* Function Name  : CAN_RX1_IRQHandler
+* Function Name  : CAN1_RX1_IRQHandler
 * Description    : This function handles CAN RX1 interrupt request.
 * Input          : None
 * Output         : None
 * Return         : None
 *******************************************************************************/
-void CAN_RX1_IRQHandler(void)
+void CAN1_RX1_IRQHandler(void)
 {}
 
 /*******************************************************************************
-* Function Name  : CAN_SCE_IRQHandler
+* Function Name  : CAN1_SCE_IRQHandler
 * Description    : This function handles CAN SCE interrupt request.
 * Input          : None
 * Output         : None
 * Return         : None
 *******************************************************************************/
-void CAN_SCE_IRQHandler(void)
+void CAN1_SCE_IRQHandler(void)
 {}
 
 /*******************************************************************************

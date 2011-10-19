@@ -22,7 +22,7 @@
 
 /* Ports Macro*/
 #define PACKED	__packed//编译器支持的按定义紧密排序结构体
-#define NULL ((void *)0)
+//#define NULL ((void *)0)
 #define Bit(bit)		(1<<bit)
 #define SetBit(reg,bit)  reg|=(1<<bit)
 #define ClrBit(reg,bit) reg&=~(1<<bit)
@@ -78,11 +78,12 @@
 
 //1														头文件包含																	
 //2									 Standard includes.										 
-#include  <stdio.h>
-#include  <string.h>
-#include  <ctype.h>
-#include  <stdlib.h>
-#include  <stdarg.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <stdarg.h>
 
 //2									 RTOS includes.												
 #include "Os_Wrap.h"
