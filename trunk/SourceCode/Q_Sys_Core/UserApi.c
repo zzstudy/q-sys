@@ -156,7 +156,7 @@ SYS_MSG Q_GotoPage(PAGE_ACTION PageAction, u8 *Name, int IntParam, void *pSysPar
 	}
 	
 	//POP页面只允许以进入子页面的形式进入
-	if((GetPageByIdx(PageIdx)->Type==POP_PAGE)&&(PageAction!=GotoSubPage))
+	if((GetPageByIdx(PageIdx)->Type==POP_PAGE)&&((PageAction!=GotoSubPage)||(PageAction!=SubPageReturn)))
 	{
 		Q_ErrorStopScreen("Pop Page not allow entry by \"GotoNewPage\" param!");
 		return SM_State_Faile;

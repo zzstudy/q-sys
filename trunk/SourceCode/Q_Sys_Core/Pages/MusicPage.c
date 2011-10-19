@@ -14,7 +14,7 @@
 
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
 static SYS_MSG GobalMusicStopHandler(PERIP_EVT PeripEvent,int intParam, void *pParam);
 
 //-----------------------本页系统变量及声明-----------------------
@@ -1015,7 +1015,7 @@ static SYS_MSG GobalMusicStopHandler(PERIP_EVT PeripEvent,int intParam, void *pP
 	return 0;
 }
 
-static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
+static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 {
 	MUSIC_EVENT MusicEvent;
 	FILELIST_SET FLPS;
@@ -1024,7 +1024,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 	switch(Key)
 	{
 		case MpVolumeDownKV:		
-			if(InEvent!=Tch_Release) return TM_State_OK;
+			if(InEvent!=Tch_Release) return CO_State_OK;
 			if(gVolStep>0)
 			{
 				gVolStep--;			
@@ -1036,7 +1036,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 			}
 			break;
 		case MpVolumeUpKV:
-			if(InEvent!=Tch_Release) return TM_State_OK;
+			if(InEvent!=Tch_Release) return CO_State_OK;
 			if(gVolStep<MAX_VOL_STEP-1)
 			{
 				gVolStep++;			
@@ -1048,7 +1048,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 			}	
 			break;
 		case MpPrevOneKV:
-			if(InEvent!=Tch_Release) return TM_State_OK;
+			if(InEvent!=Tch_Release) return CO_State_OK;
 			{
 				Q_DisableGobalPeripEvent(Perip_MscStop,GobalMusicStopHandler);
 				Debug("Now:%s\n\r",gpMusicPath);
@@ -1091,7 +1091,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 			}
 			break;
 		case MpNextOneKV:
-			if(InEvent!=Tch_Release) return TM_State_OK;
+			if(InEvent!=Tch_Release) return CO_State_OK;
 			{			
 				Q_DisableGobalPeripEvent(Perip_MscStop,GobalMusicStopHandler);
 				Debug("Now:%s\n\r",gpMusicPath);

@@ -624,7 +624,7 @@ static void ModifySnakeSettings(void *OptionsBuf){
 //-----------------------本页系统函数声明-------------------------
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
 //-----------------------本页系统变量定义及声明-----------------------
 //定义页面按键需要用到的枚举，类似于有序唯一的宏定义
 typedef enum{
@@ -857,7 +857,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 	return 0;
 }
 //当使用者按下本页TouchRegionSet里定义的按键时，会触发这个函数里的对应事件
-static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo){		
+static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo){		
 	switch(Key){	
 		case BackKV:
 			Q_GotoPage(GotoNewPage,"AppListPage",0,NULL);			

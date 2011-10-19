@@ -25,7 +25,7 @@ static void *gCtrlObjPtrBuf[MAX_DYN_CTRL_OBJ_NUM];//用来存储下列控件指针的实体
 //CHAR_TCH_OBJ **gpDynCharTchCon=NULL;//动态文字按键集合
 #ifdef QSYS_FRAME_FULL	
 //YES_NO_OBJ **gpYesNoCon=NULL;
-//NUM_BOX_OBJ **gpNumBoxCon=NULL;
+//NUM_CTRL_OBJ **gpNumCtrlObjCon=NULL;
 //STR_OPT_OBJ **gpStrOptCon=NULL;
 //STR_INPUT_OBJ **gpStrInputCon=NULL;
 #endif
@@ -87,10 +87,10 @@ static void CopyCtrlObjTouchReg(TOUCH_REGION *TouchRegsBuf)
 	IMG_TCH_OBJ **pDynImgTchCon=(void *)gCtrlObjPtrBuf; //动态图片按键集合
 	CHAR_TCH_OBJ **pDynCharTchCon=(void *)&pDynImgTchCon[gpCtrlObjNum->DynImgTchNum];//动态文字按键集合
 #ifdef QSYS_FRAME_FULL	
-	YES_NO_OBJ **pYesNoCon=(void *)&pDynCharTchCon[gpCtrlObjNum->DynCharTchNum];
-	NUM_BOX_OBJ **pNumBoxCon=(void *)&pYesNoCon[gpCtrlObjNum->YesNoNum];
-	STR_OPT_OBJ **pStrOptCon=(void *)&pNumBoxCon[gpCtrlObjNum->NumBoxNum];
-	STR_INPUT_OBJ **pStrInputCon=(void *)&pStrOptCon[gpCtrlObjNum->StrOptBoxNum];
+	YES_NO_OBJ **pYesNoCon=(void *)&pDynCharTchCon[gpCtrlObjNum->DynCharTchNum];//Yes No控件
+	NUM_CTRL_OBJ **pNumCtrlObjCon=(void *)&pYesNoCon[gpCtrlObjNum->YesNoNum];//Num 控件
+	STR_OPT_OBJ **pStrOptCon=(void *)&pNumCtrlObjCon[gpCtrlObjNum->NumBoxNum];//Strings option控件
+	STR_INPUT_OBJ **pStrInputCon=(void *)&pStrOptCon[gpCtrlObjNum->StrOptBoxNum];//String input控件
 #endif
 
 	//图片按键区域
@@ -171,16 +171,16 @@ static void CopyCtrlObjTouchReg(TOUCH_REGION *TouchRegsBuf)
 	//num box
 	for(Idx=0;Idx<gpCtrlObjNum->NumBoxNum;Idx++,Cnt++)
 	{
-		if(pNumBoxCon[Idx]!=NULL)
+		if(pNumCtrlObjCon[Idx]!=NULL)
 		{
-			TouchRegsBuf[Cnt].x=pNumBoxCon[Idx]->x;
-			TouchRegsBuf[Cnt].y=pNumBoxCon[Idx]->y;
-			TouchRegsBuf[Cnt].w=pNumBoxCon[Idx]->w;
+			TouchRegsBuf[Cnt].x=pNumCtrlObjCon[Idx]->x;
+			TouchRegsBuf[Cnt].y=pNumCtrlObjCon[Idx]->y;
+			TouchRegsBuf[Cnt].w=pNumCtrlObjCon[Idx]->w;
 			TouchRegsBuf[Cnt].h=CO_NUM_H;
-			TouchRegsBuf[Cnt].ObjID=pNumBoxCon[Idx]->ObjID;
+			TouchRegsBuf[Cnt].ObjID=pNumCtrlObjCon[Idx]->ObjID;
 			TouchRegsBuf[Cnt].Type=COT_Num;
 			TouchRegsBuf[Cnt].Index=Idx;
-			TouchRegsBuf[Cnt].OptionsMask=0;//(u8)(pNumBoxCon[Idx]->OptionsMask&0xff);
+			TouchRegsBuf[Cnt].OptionsMask=0;//(u8)(pNumCtrlObjCon[Idx]->OptionsMask&0xff);
 		}
 	}
 #if 0
@@ -682,9 +682,9 @@ void SameOidTchDisplay(u8 ObjID,INPUT_EVT_TYPE InType)
 }
 
 //有触摸输入时，处理触摸区域事件
-TCH_MSG TchCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
+CO_MSG TchCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
 {
-	TCH_MSG TchMsg=TM_State_OK;
+	CO_MSG CoMsg=CO_State_OK;
 	u8 TchEvtMsk=GetTouchInfoByIdx(Idx)->OptionsMask;//事件掩码
 	u8 ObjID=GetTouchInfoByIdx(Idx)->ObjID;//键值
 
@@ -694,38 +694,38 @@ TCH_MSG TchCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
 			//按下时图标变化
 			SameOidTchDisplay(ObjID,InType);
 			if(TchEvtMsk&PrsMsk)//需要处理
-				TchMsg=gpCurrentPage->TchEvtHandler(ObjID,Tch_Press,pTouchInfo);
+				CoMsg=gpCurrentPage->TchEvtHandler(ObjID,Tch_Press,pTouchInfo);
 			break;
 		case Input_TchContinue:
 			//不需要检查是否触发，因为在Touch线程里面已经检查了
-			TchMsg=gpCurrentPage->TchEvtHandler(ObjID,Tch_Continue,pTouchInfo);
+			CoMsg=gpCurrentPage->TchEvtHandler(ObjID,Tch_Continue,pTouchInfo);
 			break;
 		case Input_TchRelease:
 			//按键释放改变按钮图标并发出事件
 			SameOidTchDisplay(ObjID,InType);
 			if(TchEvtMsk&RelMsk)//需要处理
-				TchMsg=gpCurrentPage->TchEvtHandler(ObjID,Tch_Release,pTouchInfo);
+				CoMsg=gpCurrentPage->TchEvtHandler(ObjID,Tch_Release,pTouchInfo);
 			Allow_Touch_Input();
 			break;
 		case Input_TchReleaseVain:	
 			SameOidTchDisplay(ObjID,InType);
 			if(TchEvtMsk&ReVMsk)//需要处理
-				TchMsg=gpCurrentPage->TchEvtHandler(ObjID,Tch_ReleaseVain,pTouchInfo);
+				CoMsg=gpCurrentPage->TchEvtHandler(ObjID,Tch_ReleaseVain,pTouchInfo);
 			Allow_Touch_Input();
 			break;
 	}
 
-	return TchMsg;
+	return CoMsg;
 }
 
 #ifdef QSYS_FRAME_FULL	
 //有触摸输入时，处理yesno选框事件
 //Idx为所有触摸区域集合的索引
-TCH_MSG YesNoCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx)
+CO_MSG YesNoCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx)
 {
 	YES_NO_OBJ *pYesNo=(void *)gCtrlObjPtrBuf[Idx-gpCtrlObjNum->ImgTchNum-gpCtrlObjNum->CharTchNum];
 	GUI_REGION DrawRegion;
-	TCH_MSG TchMsg=TM_State_OK;
+	CO_MSG CoMsg=CO_State_OK;
 	u8 ObjID=GetTouchInfoByIdx(Idx)->ObjID;//键值
 
 	DrawRegion.x=pYesNo->x;
@@ -744,7 +744,7 @@ TCH_MSG YesNoCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx)
 			if(pYesNo->DefVal==FALSE)	Gui_DrawImgArray(gCtrlObj_Off,&DrawRegion);
 			else 	Gui_DrawImgArray(gCtrlObj_On,&DrawRegion);
 			
-			TchMsg=gpCurrentPage->YesNoHandler(ObjID,pYesNo->DefVal);
+			CoMsg=gpCurrentPage->YesNoHandler(ObjID,pYesNo->DefVal);
 			Allow_Touch_Input();
 			break;
 		case Input_TchReleaseVain:	
@@ -755,21 +755,21 @@ TCH_MSG YesNoCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx)
 			break;
 	}
 	
-	return TchMsg;
+	return CoMsg;
 }
 
 //有触摸输入时，处理NumBox事件
 //Idx为所有触摸区域集合的索引
-TCH_MSG NumBoxCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
+CO_MSG NumBoxCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
 {
-	NUM_BOX_OBJ *pNumBox=(void *)gCtrlObjPtrBuf[Idx-gpCtrlObjNum->ImgTchNum-gpCtrlObjNum->CharTchNum];
+	NUM_CTRL_OBJ *pNumCtrlObj=(void *)gCtrlObjPtrBuf[Idx-gpCtrlObjNum->ImgTchNum-gpCtrlObjNum->CharTchNum];
 
 	switch(InType)
 	{
 		case Input_TchPress:
 			break;
 		case Input_TchRelease:
-			Q_GotoPage(GotoSubPage,"NumCtrlObjPage",PRID_NumCtrlObjPage,pNumBox);//交给NumBoxPage处理
+			Q_GotoPage(GotoSubPage,"NumCtrlObjPage",PRID_NumCtrlObjPage,pNumCtrlObj);//交给NumBoxPage处理
 			Allow_Touch_Input();
 			break;
 		case Input_TchReleaseVain:
@@ -782,12 +782,12 @@ TCH_MSG NumBoxCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo
 }
 
 //有触摸输入时，处理StrOpt事件
-TCH_MSG StrOptCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
+CO_MSG StrOptCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
 {
 	return 0;
 }
 
-TCH_MSG StrInputCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
+CO_MSG StrInputCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
 {
 	return 0;
 }
@@ -796,6 +796,7 @@ TCH_MSG StrInputCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchIn
 //进入子页面前，保存页面的零时数据
 //要保存的数据有:
 // 1.页面的动态按键组
+// 2.
 //ps 这块看不懂不要勉强
 void PushPageCtrlObjData(void)
 {
@@ -811,11 +812,11 @@ void PushPageCtrlObjData(void)
 	p=gPageDataPtrRecord[GetCurLayerNum()]=Q_Mallco(sizeof(void*)*MAX_DYN_CTRL_OBJ_NUM
 								+sizeof(REP_IMG_SUFX)*MAX_IMG_KEY_NUM+sizeof(u8 *)*MAX_CHAR_KEY_NUM);
 	
-	memcpy(p,gCtrlObjPtrBuf,sizeof(void*)*MAX_DYN_CTRL_OBJ_NUM);
+	memcpy(p,gCtrlObjPtrBuf,sizeof(void*)*MAX_DYN_CTRL_OBJ_NUM);//所有动态控件指针
 	p=(void *)((u32)p+sizeof(void*)*MAX_DYN_CTRL_OBJ_NUM);
-	memcpy(p,(void *)gRepImgSufx,sizeof(REP_IMG_SUFX)*MAX_IMG_KEY_NUM);
+	memcpy(p,(void *)gRepImgSufx,sizeof(REP_IMG_SUFX)*MAX_IMG_KEY_NUM);//所有固态图片按键的替代后缀
 	p=(void *)((u32)p+sizeof(REP_IMG_SUFX)*MAX_IMG_KEY_NUM);
-	memcpy(p,(void *)gRepKeyNameCon,sizeof(u8 *)*MAX_CHAR_KEY_NUM);
+	memcpy(p,(void *)gRepKeyNameCon,sizeof(u8 *)*MAX_CHAR_KEY_NUM);//所有固态文字按键的替代文本指针
 }
 
 //弹出页面数据
@@ -1124,57 +1125,57 @@ bool Q_SetYesNo(u8 Idx,YES_NO_OBJ *pYesNo)
 //一旦设置，当进入页面时，会用到此内存
 //所以当页面还存在时，必须保证此内存存在
 //Idx从1开始
-bool Q_SetNumCtrlObj(u8 Idx,NUM_BOX_OBJ *pNumBox)
+bool Q_SetNumCtrlObj(u8 Idx,NUM_CTRL_OBJ *pNumCtrlObj)
 {
-	NUM_BOX_OBJ **pNumBoxCon=(void *)&gCtrlObjPtrBuf[gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum
+	NUM_CTRL_OBJ **pNumCtrlObjCon=(void *)&gCtrlObjPtrBuf[gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum
 																								+gpCtrlObjNum->YesNoNum];
 	if(Idx>gpCtrlObjNum->NumBoxNum) return FALSE;
 	Idx--;
 	
-	pNumBoxCon[Idx]=pNumBox;
+	pNumCtrlObjCon[Idx]=pNumCtrlObj;
 
-	if(pNumBox!=NULL)
+	if(pNumCtrlObj!=NULL)
 	{
 		GUI_REGION DrawRegion;
 		u8 Num=gpCtrlObjNum->ImgTchNum+gpCtrlObjNum->CharTchNum
 			+gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum
 			+gpCtrlObjNum->YesNoNum+Idx;
-		gpTouchRegions[Num].x=pNumBox->x;
-		gpTouchRegions[Num].y=pNumBox->y;
-		gpTouchRegions[Num].w=pNumBox->w;
+		gpTouchRegions[Num].x=pNumCtrlObj->x;
+		gpTouchRegions[Num].y=pNumCtrlObj->y;
+		gpTouchRegions[Num].w=pNumCtrlObj->w;
 		gpTouchRegions[Num].h=CO_NUM_H;
-		gpTouchRegions[Num].ObjID=pNumBox->ObjID;
+		gpTouchRegions[Num].ObjID=pNumCtrlObj->ObjID;
 		gpTouchRegions[Num].Type=COT_Num;
 		gpTouchRegions[Num].Index=Idx;
 		gpTouchRegions[Num].OptionsMask=(u8)(PrsMsk|RelMsk|ReVMsk);
 
 		{//draw
 			u8 NumStr[32];
-			DrawRegion.x=pNumBox->x+CO_NUM_ARROW_W-CO_NUM_FRAME_W;
-			DrawRegion.y=pNumBox->y;
+			DrawRegion.x=pNumCtrlObj->x+CO_NUM_ARROW_W-CO_NUM_FRAME_W;
+			DrawRegion.y=pNumCtrlObj->y;
 			DrawRegion.w=CO_NUM_FRAME_W;
 			DrawRegion.h=CO_NUM_H;
 			DrawRegion.Color=CO_NUM_TRAN_COLOR;
 			Gui_DrawImgArray(gCtrlObj_NumLeft,&DrawRegion);//左边框
 
-			DrawRegion.x=pNumBox->x+CO_NUM_ARROW_W;
-			DrawRegion.y=pNumBox->y;
+			DrawRegion.x=pNumCtrlObj->x+CO_NUM_ARROW_W;
+			DrawRegion.y=pNumCtrlObj->y;
 			DrawRegion.w=CO_NUM_MIDDLE_W;
 			DrawRegion.h=CO_NUM_H;
 			DrawRegion.Color=CO_NUM_TRAN_COLOR;
-			Gui_FillImgArray_H(gCtrlObj_NumMiddle,pNumBox->w-(CO_NUM_ARROW_W<<1),&DrawRegion);	
+			Gui_FillImgArray_H(gCtrlObj_NumMiddle,pNumCtrlObj->w-(CO_NUM_ARROW_W<<1),&DrawRegion);	
 
-			DrawRegion.x=pNumBox->x+pNumBox->w-CO_NUM_ARROW_W;
-			DrawRegion.y=pNumBox->y;
+			DrawRegion.x=pNumCtrlObj->x+pNumCtrlObj->w-CO_NUM_ARROW_W;
+			DrawRegion.y=pNumCtrlObj->y;
 			DrawRegion.w=CO_NUM_FRAME_W;
 			DrawRegion.h=CO_NUM_H;
 			DrawRegion.Color=CO_NUM_TRAN_COLOR;
 			Gui_DrawImgArray(gCtrlObj_NumRight,&DrawRegion);//右边框
 			
-			sprintf((void *)NumStr,"%d",pNumBox->Value);
-			DrawRegion.x=pNumBox->x+((pNumBox->w-strlen((void *)NumStr)*CO_NUM_FONT_W)>>1);
-			DrawRegion.y=pNumBox->y+3;
-			DrawRegion.w=pNumBox->w-(CO_NUM_ARROW_W<<1);
+			sprintf((void *)NumStr,"%d",pNumCtrlObj->Value);
+			DrawRegion.x=pNumCtrlObj->x+((pNumCtrlObj->w-strlen((void *)NumStr)*CO_NUM_FONT_W)>>1);
+			DrawRegion.y=pNumCtrlObj->y+3;
+			DrawRegion.w=pNumCtrlObj->w-(CO_NUM_ARROW_W<<1);
 			DrawRegion.h=CO_NUM_H;
 			DrawRegion.Color=CO_NUM_FONT_COLOR;
 			DrawRegion.Space=CO_NUM_FONT_SPACE;
