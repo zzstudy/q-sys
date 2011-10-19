@@ -40,3 +40,4 @@ typedef bool BOOL;	//add by karlno
 #endif
 
 #endif
+
