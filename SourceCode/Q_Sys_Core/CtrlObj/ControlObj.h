@@ -29,21 +29,21 @@ typedef struct{
 }PAGE_CONTROL_NUM;//页面的动态控件个数
 
 //4	用于页面的UserEventHandler返回值，旨在告诉系统做一些事情
-#define TCH_MSG u32
+#define CO_MSG u32
 //bit0-bit15 用于用户自定义返回值
-#define TM_RET_MASK 0xffff
+#define CO_RET_MASK 0xffff
 //bit16-30用于回传命令给系统，所以只支持15个回传命令
-#define TM_CMD_MASK 0x7fff0000
-#define TM_CMD_OFFSET 16
-#define TM_TouchOff (1<<16)//在TouchEventHandler返回此值，关闭触摸响应
-#define TM_TouchOn (1<<17)//在TouchEventHandler返回此值，开启触摸响应
-#define TM_ExtiKeyOff (1<<18)//在TouchEventHandler返回此值，关闭外部按键输入
-#define TM_ExtiKeyOn (1<<19)//在TouchEventHandler返回此值，开启外部按键输入
+#define CO_CMD_MASK 0x7fff0000
+#define CO_CMD_OFFSET 16
+#define CO_TouchOff (1<<16)//在TouchEventHandler返回此值，关闭触摸响应
+#define CO_TouchOn (1<<17)//在TouchEventHandler返回此值，开启触摸响应
+#define CO_ExtiKeyOff (1<<18)//在TouchEventHandler返回此值，关闭外部按键输入
+#define CO_ExtiKeyOn (1<<19)//在TouchEventHandler返回此值，开启外部按键输入
 //bit31 用于回传状态给系统
-#define TM_STATE_MASK 0x80000000
-#define TM_STATE_OFFSET 31
-#define TM_State_OK 0
-#define TM_State_Faile 0x80000000
+#define CO_STATE_MASK 0x80000000
+#define CO_STATE_OFFSET 31
+#define CO_State_OK 0
+#define CO_State_Faile 0x80000000
 
 typedef enum {
 	Tch_Press=0,//触摸按下
@@ -61,14 +61,14 @@ typedef struct {//sizeof=8
 }TOUCH_INFO;//4		传入TouchEventHandler的参数
 
 //第一参数为键值(标识符)，第二参数为按键事件，第三参数为触摸信息
-typedef TCH_MSG (*TouchHandlerFunc)(u8 ,TCH_EVT , TOUCH_INFO *);
+typedef CO_MSG (*TouchHandlerFunc)(u8 ,TCH_EVT , TOUCH_INFO *);
 #ifdef QSYS_FRAME_FULL	
 //第一个参数为键值(标识符)，第二个参数为当前值，当值变化时触发
-typedef TCH_MSG (*YesNoHandlerFunc)(u8 ,bool );
+typedef CO_MSG (*YesNoHandlerFunc)(u8 ,bool );
 //第一个参数为键值(标识符)，第二个参数为当前值，第三个值为控件本体指针，当控件返回时触发
-typedef TCH_MSG (*NumCtrlObjHanderFunc)(u8 ,s32,void *);
-typedef TCH_MSG (*StrOptBoxHandlerFunc)(u8 ,TCH_EVT ,bool ,TOUCH_INFO *);
-typedef TCH_MSG (*StrInputBoxHandlerFunc)(u8 ,TCH_EVT ,bool ,TOUCH_INFO *);
+typedef CO_MSG (*NumCtrlObjHanderFunc)(u8 ,s32,void *);
+typedef CO_MSG (*StrOptBoxHandlerFunc)(u8 ,TCH_EVT ,bool ,TOUCH_INFO *);
+typedef CO_MSG (*StrInputBoxHandlerFunc)(u8 ,TCH_EVT ,bool ,TOUCH_INFO *);
 #endif	
 
 //4	按键区域的OptionMask掩码值(最大支持16个掩码)
@@ -196,6 +196,8 @@ typedef struct{
 	s32 Min;
 }NUM_BOX_OBJ;//4		数字输入框
 
+typedef NUM_BOX_OBJ NUM_CTRL_OBJ;//用NUM_CTRL_OBJ代替所有num控件前段部分，所以所有num控件实体前段成员都必须定义一致
+
 typedef struct{
 	u8 ObjID;//标识符，页面内必须唯一，以区分其他控件对象
 	NUM_CTRL_OBJ_TYPE Type;//num box类型
@@ -281,10 +283,10 @@ bool Q_SetYesNo(u8 Idx,YES_NO_OBJ *pYesNo);
 //一旦设置，当进入页面时，会用到此内存
 //所以当页面还存在时，必须保证此内存存在
 //Idx从1开始
-bool Q_SetNumCtrlObj(u8 Idx,NUM_BOX_OBJ *pNumBox);
-#define Q_SetNumBox(Idx,pNumBox) Q_SetNumCtrlObj(Idx,pNumBox)
-#define Q_SetNumList(Idx,pNumList) Q_SetNumCtrlObj(Idx,(NUM_BOX_OBJ *)pNumList)
-#define Q_SetNumEnum(Idx,pNumEnum) Q_SetNumCtrlObj(Idx,(NUM_BOX_OBJ *)pNumEnum)
+bool Q_SetNumCtrlObj(u8 Idx,NUM_CTRL_OBJ *pNumCtrlObj);
+#define Q_SetNumBox(Idx,pNumBox) Q_SetNumCtrlObj(Idx,(NUM_CTRL_OBJ *)pNumBox)
+#define Q_SetNumList(Idx,pNumList) Q_SetNumCtrlObj(Idx,(NUM_CTRL_OBJ *)pNumList)
+#define Q_SetNumEnum(Idx,pNumEnum) Q_SetNumCtrlObj(Idx,(NUM_CTRL_OBJ *)pNumEnum)
 
 #endif
 

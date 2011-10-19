@@ -14,7 +14,7 @@
 //函数声明
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
 
 //-----------------------本页系统变量及声明-----------------------
 //定义页面按键需要用到的枚举，类似于有序唯一的宏定义
@@ -105,7 +105,12 @@ const PAGE_ATTRIBUTE TestPage={
 };
 
 //-----------------------本页自定义变量声明-----------------------
-static bool Tip=FALSE;
+typedef struct{
+	bool Tip;
+	u32 GlobaU32Value;
+	void *pGlobaPointer;
+}TestPage_VARS;//本页范围内的全局变量全部定义在这个结构体里面，并通过gpTestPageVars访问，可节省RAM占用
+static TestPage_VARS *gpTestPageVars;
 
 //-----------------------本页自定义函数-----------------------
 
@@ -120,10 +125,10 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 	{
 		case Sys_PreGotoPage:
 			break;
-		case Sys_PageInit:		//系统每次打开这个页面，会处理这个事件				
+		case Sys_PageInit:		//系统每次打开这个页面，会处理这个事件	
+			gpTestPageVars=Q_PageMallco(sizeof(TestPage_VARS));//为本页面的全局变量申请空间
 		case Sys_SubPageReturn:	//如果从子页面返回,就不会触发Sys_Page_Init事件,而是Sys_SubPage_Return
-
-			Tip=FALSE;
+			gpTestPageVars->Tip=FALSE;
 
 			//画标题栏
 			DrawRegion.x=DrawRegion.y=0;
@@ -161,6 +166,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 
 			break;
 		case Sys_PageClean:
+			if(gpTestPageVars) Q_PageFree(gpTestPageVars);
 		case Sys_PreSubPage:
 		
 			break;
@@ -217,7 +223,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 }
 
 //当使用者按下本页TouchRegionSet里定义的按键时，会触发这个函数里的对应事件
-static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
+static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 {		
 	//GUI_REGION DrawRegion;
 	
@@ -233,17 +239,17 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 		case LeftArrowKV:
 			break;
 		case DotKV:
-			if(Tip)
+			if(gpTestPageVars->Tip)
 			{
 				GUI_REGION DrawRegTmp={109,292,22,22,0,FatColor(NO_TRANS)};
 				Gui_Draw24Bmp("Theme/F/Common/Btn/DotN.bmp",&DrawRegTmp);
-				Tip=FALSE;
+				gpTestPageVars->Tip=FALSE;
 			}
 			else
 			{
 				GUI_REGION DrawRegTmp={109,292,22,22,0,FatColor(NO_TRANS)};
 				Gui_Draw24Bmp("Theme/F/Common/Btn/DotP.bmp",&DrawRegTmp);
-				Tip=TRUE;
+				gpTestPageVars->Tip=TRUE;
 			}
 			break;
 		case RightArrowKV:

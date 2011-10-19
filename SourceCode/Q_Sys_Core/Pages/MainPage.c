@@ -14,8 +14,8 @@
 
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
-static TCH_MSG NumCtrlObjHander(u8 OID,s32 Value,void *pNumCtrlObj);
+static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static CO_MSG NumCtrlObjHander(u8 OID,s32 Value,void *pNumCtrlObj);
 
 //定义互斥信号量，为系统和页面或应用之间协调
 enum
@@ -242,7 +242,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 	return 0;
 }
 
-static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
+static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 {
 	MUSIC_EVENT MusicEvent;
 
@@ -344,7 +344,7 @@ static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo
 	return 0;
 }
 
-static TCH_MSG NumCtrlObjHander(u8 OID,s32 Value,void *pNumCtrlObj)
+static CO_MSG NumCtrlObjHander(u8 OID,s32 Value,void *pNumCtrlObj)
 {
 	Debug("NumCtrlObj:%d,%d\n\r",OID,Value);
 	return 0;

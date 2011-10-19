@@ -229,7 +229,7 @@ static void KB_DrawBlock(void);							//画格线
 static void KB_DrawPress(u8 xx,u8 yy);							//选字提示
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
 //---------------------------------------------页面资源定义-----------------------------------------------------------
 
 static const IMG_TCH_OBJ ImgTchRegCon[]={
@@ -350,7 +350,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 	return 0;
 }
 //当使用者按下本页TouchRegionSet里定义的按键时，会触发这个函数里的对应事件
-static TCH_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo){
+static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo){
 	u8 mainmode;
 
 	mainmode = gpKbpVars->KB_ModeBox.GetMode() & 0xf;

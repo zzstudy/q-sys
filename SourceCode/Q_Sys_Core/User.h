@@ -31,8 +31,8 @@
 //1																宏定义                               
 //2												系统设定												
 //3						页面触摸区域定义						
-#define MAX_IMG_KEY_NUM	32//每个页面自定义的最大图片按键数目
-#define MAX_CHAR_KEY_NUM	32//每个页面自定义的最大文字按键数目
+#define MAX_IMG_KEY_NUM	32//每个页面自定义的最大固态图片按键数目
+#define MAX_CHAR_KEY_NUM	32//每个页面自定义的最大固态文字按键数目
 #define MAX_DYN_CTRL_OBJ_NUM	24//每个页面允许的动态控件的总数目，包含动态按键，yesno，numbox...等控件
 #define EXTI_KEY_VALUE_START 0x00 //每个页面定义的外部按键枚举，必须从此数字开始
 #define USER_KEY_VALUE_START 0x40	//每个页面定义的按键枚举，必须从此数字开始

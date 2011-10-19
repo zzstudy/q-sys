@@ -5,3 +5,4 @@ extern const PAGE_ATTRIBUTE PicturePage;
 
 
 #endif
+

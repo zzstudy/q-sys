@@ -47,12 +47,12 @@ extern TOUCH_REGION *GetTouchInfoByIdx(u8 Idx);
 #if 1 //control obj 
 extern void ControlObjInit(void);
 extern void PageSwithcCtrlObjDataHandler(const PAGE_ATTRIBUTE *pNewPage);
-TCH_MSG TchCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo);
+CO_MSG TchCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo);
 #ifdef QSYS_FRAME_FULL	
-TCH_MSG YesNoCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx);
-TCH_MSG NumBoxCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo);
-TCH_MSG StrOptCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo);
-TCH_MSG StrInputCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo);
+CO_MSG YesNoCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx);
+CO_MSG NumBoxCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo);
+CO_MSG StrOptCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo);
+CO_MSG StrInputCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo);
 #endif
 extern void PushPageCtrlObjData(void);
 extern void PopPageCtrlObjData(bool);
@@ -250,9 +250,9 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 #ifdef QSYS_FRAME_FULL	
 	if(GetRegIdByIdx(GetPageIdxByTrack(1)) == PRID_NumCtrlObjPage)//从num控件页返回
 	{
-		NUM_BOX_OBJ *pNumBoxObj=pSysParam;
+		NUM_CTRL_OBJ *pNumCtrlObj=pSysParam;
 		if(gpCurrentPage->NumCtrlObjHander)
-			gpCurrentPage->NumCtrlObjHander(pNumBoxObj->ObjID,pNumBoxObj->Value,pSysParam);
+			gpCurrentPage->NumCtrlObjHander(pNumCtrlObj->ObjID,pNumCtrlObj->Value,pSysParam);
 		else 
 			Debug("!!!Not Define Handler Function In Page Struct!!!\n\r");
 	}
@@ -266,7 +266,7 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 	return gCurrSysMsg;
 }
 
-//用于处理Touch Type事件
+//用于处理控件触摸事件分类
 //Num里存储的是touch线程的触摸区域索引
 //InType:	Input_TchPress,//触摸按下
 //				Input_TchContinue,//保持触摸状态，用于传递长按时的实时坐标
@@ -274,9 +274,9 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 //				Input_TchReleaseVain,//在非有效区域松开
 //Idx:usb by GetTouchInfoByIdx(Num)
 //pTouchInfo:touch info
-static TCH_MSG TouchTypeHandler(INPUT_EVT_TYPE InType,u16 Idx,TOUCH_INFO *pTouchInfo)
+static CO_MSG CtrlObjTypeHandler(INPUT_EVT_TYPE InType,u16 Idx,TOUCH_INFO *pTouchInfo)
 {	
-	TCH_MSG TchMsg=TM_State_OK;
+	CO_MSG CoMsg=CO_State_OK;
 
 	switch(GetTouchInfoByIdx(Idx)->Type)
 	{
@@ -284,24 +284,24 @@ static TCH_MSG TouchTypeHandler(INPUT_EVT_TYPE InType,u16 Idx,TOUCH_INFO *pTouch
 		case COT_CharTch:
 		case COT_DynImg:
 		case COT_DynChar:
-			TchMsg=TchCtrlObjHandler(InType,Idx,pTouchInfo);
+			CoMsg=TchCtrlObjHandler(InType,Idx,pTouchInfo);
 			break;
 #ifdef QSYS_FRAME_FULL	
 		case COT_YesNo:
-			TchMsg=YesNoCtrlObjHandler(InType,Idx);
+			CoMsg=YesNoCtrlObjHandler(InType,Idx);
 			break;
 		case COT_Num:
-			TchMsg=NumBoxCtrlObjHandler(InType,Idx,pTouchInfo);
+			CoMsg=NumBoxCtrlObjHandler(InType,Idx,pTouchInfo);
 			break;
 		case COT_StrOpt:
-			TchMsg=StrOptCtrlObjHandler(InType,Idx,pTouchInfo);
+			CoMsg=StrOptCtrlObjHandler(InType,Idx,pTouchInfo);
 			break;
 		case COT_StrInput:
-			TchMsg=StrInputCtrlObjHandler(InType,Idx,pTouchInfo);
+			CoMsg=StrInputCtrlObjHandler(InType,Idx,pTouchInfo);
 			break;
 #endif
 	}
-	return TchMsg;
+	return CoMsg;
 }
 
 //系统全局数据初始化
@@ -348,7 +348,7 @@ void InputHandler_Task( void *Task_Parameters )
 	u32 TickStamp[EXTI_KEY_MAX_NUM];
 	u16 ExtiKeyNum;
 	SYS_MSG SysMsg;
-	TCH_MSG TchMsg;
+	CO_MSG CoMsg;
 
 	QSYS_Init();//系统初始化
 	QSYS_DataInit();//系统数据初始化
@@ -366,11 +366,11 @@ void InputHandler_Task( void *Task_Parameters )
 		//if(Sync_Type==InEventParam.uType)
 			//if(Input_GotoSubPage==InEventParam.EventType) Debug("@@@Gopage\n\r");
 		
-		SysMsg=TchMsg=0;
+		SysMsg=CoMsg=0;
 		switch(InEventParam.uType)//对第一级分类进行判断
 		{
 			case Touch_Type:
-				TchMsg=TouchTypeHandler(InEventParam.EventType,InEventParam.Num,&InEventParam.Info.TouchInfo);
+				CoMsg=CtrlObjTypeHandler(InEventParam.EventType,InEventParam.Num,&InEventParam.Info.TouchInfo);
 				break; 
 			case Sync_Type:
 				if(Input_PageSync==InEventParam.EventType)//处理页面同步
@@ -446,7 +446,7 @@ void InputHandler_Task( void *Task_Parameters )
 						MyGobalPeripEvtHandler(Perip_KeyPress,ExtiKeyNum+EXTI_KEY_VALUE_START,&ExtiKeyInfo[ExtiKeyNum]);
 						if(Q_InspectPeripEvt(PRID_Current,Perip_KeyPress)==HasPagePeripEvt)//检查是否允许触发
 							if(gpCurrentPage->PeripEvtHandler)//这里要检查是因为按键可能在还没进入第一个页面的时候就按下了。
-								TchMsg=gpCurrentPage->PeripEvtHandler(Perip_KeyPress,ExtiKeyNum+EXTI_KEY_VALUE_START,&ExtiKeyInfo[ExtiKeyNum]);
+								CoMsg=gpCurrentPage->PeripEvtHandler(Perip_KeyPress,ExtiKeyNum+EXTI_KEY_VALUE_START,&ExtiKeyInfo[ExtiKeyNum]);
 					}
 					else	//key release
 					{
@@ -454,7 +454,7 @@ void InputHandler_Task( void *Task_Parameters )
 						MyGobalPeripEvtHandler(Perip_KeyRelease,ExtiKeyNum+EXTI_KEY_VALUE_START,&ExtiKeyInfo[ExtiKeyNum]);
 						if(Q_InspectPeripEvt(PRID_Current,Perip_KeyRelease)==HasPagePeripEvt)//检查是否允许触发
 							if(gpCurrentPage->PeripEvtHandler)//这里要检查是因为按键可能在还没进入第一个页面的时候就按下了。
-								TchMsg=gpCurrentPage->PeripEvtHandler(Perip_KeyRelease,ExtiKeyNum+EXTI_KEY_VALUE_START,&ExtiKeyInfo[ExtiKeyNum]);
+								CoMsg=gpCurrentPage->PeripEvtHandler(Perip_KeyRelease,ExtiKeyNum+EXTI_KEY_VALUE_START,&ExtiKeyInfo[ExtiKeyNum]);
 					}
 					//OS_TaskDelayMs(20);
 				}
@@ -534,10 +534,11 @@ void InputHandler_Task( void *Task_Parameters )
 		}
 
 		//系统信息处理
-		if((SysMsg&SM_TouchOff)||(TchMsg&TM_TouchOff)) Disable_Touch_Inperrupt();
-		if((SysMsg&SM_TouchOn)||(TchMsg&TM_TouchOn)) Enable_Touch_Inperrupt();
+		if((SysMsg&SM_TouchOff)||(CoMsg&CO_TouchOff)) Disable_Touch_Inperrupt();
+		if((SysMsg&SM_TouchOn)||(CoMsg&CO_TouchOn)) Enable_Touch_Inperrupt();
 		
-		if((SysMsg&SM_ExtiKeyOff)||(TchMsg&TM_ExtiKeyOff)) OS_TaskSuspend(KeysHandler_Task_Handle);//挂起按键监控线程
-		if((SysMsg&SM_ExtiKeyOn)||(TchMsg&TM_ExtiKeyOn)) OS_TaskResume(KeysHandler_Task_Handle);//恢复按键监控线程
+		if((SysMsg&SM_ExtiKeyOff)||(CoMsg&CO_ExtiKeyOff)) OS_TaskSuspend(KeysHandler_Task_Handle);//挂起按键监控线程
+		if((SysMsg&SM_ExtiKeyOn)||(CoMsg&CO_ExtiKeyOn)) OS_TaskResume(KeysHandler_Task_Handle);//恢复按键监控线程
 	}
 }
+
