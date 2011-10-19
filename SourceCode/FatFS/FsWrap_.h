@@ -152,3 +152,4 @@ FS_i32 FS_FileCpy(const TCHAR*path1, const TCHAR*path2);		//path1: souce file   
 FS_i32 FS_GetFileSize(FS_FILE *pFile);
 
 #endif
+

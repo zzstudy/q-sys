@@ -342,3 +342,4 @@ FRESULT f_readdir_noinfo (
 #endif
 
 #endif /* _FATFS */
+
