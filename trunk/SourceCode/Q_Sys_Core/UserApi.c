@@ -154,13 +154,13 @@ SYS_MSG Q_GotoPage(PAGE_ACTION PageAction, u8 *Name, int IntParam, void *pSysPar
 			return gCurrSysMsg;
 		}
 	}
-	
-	//POP页面只允许以进入子页面的形式进入
-	if((GetPageByIdx(PageIdx)->Type==POP_PAGE)&&((PageAction!=GotoSubPage)||(PageAction!=SubPageReturn)))
-	{
-		Q_ErrorStopScreen("Pop Page not allow entry by \"GotoNewPage\" param!");
-		return SM_State_Faile;
-	}
+
+	if(GetPageByIdx(PageIdx)->Type==POP_PAGE)//要进入的页面是pop页面
+		if((PageAction!=GotoSubPage)&&(PageAction!=SubPageReturn))
+		{
+			Q_ErrorStopScreen("Pop Page not allow entry by \"GotoNewPage\" & \"SubPageTranslate\" param!");
+			return SM_State_Faile;
+		}
 
 	//POP页面只允许以子页面返回的形式退出
 	if((Q_GetPageByTrack(0)->Type==POP_PAGE)&&(PageAction!=SubPageReturn))
