@@ -8,7 +8,7 @@ bool Q_PageSync(int IntParam,void *pSysParam,u32 TicksToWait)
 	SyncEvent.EventType=Input_PageSync;
 	SyncEvent.Info.SyncInfo.IntParam=IntParam;
 	SyncEvent.Info.SyncInfo.pParam=pSysParam;
-	if(OS_ERR_NONE==OS_MsgBoxSend(gInputHandler_Queue,&SyncEvent,TicksToWait,FALSE))
+	if(OS_ERR_NONE!=OS_MsgBoxSend(gInputHandler_Queue,&SyncEvent,TicksToWait,FALSE))
 	{
 		Debug("Page Sync Queue Send Faile!\n\r");
 		return FALSE;
