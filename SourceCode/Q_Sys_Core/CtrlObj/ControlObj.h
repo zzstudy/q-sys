@@ -3,29 +3,23 @@
 
 typedef enum{
 	COT_NULL=0,
-	COT_ImgTch,
-	COT_CharTch,
-	COT_DynImg,
-	COT_DynChar,
-#ifdef QSYS_FRAME_FULL	
+	COT_ImgBtn,
+	COT_CharBtn,
+	COT_DynImgBtn,
+	COT_DynCharBtn,
 	COT_YesNo,
 	COT_Num,
-	COT_StrOpt,
-	COT_StrInput,
-#endif
+	COT_Str,
 }CTRL_OBJ_TYPE;
 
 typedef struct{
-	u8 ImgTchNum;//图片按键数目，大多数页面只用到了图片按钮
-	u8 CharTchNum;//文字按键数目，大多数页面只用到了图片按钮，则此值定义为0即可
-	u8 DynImgTchNum;//动态图片按键的个数
-	u8 DynCharTchNum;//动态文字按键的个数
-#ifdef QSYS_FRAME_FULL	
+	u8 ImgBtnNum;//图片按键数目，大多数页面只用到了图片按钮
+	u8 CharBtnNum;//文字按键数目，大多数页面只用到了图片按钮，则此值定义为0即可
+	u8 DynImgBtnNum;//动态图片按键的个数
+	u8 DynCharBtnNum;//动态文字按键的个数
 	u8 YesNoNum;//yes or no 选项的个数
-	u8 NumBoxNum;//数字框的个数
-	u8 StrOptBoxNum;//字符串选项框的个数
-	u8 StrInputBoxNum;//字符串输入框的个数
-#endif
+	u8 NumCtrlObjNum;//数字框的个数
+	u8 StrCtrlObjNum;//字符串框的个数
 }PAGE_CONTROL_NUM;//页面的动态控件个数
 
 //4	用于页面的UserEventHandler返回值，旨在告诉系统做一些事情
@@ -61,15 +55,13 @@ typedef struct {//sizeof=8
 }TOUCH_INFO;//4		传入TouchEventHandler的参数
 
 //第一参数为键值(标识符)，第二参数为按键事件，第三参数为触摸信息
-typedef CO_MSG (*TouchHandlerFunc)(u8 ,TCH_EVT , TOUCH_INFO *);
-#ifdef QSYS_FRAME_FULL	
+typedef CO_MSG (*ButtonHandlerFunc)(u8 ,TCH_EVT , TOUCH_INFO *);
 //第一个参数为键值(标识符)，第二个参数为当前值，当值变化时触发
 typedef CO_MSG (*YesNoHandlerFunc)(u8 ,bool );
 //第一个参数为键值(标识符)，第二个参数为当前值，第三个值为控件本体指针，当控件返回时触发
 typedef CO_MSG (*NumCtrlObjHanderFunc)(u8 ,s32,void *);
-typedef CO_MSG (*StrOptBoxHandlerFunc)(u8 ,TCH_EVT ,bool ,TOUCH_INFO *);
-typedef CO_MSG (*StrInputBoxHandlerFunc)(u8 ,TCH_EVT ,bool ,TOUCH_INFO *);
-#endif	
+//第一个参数为键值(标识符)，第二个参数
+typedef CO_MSG (*StrCtrlObjHandlerFunc)(u8 ,u32 ,u8 *);
 
 //4	按键区域的OptionMask掩码值(最大支持16个掩码)
 //注:因为Touch线程和Input线程资源交换有限的缘故，按键事件掩码必须放在低8位
@@ -125,7 +117,7 @@ typedef struct {
 	//u8 ReleaseSuffix;//释放状态后缀，单字节，如果指定为0，则不显示
 	//u8 ReserveU8;//保留
 	COLOR_TYPE TransColor; //32位透明色，NO_TRANSP表示不用透明色
-}IMG_TCH_OBJ;//4		触摸按键区域定义
+}IMG_BUTTON_OBJ;//4		触摸按键区域定义
 
 typedef struct {
 	u8 *Name;//键名，图标按键下用于不能显示图标时的提示。文字按键下用于文字显示。
@@ -163,9 +155,8 @@ typedef struct {
 	COLOR_TYPE PressBG;//16位色彩，指定按下状态背景色	
 	COLOR_TYPE ReleaseColor;//16位色彩，指定释放状态文字颜色
 	COLOR_TYPE ReleaseBG;//16位色彩，指定释放状态背景色
-}CHAR_TCH_OBJ;//4		触摸按键区域定义
+}CHAR_BUTTON_OBJ;//4		触摸按键区域定义
 
-#ifdef QSYS_FRAME_FULL	
 typedef struct {		
 	u8 ObjID;//标识符，页面内必须唯一，以区分其他控件对象
 
@@ -226,19 +217,44 @@ typedef struct{
 	u8 Idx;//当前值索引
 	u8 Num;//当前值个数
 	u8 Total;//可容纳总数
-	s32 *pEnumList;//指向枚举数的存储空间，在控件有效时，此指针指向的内存也应有效
+	s32 *pEnumList;//指向枚举数的存储空间，在控件有效时，此指针指向的内存也应有效，此空间需开发者自行分配获取
 }NUM_ENUM_OBJ;//4		数字输入框
 
-typedef struct{
-	u8 ObjID;//标识符，页面内必须唯一，以区分其他控件对象
-}STR_OPT_OBJ;//4		字符串选项框
+typedef enum{
+	SCOT_StrBox,
+	SCOT_StrEnum,
+}STR_CTRL_OBJ_TYPE;
 
 typedef struct{
 	u8 ObjID;//标识符，页面内必须唯一，以区分其他控件对象
-}STR_INPUT_OBJ;//4		字符串输入框
-#endif
+	STR_CTRL_OBJ_TYPE Type;//str控件类型
 
-typedef u8 REP_IMG_SUFX;
+	u16 x; 	//控件含边框的区域起点的x值，屏幕左上点为0，0坐标。如果是横屏模式，则需要横过显示屏，指定显示区域的左上点。
+	u16 y;	//控件含边框的区域域起点的y值
+	u16 w; //控件含边框的区域的宽度,如果按键是横屏模式,注意横过显示屏来定义
+	u16 h;  //控件含边框的区域的高度
+
+	u16 TotalSize;//缓存总大小
+	u8 *pStrBuf;//字符串缓存
+}STR_BOX_OBJ;//4		字符串输入框
+
+typedef STR_BOX_OBJ STR_CTRL_OBJ;
+
+typedef struct{
+	u8 ObjID;//标识符，页面内必须唯一，以区分其他控件对象
+	STR_CTRL_OBJ_TYPE Type;//str控件类型
+	
+	u16 x; 	//触摸区域起点的x值，屏幕左上点为0，0坐标。如果是横屏模式，则需要横过显示屏，指定显示区域的左上点。
+	u16 y;	//触摸区域起点的y值
+	u16 w; //触摸区域宽度,如果按键是横屏模式,注意横过显示屏来定义
+	
+	u16 Idx;//当前字符串位置
+	u16 Size;//当前所有字符串占用长度，不含最后一个字符串的结束符
+	u16 TotalSize;//缓存可容纳总长度
+	u8 *pStrEnumBuf;//指向字符串缓存，每个字符串以0间隔，此缓存需开发者自行分配获取
+}STR_ENUM_OBJ;//4		字符串枚举选项框
+
+typedef u8 REP_IMG_SUFX;//img替代文件后缀类型
 
 //api
 
@@ -247,48 +263,59 @@ typedef u8 REP_IMG_SUFX;
 // 2.只能指定后缀，比如原来的资源图标是"MusicN.bmp"
 //    指定Suffix='T'，则图标资源变成"MusicT.bmp"
 //如果Suffix=0，则恢复原始图标
-void Q_ChangeImgTchImg(u8 Key,u8 Suffix);
+void Q_ChangeImgTchImg(u8 OID,u8 Suffix);
 
 //和ChangeKeyImg相对，读取当前的图标替换后缀值
 //返回0表示是默认值
 //否则返回替换的后缀
-u8 Q_ReadImgTchImg(u8 Key);
+u8 Q_ReadImgTchImg(u8 OID);
 
 //更改当前触摸域某个文字按键的显示文字
 // 1.只对当前页面有效,转换页面或子页面后失效
 //如果NewName=NULL，则恢复原始文字
-void Q_ChangeCharTchName(u8 Key,u8 *NewName);
+void Q_ChangeCharTchName(u8 OID,u8 *NewName);
 
 //和ChangeKeyName相对，读取当前的图标替换后缀值
 //返回NULL表示是默认值或者key超出范围
-u8 *Q_ReadCharTchName(u8 Key);
+u8 *Q_ReadCharTchName(u8 OID);
 
 //立刻呈现指定按键键值的图标或文字，对所有此键值的按键均有效
-void Q_PresentTch(u8 Key,TCH_EVT Type);
+void Q_PresentTch(u8 OID,TCH_EVT Type);
 
 //用于设置新的动态图标按键
-bool Q_SetDynamicImgTch(u8 Idx,IMG_TCH_OBJ *pTchReg);
+//pTchReg为NULL时，表示注销此控件有效性
+bool Q_SetDynamicImgTch(u8 Idx,IMG_BUTTON_OBJ *pBtnObj);
 
 //用于设置新的动态文字按键
-bool Q_SetDynamicCharTch(u8 Idx,CHAR_TCH_OBJ *pTchReg);
+//pTchReg为NULL时，表示注销此控件有效性
+bool Q_SetDynamicCharTch(u8 Idx,CHAR_BUTTON_OBJ *pBtnObj);
 
-#ifdef QSYS_FRAME_FULL
-//设置yes no选项，pYesNo指向的内存在调用完函数后不可注销
+//设置yes no控件，pYesNo指向的内存在调用完函数后不可注销
 //一旦设置，当进入页面时，会用到此内存
 //所以当页面还存在时，必须保证此内存存在
 //Idx从1开始
+//pYesNo为NULL时，表示注销此控件有效性
 bool Q_SetYesNo(u8 Idx,YES_NO_OBJ *pYesNo);
 
-//设置num box选项，pNumBox指向的内存在调用完函数后不可注销
+//设置num控件，pNumBox指向的内存在调用完函数后不可注销
 //一旦设置，当进入页面时，会用到此内存
 //所以当页面还存在时，必须保证此内存存在
 //Idx从1开始
+//pNumCtrlObj为NULL时，表示注销此控件有效性
 bool Q_SetNumCtrlObj(u8 Idx,NUM_CTRL_OBJ *pNumCtrlObj);
 #define Q_SetNumBox(Idx,pNumBox) Q_SetNumCtrlObj(Idx,(NUM_CTRL_OBJ *)pNumBox)
 #define Q_SetNumList(Idx,pNumList) Q_SetNumCtrlObj(Idx,(NUM_CTRL_OBJ *)pNumList)
 #define Q_SetNumEnum(Idx,pNumEnum) Q_SetNumCtrlObj(Idx,(NUM_CTRL_OBJ *)pNumEnum)
 
-#endif
+//设置str控件,pStrCtrlObj及pStrCtrlObj->pBuf均必须有效，在调用完函数后不能注销
+//所以当页面还存在时，必须保证此内存存在
+//Idx从1开始
+//pStrCtrlObj为NULL时，表示注销此控件有效性
+bool Q_SetStrCtrlObj(u8 Idx,STR_CTRL_OBJ *pStrCtrlObj);
+#define Q_SetStrBox(Idx,pStrBox) Q_SetStrCtrlObj(Idx,(STR_CTRL_OBJ *)pStrBox)
+#define Q_SetStrEnum(Idx,pStrEnum) Q_SetStrCtrlObj(Idx,(STR_CTRL_OBJ *)pStrEnum)
+
+bool Q_StrEnumAddOne(STR_ENUM_OBJ *pStrEnum,u8 *Str);
 
 #endif
 

@@ -49,7 +49,7 @@ extern s32 X_OFFSET;
 extern s32 Y_OFFSET;
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
 enum{
 	ExtiKeyDown=EXTI_KEY_VALUE_START,//系统默认将外部中断按键发送到第一个键值
 	ExtiKeyUp,
@@ -64,7 +64,7 @@ enum{
     RingKV,
     CallKV
 };
-static const IMG_TCH_OBJ ImgTchRegCon[]={
+static const IMG_BUTTON_OBJ ImgButtonCon[]={
 	{"",LU,RelMsk,LeftUp_X-19,LeftUp_Y-19,38,38,0,0,"",FatColor(NO_TRANS)},
     {"",RU,RelMsk,RightUp_X-19,RightUp_Y-19,38,38,0,0,"",FatColor(NO_TRANS)},
     {"",LD,RelMsk,LeftDown_X-19,LeftDown_Y-19,38,38,0,0,"",FatColor(NO_TRANS)},
@@ -82,15 +82,15 @@ const PAGE_ATTRIBUTE TouchCheckPage={
     NORMAL_PAGE,
     0,
     {
-		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
-		0,//sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
+		sizeof(ImgButtonCon)/sizeof(IMG_BUTTON_OBJ), //size of touch region array
+		0,//sizeof(CharButtonCon)/sizeof(CHAR_BUTTON_OBJ), //size of touch region array,
 	},
-    ImgTchRegCon,
+    ImgButtonCon,
     NULL,
     SystemEventHandler,
 	PeripheralsHandler,
 	Bit(Perip_KeyRelease),
-    TouchEventHandler,
+    ButtonHandler,
 };
 typedef struct{
 	bool lu_flag;
@@ -295,7 +295,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 	return 0;
 }
 
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo){
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo){
     switch(Key){
 		case LU:{
 			if(gpTcpVars->lu_flag==FALSE){

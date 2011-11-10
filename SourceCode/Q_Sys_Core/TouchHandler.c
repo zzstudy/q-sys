@@ -8,7 +8,7 @@ extern OS_SemaphoreHandle gAllowTchHandler_Sem;
 #define TOUCH_SAMPLE_NUM 18   //每次触摸采用数目
 
 u8 gTouchRegionNum=0;//记录所有注册区域个数的变量
-TOUCH_REGION *gpTouchRegions;//记录所有注册区域的指针变量
+TOUCH_REGION *gpTouchRegions;//记录所有注册区域的指针变量，包括全部静态和动态控件
 
 float X_RATIO=1.0;
 float Y_RATIO=1.0;
@@ -136,7 +136,7 @@ static bool Chk_SameID_Touch(u16 x,u16 y,u8 TchRegIdx)
 	u8 i;
 	u8 ObjID=gpTouchRegions[TchRegIdx].ObjID;
 
-	if(gpTouchRegions[TchRegIdx].Type<=COT_DynChar)
+	if(gpTouchRegions[TchRegIdx].Type<=COT_DynCharBtn)
 	{
 		for(i=0;i<gTouchRegionNum;i++)//找相同键值的键
 		{

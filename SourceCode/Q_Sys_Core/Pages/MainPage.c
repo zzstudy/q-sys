@@ -14,11 +14,12 @@
 
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
-static CO_MSG NumCtrlObjHander(u8 OID,s32 Value,void *pNumCtrlObj);
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static CO_MSG NumCtrlObjHandler(u8 OID,s32 Value,void *pNumCtrlObj);
+static CO_MSG StrCtrlObjHandler(u8 OID,u32 Len,u8 *Str);
 
 //定义互斥信号量，为系统和页面或应用之间协调
-enum
+typedef enum
 {
 	ExtiKey0=EXTI_KEY_VALUE_START,//系统默认将外部中断按键发送到第一个键值
 	ExtiKey1,
@@ -39,10 +40,10 @@ enum
 	MailKV,
 	RingKV,
 	CallKV,
-};
+}MainPage_OID;
 
 //定义页面或应用的触摸区域集，相当于定义按键
-static const IMG_TCH_OBJ ImgTchRegCon[]={
+static const IMG_BUTTON_OBJ ImgButtonCon[]={
 	//{key,gLandScapeMode,x,y,width,hight,image x,image y,normal bmp path,release bmp path,press bmp path,transparent color,key name}
 	{"<",				PrevKV,		RelMsk,0,33,17,70,0,25,"Left",FatColor(NO_TRANS)},
 	{"Music",		MusicKV,	RelMsk,18,33,50,70,0,0,"Music",FatColor(0xff0000)},
@@ -67,26 +68,23 @@ const PAGE_ATTRIBUTE MainPage={
 	0,
 
 	{
-		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
-		0,//sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
+		sizeof(ImgButtonCon)/sizeof(IMG_BUTTON_OBJ), //size of touch region array
+		0,//sizeof(CharButtonCon)/sizeof(CHAR_BUTTON_OBJ), //size of touch region array,
 		0,0,
-#ifdef QSYS_FRAME_FULL	
-		0,3
-#endif
+		1,3,2
 	},
 	
-	ImgTchRegCon, //touch region array
-	NULL,//CharTchRegCon,
+	ImgButtonCon, //touch region array
+	NULL,//CharButtonCon,
 	
 	SystemEventHandler, //init page or app function  
 	PeripheralsHandler,
 	Bit(Perip_RtcMin)|Bit(Perip_LcdOff)|Bit(Perip_LcdOn)|Bit(Perip_UartInput)|
 	Bit(Perip_Timer)|Bit(Perip_RtcAlarm)|Bit(Perip_KeyPress)|Bit(Perip_KeyRelease),
-	TouchEventHandler, //touch input event handler function
-#ifdef QSYS_FRAME_FULL
+	ButtonHandler, //touch input event handler function
 	NULL,
-	NumCtrlObjHander,
-#endif
+	NumCtrlObjHandler,
+	StrCtrlObjHandler,
 };
 
 static const char Week[][4]={"一","二","三","四","五","六","天"};
@@ -170,12 +168,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent,int IntParam,void *pSysParam)
 	
 	return 0;
 }
-
-			NUM_BOX_OBJ NumBoxObj;
-			NUM_LIST_OBJ NumListObj;
-			NUM_ENUM_OBJ NumEnumObj;
-			s32 gEnumList[100];
-			
+		
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam)
 {
 	switch(PeripEvent)
@@ -242,7 +235,16 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 	return 0;
 }
 
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
+NUM_BOX_OBJ NumBoxObj;
+NUM_LIST_OBJ NumListObj;
+NUM_ENUM_OBJ NumEnumObj;
+STR_BOX_OBJ StrBoxObj;
+STR_ENUM_OBJ StrEnumObj;
+s32 gEnumList[100];
+u8 gStrBoxBuf[100];
+u8 gStrEnumBuf[100];
+
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 {
 	MUSIC_EVENT MusicEvent;
 
@@ -280,8 +282,8 @@ static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
  		case HomeKV:
 			NumListObj.ObjID=100;
 			NumListObj.Type=NCOT_NumList;
-			NumListObj.x=100;
-			NumListObj.y=150;
+			NumListObj.x=10;
+			NumListObj.y=120;
 			NumListObj.w=100;
 			NumListObj.Value=50;
 			NumListObj.Min=0;
@@ -291,8 +293,8 @@ static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 
 			NumEnumObj.ObjID=101;
 			NumEnumObj.Type=NCOT_NumEnum;
-			NumEnumObj.x=100;
-			NumEnumObj.y=200;
+			NumEnumObj.x=120;
+			NumEnumObj.y=120;
 			NumEnumObj.w=100;
 			NumEnumObj.Value=0;
 			NumEnumObj.Idx=0;
@@ -307,14 +309,58 @@ static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 
 			NumBoxObj.ObjID=102;
 			NumBoxObj.Type=NCOT_NumBox;
-			NumBoxObj.x=20;
-			NumBoxObj.y=250;
+			NumBoxObj.x=10;
+			NumBoxObj.y=150;
 			NumBoxObj.w=100;
 			NumBoxObj.Value=50;
 			NumBoxObj.Max=1000;
 			NumBoxObj.Min=40;
 			Q_SetNumBox(3,&NumBoxObj);
  			//Gui_SetBgLight(0);
+
+			StrBoxObj.ObjID=103;
+			StrBoxObj.Type=SCOT_StrBox;
+			StrBoxObj.x=20;
+			StrBoxObj.y=180;
+			StrBoxObj.w=200;
+			StrBoxObj.h=60;
+			StrBoxObj.TotalSize=100;
+			StrBoxObj.pStrBuf=gStrBoxBuf;
+			Q_SetStrBox(1,&StrBoxObj);
+
+			StrEnumObj.ObjID=104;
+			StrEnumObj.Type=SCOT_StrEnum;
+			StrEnumObj.x=20;
+			StrEnumObj.y=260;
+			StrEnumObj.w=200;
+			StrEnumObj.Idx=0;
+			StrEnumObj.Size=0;
+			StrEnumObj.TotalSize=100;
+			StrEnumObj.pStrEnumBuf=gStrEnumBuf;
+			Q_StrEnumAddOne(&StrEnumObj,"Test1");
+			{
+				u8 i;Debug("\n\r#");
+				for(i=0;i<StrEnumObj.TotalSize;i++) 
+					if(StrEnumObj.pStrEnumBuf[i] == 0) Debug(" ");
+					else Debug("%c",StrEnumObj.pStrEnumBuf[i]);
+			}
+			Q_StrEnumAddOne(&StrEnumObj,"12345678901234567890");
+			{
+				u8 i;Debug("\n\r#");
+				for(i=0;i<StrEnumObj.TotalSize;i++)
+					if(StrEnumObj.pStrEnumBuf[i] == 0) Debug(" ");
+					else Debug("%c",StrEnumObj.pStrEnumBuf[i]);
+			}
+			Q_StrEnumAddOne(&StrEnumObj,"Test222");
+			{
+				u8 i;Debug("\n\r#");
+				for(i=0;i<StrEnumObj.TotalSize;i++) 					
+					if(StrEnumObj.pStrEnumBuf[i] == 0) Debug(" ");
+					else Debug("%c",StrEnumObj.pStrEnumBuf[i]);
+			}
+			Q_StrEnumAddOne(&StrEnumObj,"Test333");
+			Q_SetStrEnum(2,&StrEnumObj);
+ 			
  			break;
 		case MailKV:
 			Gui_SetBgLight(50);
@@ -344,13 +390,17 @@ static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 	return 0;
 }
 
-static CO_MSG NumCtrlObjHander(u8 OID,s32 Value,void *pNumCtrlObj)
+static CO_MSG NumCtrlObjHandler(u8 OID,s32 Value,void *pNumCtrlObj)
 {
 	Debug("NumCtrlObj:%d,%d\n\r",OID,Value);
 	return 0;
 }
 
-
+static CO_MSG StrCtrlObjHandler(u8 OID,u32 Len,u8 *Str)
+{
+	Debug("StrCtrlObj:%d,%d,%s\n\r",OID,Len,Str);
+	return 0;
+}
 
 
 

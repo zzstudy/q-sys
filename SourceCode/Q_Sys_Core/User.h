@@ -47,7 +47,6 @@
 //3								主题项									
 
 //3							杂项											
-#define QSYS_FRAME_FULL 1 //定义此宏表示全功能版
 #define EXTI_KEY_MAX_NUM	3 	//外部按键个数
 #define MAX_PATH_LEN		512 //系统最长路径字节数为1024
 #define MAX_PAGE_TRACK_NUM 32//最大的页面痕迹记录数
@@ -123,6 +122,9 @@ typedef enum{
 	INPUT_TASK_PRIORITY,
 	RF_DATA_TASK_PRIORITY,
 	KEYS_TASK_PRIORITY,
+	//用户定义的任务优先级放这里
+	WAVE_DISP_TASK_PRIORITY,
+	
 }TASK_PRIORITY;
 #endif
 #if OS_USE_FREERTOS
@@ -150,6 +152,7 @@ typedef enum{
 	PRID_MusicPage,
 	PRID_FileListPage,
 	PRID_NumCtrlObjPage,
+	PRID_StrCtrlObjPage,
 	PRID_EBookPage,
 	PRID_PicturePage,
 	PRID_SettingsPage,
@@ -161,6 +164,7 @@ typedef enum{
 	PRID_AppListPage,
 	PRID_SnakePage,
 	PRID_TouchCheckPage,
+	PRID_WaveDispPage,
 	//新页面的RID定义到这里
 	
 }PAGE_RID;//4 	页面RID
@@ -295,19 +299,17 @@ typedef struct PAGE_ATTRIBUTE{
 	
 	PAGE_CONTROL_NUM CtrlObjNum;//控件个数记录
 	
-	const IMG_TCH_OBJ *pImgTchRegCon;//页面的按钮区域集，用来定义页面所有的图片按键
-	const CHAR_TCH_OBJ *pCharTchRegCon;//页面的按钮区域集，用来定义页面所有的文字按键
+	const IMG_BUTTON_OBJ *pImgButtonCon;//页面的按钮集，用来定义页面所有的图片按键
+	const CHAR_BUTTON_OBJ *pCharButtonCon;//页面的按钮集，用来定义页面所有的文字按键
 
 	SystemHandlerFunc SysEvtHandler;//页面的SystemEventHandler实体，处理系统事件，主要是页面切换。不能为空
 	PeripheralsHandlerFunc PeripEvtHandler;//页面PeripheralsHandlerFunc实体，处理外围事件。不能为空
 	u32 PeripEvtInitMask;
-	TouchHandlerFunc TchEvtHandler;//页面的TouchEventHandler实体。不能为空
-#ifdef QSYS_FRAME_FULL	
+	
+	ButtonHandlerFunc ButtonHandler;//页面的TouchEventHandler实体。不能为空
 	YesNoHandlerFunc YesNoHandler;//处理YesNo控件
 	NumCtrlObjHanderFunc NumCtrlObjHander;//处理Num控件
-	StrOptBoxHandlerFunc StrOptBoxHandler;//处理StrOpt控件
-	StrInputBoxHandlerFunc StrInputBoxHandler;//处理Input控件
-#endif	
+	StrCtrlObjHandlerFunc StrCtrlObjHandler;//处理Str控件
 }PAGE_ATTRIBUTE;//4	每个页面都会定义的属性结构体
 
 //4	spi flash项

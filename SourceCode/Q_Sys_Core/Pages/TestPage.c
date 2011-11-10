@@ -12,9 +12,12 @@
 #include "TestPage.h"
 
 //函数声明
-static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
-static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static SYS_MSG SystemHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);//系统事件处理函数
+static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);//外设事件处理函数
+static CO_MSG ButtonHandler(u8 OID,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);//按钮控件处理函数
+static CO_MSG YesNoHandler(u8 OID,bool NowValue);//yes no控件处理函数
+static CO_MSG NumCtrlObjHandler(u8 OID,s32 Value,void *pNumCtrlObj);//num控件处理函数
+static CO_MSG StrCtrlObjHandler(u8 OID,u32 Len,u8 *Str);//str控件处理函数
 
 //-----------------------本页系统变量及声明-----------------------
 //定义页面按键需要用到的枚举，类似于有序唯一的宏定义
@@ -36,12 +39,12 @@ typedef enum
 	MessageKV,
 	MusicKV,
 	PepoleKV,
-}TestPage_KEY_NAME;
+}TestPage_OID;
 
 //定义页面或应用的触摸区域集，相当于定义按键
 //支持的最大触摸区域个数为MAX_TOUCH_REGION_NUM
 //系统显示和触摸的所有坐标系均以屏幕左上角为原点(x 0,y 0)，右下角为(x 320,y 240)
-static const IMG_TCH_OBJ ImgTchRegCon[]={
+static const IMG_BUTTON_OBJ ImgButtonCon[]={
 	//KeyName,ObjID,OptionMask,Tch_x,Tch_y,Tch_w,Tch_h,Img_x,Img_y,BmpPathPrefix,NormalSuf,PressSuf,ReleaseSuf,TransColor},
 	{"Back",	BackKV,RelMsk|PathMsk,3,287,54,31,0,0,"Common/Btn/Back",FatColor(NO_TRANS)},
 	{"<<",		LeftArrowKV,RelMsk|PathMsk,65,287,39,31,0,0,"Common/Btn/LeftArr",FatColor(NO_TRANS)},
@@ -56,7 +59,7 @@ static const IMG_TCH_OBJ ImgTchRegCon[]={
 	{"",PepoleKV,RelMsk,180,320,60,30,0,0,"",FatColor(NO_TRANS)},
 };
 
-static const CHAR_TCH_OBJ CharTchRegCon[]={
+static const CHAR_BUTTON_OBJ CharButtonCon[]={
 	//KeyName,ObjID,OptionMask,Tch_x,Tch_y,Tch_w,Tch_h,
 		//Char_x,Char_y,MarginXY,SpaceXY,NormalColor,NormalBG,PressColor,PressBG,ReleaseColor,ReleaseBG},
 	{"音乐盒",21,RoueMsk|PrsMsk|CotMsk|RelMsk|ReVMsk,18,83,50,19,
@@ -78,30 +81,25 @@ const PAGE_ATTRIBUTE TestPage={
 	0,//page function mask bit.
 
 	{//control object num records.
-		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //number of image touch control object
-		0,//sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //number of char touch control object,
+		sizeof(ImgButtonCon)/sizeof(IMG_BUTTON_OBJ), //number of image touch control object
+		0,//sizeof(CharButtonCon)/sizeof(CHAR_BUTTON_OBJ), //number of char touch control object,
 		0,//number of dynamic image touch control object
 		0,//number of dynamic char touch control object
-#ifdef QSYS_FRAME_FULL	
 		0,//number of yes no control object
 		0,//number of num box control object
 		0,//number of string option control object
-		0,//number of string input frame control object
-#endif
 	},
-	ImgTchRegCon, //image touch ctrl obj
-	CharTchRegCon,//char touch ctrl obj
 	
-	SystemEventHandler,//handler of system event
+	ImgButtonCon, //image touch ctrl obj
+	CharButtonCon,//char touch ctrl obj
+	
+	SystemHandler,//handler of system event
 	PeripheralsHandler,//handler of Peripherals event
 	Bit(Perip_KeyPress)|Bit(Perip_KeyRelease)|Bit(Perip_UartInput),//mask bits of peripherals event
-	TouchEventHandler,//handler of all touch control object
-#ifdef QSYS_FRAME_FULL	
-	NULL,//handler of yes no control object
-	NULL,//handler of num box control object
-	NULL,//handler of string option control object
-	NULL,//handler of string input control object
-#endif
+	ButtonHandler,//handler of all touch control object
+	YesNoHandler,//handler of yes no control object
+	NumCtrlObjHandler,//handler of num control object
+	StrCtrlObjHandler,//handler of string control object
 };
 
 //-----------------------本页自定义变量声明-----------------------
@@ -117,7 +115,7 @@ static TestPage_VARS *gpTestPageVars;
 //-----------------------本页系统函数----------------------
 
 //发生某些事件时，会触发的函数
-static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam)
+static SYS_MSG SystemHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam)//系统事件处理函数
 {
 	GUI_REGION DrawRegion;
 	
@@ -179,7 +177,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 	return 0;
 }
 
-static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam)
+static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam)//外设事件处理函数
 {
 	switch(PeripEvent)
 	{
@@ -223,11 +221,11 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 }
 
 //当使用者按下本页TouchRegionSet里定义的按键时，会触发这个函数里的对应事件
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
+static CO_MSG ButtonHandler(u8 OID,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)//按钮控件处理函数
 {		
 	//GUI_REGION DrawRegion;
 	
-	switch(Key)
+	switch(OID)
 	{
 		
 		case BackKV:
@@ -261,12 +259,29 @@ static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 			break;
 		default:
 			//需要响应的事件未定义
-			Debug("%s TouchEventHandler:This Touch Event Handler case unfinish! Key:%d\n\r",Q_GetCurrPageName(),Key);
+			Debug("%s ButtonHandler:This Touch Event Handler case unfinish! OID:%d\n\r",Q_GetCurrPageName(),OID);
 			///while(1);
 	}
 	
 	return 0;
 }
 
+static CO_MSG YesNoHandler(u8 OID,bool NowValue)//yes no控件处理函数
+{
+
+	return 0;
+}
+
+static CO_MSG NumCtrlObjHandler(u8 OID,s32 Value,void *pNumCtrlObj)//num控件处理函数
+{
+
+	return 0;
+}
+
+static CO_MSG StrCtrlObjHandler(u8 OID,u32 Len,u8 *Str)//str控件处理函数
+{
+
+	return 0;
+}
 
 

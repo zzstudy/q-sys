@@ -60,7 +60,7 @@ typedef enum{
 	KB_PY_SELECT,
 	//拼音翻页
 	KB_PRESS_24,	KB_PRESS_25
-}KeyBoardPage_KEY_NAME;
+}KeyBoardPage_OID;
 //------------------------对象声明-------------------------------
 //注:由对象自身调用，而且只改变对象自身的状态的函数被归为私有函数
 //	 由对象自身调用，而且将改变其他对象的状态的函数被归为操纵函数
@@ -229,10 +229,10 @@ static void KB_DrawBlock(void);							//画格线
 static void KB_DrawPress(u8 xx,u8 yy);							//选字提示
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
 //---------------------------------------------页面资源定义-----------------------------------------------------------
 
-static const IMG_TCH_OBJ ImgTchRegCon[]={
+static const IMG_BUTTON_OBJ ImgButtonCon[]={
 	{"\n 逗号",KB_PRESS_1,			RelMsk,0,157,39,31,0,0,"Comma",FatColor(NO_TRANS)},	
 	{"\n 句号",KB_PRESS_6,			RelMsk,0,190,39,31,0,0,"Period",FatColor(NO_TRANS)},
 	{"\n省略号",KB_PRESS_11,		RelMsk,0,223,39,31,0,0,"Points",FatColor(NO_TRANS)},
@@ -275,15 +275,15 @@ const PAGE_ATTRIBUTE KeyBoardPage={
 	NORMAL_PAGE,
 	0,
 	{
-		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
-		0,//sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
+		sizeof(ImgButtonCon)/sizeof(IMG_BUTTON_OBJ), //size of touch region array
+		0,//sizeof(CharButtonCon)/sizeof(CHAR_BUTTON_OBJ), //size of touch region array,
 	},
-	ImgTchRegCon, 
+	ImgButtonCon, 
 	0,
 	SystemEventHandler,
 	PeripheralsHandler,
 	Bit(Perip_Timer)|Bit(Perip_UartInput),
-	TouchEventHandler,
+	ButtonHandler,
 
 };
 
@@ -350,7 +350,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 	return 0;
 }
 //当使用者按下本页TouchRegionSet里定义的按键时，会触发这个函数里的对应事件
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo){
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo){
 	u8 mainmode;
 
 	mainmode = gpKbpVars->KB_ModeBox.GetMode() & 0xf;

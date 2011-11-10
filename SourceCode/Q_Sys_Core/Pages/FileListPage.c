@@ -11,10 +11,10 @@
 
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,FILELIST_CMD Cmd, FILELIST_SET *pFLS);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
 
 //-----------------------本页系统变量及声明-----------------------
-enum FileListPageKey
+typedef enum 
 {
 	ExtiKeyDown=EXTI_KEY_VALUE_START,//系统默认将外部中断按键发送到第一个键值
 	ExtiKeyUp,
@@ -26,10 +26,10 @@ enum FileListPageKey
 	ParentDirKV,
 	EnterKV,
 	ReturnKV
-};
+}FileListPage_OID;
 
 //定义页面或应用的触摸区域集，相当于定义按键
-static const IMG_TCH_OBJ ImgTchRegCon[]={
+static const IMG_BUTTON_OBJ ImgButtonCon[]={
 	//{key,gLandScapeMode,x,y,width,hight,image x,image y,normal bmp path,release bmp path,press bmp path,transparent color,key name}
 	{"",NumKV,PrsMsk|CotMsk|RelMsk,0,26,240,260,0,0,"",0},
 	{"Return",ReturnKV,RelMsk|PathMsk,4,287,39,31,0,0,"Common/Btn/Return",FatColor(NO_TRANS)},
@@ -48,16 +48,16 @@ const PAGE_ATTRIBUTE FileListPage={
 	0,
 	
 	{
-		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
-		0,//sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
+		sizeof(ImgButtonCon)/sizeof(IMG_BUTTON_OBJ), //size of touch region array
+		0,//sizeof(CharButtonCon)/sizeof(CHAR_BUTTON_OBJ), //size of touch region array,
 	},
-	ImgTchRegCon,
+	ImgButtonCon,
 	NULL,
 	
 	(SystemHandlerFunc)SystemEventHandler,
 	PeripheralsHandler,
 	Bit(Perip_KeyPress)|Bit(Perip_KeyRelease)|Bit(Perip_UartInput),
-	TouchEventHandler,
+	ButtonHandler,
 
 };
 
@@ -1225,7 +1225,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 	} 
 	return 0;
 }
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 {	
 	int i;
 

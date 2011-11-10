@@ -16,19 +16,25 @@ static REP_IMG_SUFX gRepImgSufx[MAX_IMG_KEY_NUM];
 //ÎÄ×Ö°´¼üÌæ»»µÄÁÙÊ±×Ö·û´®Ö¸Õë´æ´¢Êý×é
 static u8 *gRepKeyNameCon[MAX_CHAR_KEY_NUM];
 
-static const IMG_TCH_OBJ *gpCurImgTchCon=NULL; //µ±Ç°°´¼üÇøÓò¼¯ºÏ
-static const CHAR_TCH_OBJ *gpCurCharTchCon=NULL; //µ±Ç°°´¼üÇøÓò¼¯ºÏ
+static const IMG_BUTTON_OBJ *gpCurImgTchCon=NULL; //µ±Ç°°´¼üÇøÓò¼¯ºÏ
+static const CHAR_BUTTON_OBJ *gpCurCharTchCon=NULL; //µ±Ç°°´¼üÇøÓò¼¯ºÏ
 
 //¶¯Ì¬¿Ø¼þ´æ´¢ÊµÌåÖ¸Õë
 static void *gCtrlObjPtrBuf[MAX_DYN_CTRL_OBJ_NUM];//ÓÃÀ´´æ´¢ÏÂÁÐ¿Ø¼þÖ¸ÕëµÄÊµÌå
-//IMG_TCH_OBJ **gpDynImgTchCon=NULL; //¶¯Ì¬Í¼Æ¬°´¼ü¼¯ºÏ
-//CHAR_TCH_OBJ **gpDynCharTchCon=NULL;//¶¯Ì¬ÎÄ×Ö°´¼ü¼¯ºÏ
-#ifdef QSYS_FRAME_FULL	
+//IMG_BUTTON_OBJ **gpDynImgTchCon=NULL; //¶¯Ì¬Í¼Æ¬°´¼ü¼¯ºÏ
+//CHAR_BUTTON_OBJ **gpDynCharTchCon=NULL;//¶¯Ì¬ÎÄ×Ö°´¼ü¼¯ºÏ
 //YES_NO_OBJ **gpYesNoCon=NULL;
 //NUM_CTRL_OBJ **gpNumCtrlObjCon=NULL;
-//STR_OPT_OBJ **gpStrOptCon=NULL;
-//STR_INPUT_OBJ **gpStrInputCon=NULL;
-#endif
+//STR_ENUM_OBJ **gpStrOptCon=NULL;
+//STR_BOX_OBJ **gpStrInputCon=NULL;
+
+//ÓÃÀ´·½±ã±à³ÌµÄºê£¬¶¨ÒåË÷ÒýÆðÊ¼Î»ÖÃ
+#define CO_STATIC_TCH_NUM (gpCtrlObjNum->ImgBtnNum+gpCtrlObjNum->CharBtnNum)
+#define CO_DYN_IMG_IDX_START 0
+#define CO_DYN_CHAR_IDX_START (CO_DYN_IMG_IDX_START+gpCtrlObjNum->DynImgBtnNum)
+#define CO_YES_NO_IDX_START (CO_DYN_CHAR_IDX_START+gpCtrlObjNum->DynCharBtnNum)
+#define CO_NUM_IDX_START (CO_YES_NO_IDX_START+gpCtrlObjNum->YesNoNum)
+#define CO_STR_IDX_START (CO_NUM_IDX_START+gpCtrlObjNum->NumCtrlObjNum)
 
 //***********************************Íâ²¿ÒýÓÃ*********************************************
 extern u8 GetCurLayerNum(void);
@@ -44,22 +50,19 @@ void ControlObjInit(void)//ÏµÍ³Æô¶¯Ê±µÄ³õÊ¼»¯
 
 	for(i=0;i<Q_GetPageTotal();i++)
 	{
-		if((GetPageByIdx(i)->CtrlObjNum.ImgTchNum>MAX_IMG_KEY_NUM)
-			||(GetPageByIdx(i)->CtrlObjNum.CharTchNum>MAX_CHAR_KEY_NUM))
+		if((GetPageByIdx(i)->CtrlObjNum.ImgBtnNum>MAX_IMG_KEY_NUM)
+			||(GetPageByIdx(i)->CtrlObjNum.CharBtnNum>MAX_CHAR_KEY_NUM))
 		{//Ò³ÃæµÄ°´¼üÇøÓò³¬¹ýÖ§³ÖÊýÄ¿
 			Debug("%s touch region num is too much!%d %d\n\r",GetPageByIdx(i)->Name,
-			GetPageByIdx(i)->CtrlObjNum.ImgTchNum,GetPageByIdx(i)->CtrlObjNum.CharTchNum);
+			GetPageByIdx(i)->CtrlObjNum.ImgBtnNum,GetPageByIdx(i)->CtrlObjNum.CharBtnNum);
 			Q_ErrorStopScreen("!!!New page's touch region num is over MAX_IMG_KEY_NUM or MAX_CHAR_KEY_NUM");
 		}
 
-		if((GetPageByIdx(i)->CtrlObjNum.DynImgTchNum
-			+GetPageByIdx(i)->CtrlObjNum.DynCharTchNum
-#ifdef QSYS_FRAME_FULL	
+		if((GetPageByIdx(i)->CtrlObjNum.DynImgBtnNum
+			+GetPageByIdx(i)->CtrlObjNum.DynCharBtnNum
 			+GetPageByIdx(i)->CtrlObjNum.YesNoNum
-			+GetPageByIdx(i)->CtrlObjNum.NumBoxNum
-			+GetPageByIdx(i)->CtrlObjNum.StrOptBoxNum
-			+GetPageByIdx(i)->CtrlObjNum.StrInputBoxNum
-#endif
+			+GetPageByIdx(i)->CtrlObjNum.NumCtrlObjNum
+			+GetPageByIdx(i)->CtrlObjNum.StrCtrlObjNum
 			)>MAX_DYN_CTRL_OBJ_NUM)
 		{//Ò³ÃæµÄ¿Ø¼þ¸öÊý³¬¹ýÖ§³ÖÊýÄ¿
 			Debug("%s control object num is too much!\n\r",GetPageByIdx(i)->Name);
@@ -84,43 +87,40 @@ static void CopyCtrlObjTouchReg(TOUCH_REGION *TouchRegsBuf)
 	u8 Idx;
 	u8 Cnt=0;
 
-	IMG_TCH_OBJ **pDynImgTchCon=(void *)gCtrlObjPtrBuf; //¶¯Ì¬Í¼Æ¬°´¼ü¼¯ºÏ
-	CHAR_TCH_OBJ **pDynCharTchCon=(void *)&pDynImgTchCon[gpCtrlObjNum->DynImgTchNum];//¶¯Ì¬ÎÄ×Ö°´¼ü¼¯ºÏ
-#ifdef QSYS_FRAME_FULL	
-	YES_NO_OBJ **pYesNoCon=(void *)&pDynCharTchCon[gpCtrlObjNum->DynCharTchNum];//Yes No¿Ø¼þ
-	NUM_CTRL_OBJ **pNumCtrlObjCon=(void *)&pYesNoCon[gpCtrlObjNum->YesNoNum];//Num ¿Ø¼þ
-	STR_OPT_OBJ **pStrOptCon=(void *)&pNumCtrlObjCon[gpCtrlObjNum->NumBoxNum];//Strings option¿Ø¼þ
-	STR_INPUT_OBJ **pStrInputCon=(void *)&pStrOptCon[gpCtrlObjNum->StrOptBoxNum];//String input¿Ø¼þ
-#endif
+	IMG_BUTTON_OBJ **pDynImgTchCon=(void *)&gCtrlObjPtrBuf[CO_DYN_IMG_IDX_START]; //¶¯Ì¬Í¼Æ¬°´¼ü¼¯ºÏ
+	CHAR_BUTTON_OBJ **pDynCharTchCon=(void *)&gCtrlObjPtrBuf[CO_DYN_CHAR_IDX_START];//¶¯Ì¬ÎÄ×Ö°´¼ü¼¯ºÏ
+	YES_NO_OBJ **pYesNoCon=(void *)&gCtrlObjPtrBuf[CO_YES_NO_IDX_START];//Yes No¿Ø¼þ
+	NUM_CTRL_OBJ **pNumCtrlObjCon=(void *)&gCtrlObjPtrBuf[CO_NUM_IDX_START];//Num ¿Ø¼þ
+	STR_CTRL_OBJ **pStrCtrlObjCon=(void *)&gCtrlObjPtrBuf[CO_STR_IDX_START];//Strings option¿Ø¼þ
 
 	//Í¼Æ¬°´¼üÇøÓò
-	for(Idx=0;Idx<gpCtrlObjNum->ImgTchNum;Idx++,Cnt++)
+	for(Idx=0;Idx<gpCtrlObjNum->ImgBtnNum;Idx++,Cnt++)
 	{
 		TouchRegsBuf[Cnt].x=gpCurImgTchCon[Idx].x;
 		TouchRegsBuf[Cnt].y=gpCurImgTchCon[Idx].y;
 		TouchRegsBuf[Cnt].w=gpCurImgTchCon[Idx].w;
 		TouchRegsBuf[Cnt].h=gpCurImgTchCon[Idx].h;
 		TouchRegsBuf[Cnt].ObjID=gpCurImgTchCon[Idx].ObjID;
-		TouchRegsBuf[Cnt].Type=COT_ImgTch;
+		TouchRegsBuf[Cnt].Type=COT_ImgBtn;
 		TouchRegsBuf[Cnt].Index=Idx;
 		TouchRegsBuf[Cnt].OptionsMask=(u8)(gpCurImgTchCon[Idx].OptionsMask&0xff);
 	}
 				
 	//ÎÄ×Ö°´¼üÇøÓò
-	for(Idx=0;Idx<gpCtrlObjNum->CharTchNum;Idx++,Cnt++)
+	for(Idx=0;Idx<gpCtrlObjNum->CharBtnNum;Idx++,Cnt++)
 	{
 		TouchRegsBuf[Cnt].x=gpCurCharTchCon[Idx].x;
 		TouchRegsBuf[Cnt].y=gpCurCharTchCon[Idx].y;
 		TouchRegsBuf[Cnt].w=gpCurCharTchCon[Idx].w;
 		TouchRegsBuf[Cnt].h=gpCurCharTchCon[Idx].h;
 		TouchRegsBuf[Cnt].ObjID=gpCurCharTchCon[Idx].ObjID;
-		TouchRegsBuf[Cnt].Type=COT_CharTch;
+		TouchRegsBuf[Cnt].Type=COT_CharBtn;
 		TouchRegsBuf[Cnt].Index=Idx;
 		TouchRegsBuf[Cnt].OptionsMask=(u8)(gpCurCharTchCon[Idx].OptionsMask&0xff);
 	}
 
 	//¶¯Ì¬Í¼Æ¬°´¼üÇøÓò
-	for(Idx=0;Idx<gpCtrlObjNum->DynImgTchNum;Idx++,Cnt++)
+	for(Idx=0;Idx<gpCtrlObjNum->DynImgBtnNum;Idx++,Cnt++)
 	{
 		if(pDynImgTchCon[Idx]!=NULL)
 		{
@@ -129,14 +129,14 @@ static void CopyCtrlObjTouchReg(TOUCH_REGION *TouchRegsBuf)
 			TouchRegsBuf[Cnt].w=pDynImgTchCon[Idx]->w;
 			TouchRegsBuf[Cnt].h=pDynImgTchCon[Idx]->h;
 			TouchRegsBuf[Cnt].ObjID=pDynImgTchCon[Idx]->ObjID;
-			TouchRegsBuf[Cnt].Type=COT_DynImg;
+			TouchRegsBuf[Cnt].Type=COT_DynImgBtn;
 			TouchRegsBuf[Cnt].Index=Idx;
 			TouchRegsBuf[Cnt].OptionsMask=(u8)(pDynImgTchCon[Idx]->OptionsMask&0xff);
 		}
 	}
 
 	//¶¯Ì¬ÎÄ×Ö°´¼üÇøÓò
-	for(Idx=0;Idx<gpCtrlObjNum->DynCharTchNum;Idx++,Cnt++)
+	for(Idx=0;Idx<gpCtrlObjNum->DynCharBtnNum;Idx++,Cnt++)
 	{
 		if(pDynCharTchCon[Idx]!=NULL)
 		{
@@ -145,13 +145,12 @@ static void CopyCtrlObjTouchReg(TOUCH_REGION *TouchRegsBuf)
 			TouchRegsBuf[Cnt].w=pDynCharTchCon[Idx]->w;
 			TouchRegsBuf[Cnt].h=pDynCharTchCon[Idx]->h;
 			TouchRegsBuf[Cnt].ObjID=pDynCharTchCon[Idx]->ObjID;
-			TouchRegsBuf[Cnt].Type=COT_DynChar;
+			TouchRegsBuf[Cnt].Type=COT_DynCharBtn;
 			TouchRegsBuf[Cnt].Index=Idx;
 			TouchRegsBuf[Cnt].OptionsMask=(u8)(pDynCharTchCon[Idx]->OptionsMask&0xff);
 		}
 	}
 
-#ifdef QSYS_FRAME_FULL	
 	//yes no
 	for(Idx=0;Idx<gpCtrlObjNum->YesNoNum;Idx++,Cnt++)
 	{
@@ -168,8 +167,8 @@ static void CopyCtrlObjTouchReg(TOUCH_REGION *TouchRegsBuf)
 		}
 	}
 
-	//num box
-	for(Idx=0;Idx<gpCtrlObjNum->NumBoxNum;Idx++,Cnt++)
+	//num ctrl obj
+	for(Idx=0;Idx<gpCtrlObjNum->NumCtrlObjNum;Idx++,Cnt++)
 	{
 		if(pNumCtrlObjCon[Idx]!=NULL)
 		{
@@ -180,43 +179,26 @@ static void CopyCtrlObjTouchReg(TOUCH_REGION *TouchRegsBuf)
 			TouchRegsBuf[Cnt].ObjID=pNumCtrlObjCon[Idx]->ObjID;
 			TouchRegsBuf[Cnt].Type=COT_Num;
 			TouchRegsBuf[Cnt].Index=Idx;
-			TouchRegsBuf[Cnt].OptionsMask=0;//(u8)(pNumCtrlObjCon[Idx]->OptionsMask&0xff);
-		}
-	}
-#if 0
-	//str option
-	for(Idx=0;Idx<gpCtrlObjNum->StrOptBoxNum;Idx++,Cnt++)
-	{
-		if(pStrOptCon[Idx]!=NULL)
-		{
-			TouchRegsBuf[Cnt].x=pStrOptCon[Idx]->x;
-			TouchRegsBuf[Cnt].y=pStrOptCon[Idx]->y;
-			TouchRegsBuf[Cnt].w=pStrOptCon[Idx]->w;
-			TouchRegsBuf[Cnt].h=CO_STR_OPT_H;
-			TouchRegsBuf[Cnt].ObjID=pStrOptCon[Idx]->ObjID;
-			TouchRegsBuf[Cnt].Type=COT_StrOpt;
-			TouchRegsBuf[Cnt].Index=Idx;
-			TouchRegsBuf[Cnt].OptionsMask=(u8)(pStrOptCon[Idx]->OptionsMask&0xff);
+			TouchRegsBuf[Cnt].OptionsMask=(u8)(PrsMsk|RelMsk|ReVMsk);
 		}
 	}
 
-	//str input
-	for(Idx=0;Idx<gpCtrlObjNum->StrInputBoxNum;Idx++,Cnt++)
+	//str ctrl obj
+	for(Idx=0;Idx<gpCtrlObjNum->StrCtrlObjNum;Idx++,Cnt++)
 	{
-		if(pStrInputCon[Idx]!=NULL)
+		if(pStrCtrlObjCon[Idx]!=NULL)
 		{
-			TouchRegsBuf[Cnt].x=pStrInputCon[Idx]->x;
-			TouchRegsBuf[Cnt].y=pStrInputCon[Idx]->y;
-			TouchRegsBuf[Cnt].w=pStrInputCon[Idx]->w;
-			TouchRegsBuf[Cnt].h=pStrInputCon[Idx]->h;
-			TouchRegsBuf[Cnt].ObjID=pStrInputCon[Idx]->ObjID;
-			TouchRegsBuf[Cnt].Type=COT_StrInput;
+			TouchRegsBuf[Cnt].x=pStrCtrlObjCon[Idx]->x;
+			TouchRegsBuf[Cnt].y=pStrCtrlObjCon[Idx]->y;
+			TouchRegsBuf[Cnt].w=pStrCtrlObjCon[Idx]->w;
+			TouchRegsBuf[Cnt].h=CO_STR_ENUM_H;
+			TouchRegsBuf[Cnt].ObjID=pStrCtrlObjCon[Idx]->ObjID;
+			TouchRegsBuf[Cnt].Type=COT_Str;
 			TouchRegsBuf[Cnt].Index=Idx;
-			TouchRegsBuf[Cnt].OptionsMask=(u8)(pStrInputCon[Idx]->OptionsMask&0xff);
+			TouchRegsBuf[Cnt].OptionsMask=(u8)(PrsMsk|RelMsk|ReVMsk);
 		}
 	}
-#endif
-#endif
+	
 }
 
 //ÇÐ»»Ò³ÃæÊ±Ö´ÐÐµÄ¿Ø¼þ²¿·ÖÊý¾Ý´¦Àí
@@ -224,21 +206,17 @@ void PageSwithcCtrlObjDataHandler(const PAGE_ATTRIBUTE *pNewPage)
 {
 	gpCtrlObjNum=&gpCurrentPage->CtrlObjNum;//µÃµ½¿Ø¼þ¸öÊý½á¹¹Ìå
 
-	gpCurImgTchCon=gpCurrentPage->pImgTchRegCon;//ÇÐ»»»ù±¾´¥ÃþÇøÓò¼¯Ö¸Õë
-	gpCurCharTchCon=gpCurrentPage->pCharTchRegCon;
+	gpCurImgTchCon=gpCurrentPage->pImgButtonCon;//ÇÐ»»»ù±¾´¥ÃþÇøÓò¼¯Ö¸Õë
+	gpCurCharTchCon=gpCurrentPage->pCharButtonCon;
 	
 	if(gTouchRegionNum) Q_Free(gpTouchRegions);//ÊÕ»ØÉÏ¸öÒ³ÃæµÄÄÚ´æ
 	
-	gTouchRegionNum=gpCtrlObjNum->ImgTchNum
-									+gpCtrlObjNum->CharTchNum
-									+gpCtrlObjNum->DynImgTchNum
-									+gpCtrlObjNum->DynCharTchNum
-#ifdef QSYS_FRAME_FULL	
+	gTouchRegionNum=CO_STATIC_TCH_NUM
+									+gpCtrlObjNum->DynImgBtnNum
+									+gpCtrlObjNum->DynCharBtnNum
 									+gpCtrlObjNum->YesNoNum//yes or no Ñ¡ÏîµÄ¸öÊý
-									+gpCtrlObjNum->NumBoxNum//Êý×Ö¿òµÄ¸öÊý
-									+gpCtrlObjNum->StrOptBoxNum//×Ö·û´®Ñ¡Ïî¿òµÄ¸öÊý
-									+gpCtrlObjNum->StrInputBoxNum//×Ö·û´®ÊäÈë¿òµÄ¸öÊý
-#endif
+									+gpCtrlObjNum->NumCtrlObjNum//Êý×Ö¿òµÄ¸öÊý
+									+gpCtrlObjNum->StrCtrlObjNum//×Ö·û´®¿òµÄ¸öÊý
 	;
 	if(gTouchRegionNum)//ÉêÇëÐÂÄÚ´æÓÃÓÚ´æ·Å×ø±êÐÅÏ¢
 	{
@@ -253,7 +231,7 @@ static u8 FindImgTchIdx(u8 Key)
 {
 	u8 i=0;
 
-	for(;i<gpCtrlObjNum->ImgTchNum;i++)
+	for(;i<gpCtrlObjNum->ImgBtnNum;i++)
 		if(gpCurImgTchCon[i].ObjID==Key) return i;
 
 	return 0xff;
@@ -263,7 +241,7 @@ static u8 FindCharTchIdx(u8 Key)
 {
 	u8 i=0;
 
-	for(;i<gpCtrlObjNum->CharTchNum;i++)
+	for(;i<gpCtrlObjNum->CharBtnNum;i++)
 		if(gpCurCharTchCon[i].ObjID==Key) return i;
 
 	return 0xff;
@@ -272,7 +250,7 @@ static u8 FindCharTchIdx(u8 Key)
 //ÓÃÓÚÏÔÊ¾Í¼Æ¬´¥ÃþÇøÓòµÄÍ¼Æ¬
 static bool ImgTchDisplay(u8 Index,INPUT_EVT_TYPE InType,bool IsDyn)
 {
-	IMG_TCH_OBJ *pTouchRegion;
+	IMG_BUTTON_OBJ *pTouchRegion;
 	GUI_REGION BmpRegion;
 	GUI_REGION BgRegion;
 	u8 PathBuf[MAX_BMP_PATH_LEN]="";
@@ -283,7 +261,7 @@ static bool ImgTchDisplay(u8 Index,INPUT_EVT_TYPE InType,bool IsDyn)
 
 	if(IsDyn)//ÊÇ·ñÊÇÒ³Ãæ¶¯Ì¬×éµÄÍ¼±ê
 	{
-		pTouchRegion=gCtrlObjPtrBuf[Index];
+		pTouchRegion=gCtrlObjPtrBuf[CO_DYN_IMG_IDX_START+Index];
 
 		switch(InType)//¼ì²éÊÂ¼þÀàÐÍ
 		{
@@ -451,7 +429,7 @@ static bool ImgTchDisplay(u8 Index,INPUT_EVT_TYPE InType,bool IsDyn)
 //ÓÃÓÚÏÔÊ¾ÎÄ×Ö´¥ÃþÇøÓòµÄÎÄ×Ö
 static bool CharTchDisplay(u8 Index,INPUT_EVT_TYPE InType,bool IsDyn)
 {
-	const CHAR_TCH_OBJ *pTouchRegion;
+	const CHAR_BUTTON_OBJ *pTouchRegion;
 	GUI_REGION CharRegion;
 	GUI_REGION BgRegion;
 	bool LandScapeMode=Gui_GetLandScapeMode();//´æ´¢µ±Ç°ºáÆÁÄ£Ê½
@@ -461,7 +439,7 @@ static bool CharTchDisplay(u8 Index,INPUT_EVT_TYPE InType,bool IsDyn)
 
 	if(IsDyn)//¼ì²éÊÇ²»ÊÇ¶¯Ì¬ÎÄ×Ö°´¼ü×é
 	{
-		pTouchRegion=gCtrlObjPtrBuf[gpCtrlObjNum->DynImgTchNum+Index];
+		pTouchRegion=gCtrlObjPtrBuf[CO_DYN_CHAR_IDX_START+Index];
 		pName=pTouchRegion->Name;
 	}
 	else//ÊÇÒ³ÃæµÄ¹Ì¶¨ÎÄ×Ö°´¼ü×é
@@ -647,18 +625,18 @@ static bool CharTchDisplay(u8 Index,INPUT_EVT_TYPE InType,bool IsDyn)
 void SameOidTchDisplay(u8 ObjID,INPUT_EVT_TYPE InType)
 {
 	u8 i;
-	IMG_TCH_OBJ **pDynImgTchCon=(void *)gCtrlObjPtrBuf; //¶¯Ì¬Í¼Æ¬°´¼ü¼¯ºÏ
-	CHAR_TCH_OBJ **pDynCharTchCon=(void *)&pDynImgTchCon[gpCtrlObjNum->DynImgTchNum];//¶¯Ì¬ÎÄ×Ö°´¼ü¼¯ºÏ
+	IMG_BUTTON_OBJ **pDynImgTchCon=(void *)&gCtrlObjPtrBuf[CO_DYN_IMG_IDX_START]; //¶¯Ì¬Í¼Æ¬°´¼ü¼¯ºÏ
+	CHAR_BUTTON_OBJ **pDynCharTchCon=(void *)&gCtrlObjPtrBuf[CO_DYN_CHAR_IDX_START];//¶¯Ì¬ÎÄ×Ö°´¼ü¼¯ºÏ
 
 	//ÏàÍ¬¼üÖµµÄÎÄ×Ö°´¼ü
-	for(i=0;i<gpCtrlObjNum->CharTchNum;i++)//ÕÒÏàÍ¬¼üÖµµÄ¼ü
+	for(i=0;i<gpCtrlObjNum->CharBtnNum;i++)//ÕÒÏàÍ¬¼üÖµµÄ¼ü
 	{
 		if(gpCurCharTchCon[i].ObjID==ObjID)
 			CharTchDisplay(i,InType,FALSE);
 	}
 
 	//ÏàÍ¬¼üÖµµÄ¶¯Ì¬ÎÄ×Ö°´¼ü
-	for(i=0;i<gpCtrlObjNum->DynCharTchNum;i++)
+	for(i=0;i<gpCtrlObjNum->DynCharBtnNum;i++)
 	{
 		if(pDynCharTchCon[i]!=NULL)
 			if(pDynCharTchCon[i]->ObjID==ObjID)
@@ -666,14 +644,14 @@ void SameOidTchDisplay(u8 ObjID,INPUT_EVT_TYPE InType)
 	}
 	
 	//ÏàÍ¬¼üÖµµÄÍ¼Ïñ°´¼ü
-	for(i=0;i<gpCtrlObjNum->ImgTchNum;i++)//ÕÒÏàÍ¬¼üÖµµÄ¼ü
+	for(i=0;i<gpCtrlObjNum->ImgBtnNum;i++)//ÕÒÏàÍ¬¼üÖµµÄ¼ü
 	{
 		if(gpCurImgTchCon[i].ObjID==ObjID)
 			ImgTchDisplay(i,InType,FALSE);
 	}
 
 	//ÏàÍ¬¼üÖµµÄ¶¯Ì¬Í¼Ïñ°´¼ü
-	for(i=0;i<gpCtrlObjNum->DynImgTchNum;i++) 
+	for(i=0;i<gpCtrlObjNum->DynImgBtnNum;i++) 
 	{
 		if(pDynImgTchCon[i]!=NULL)
 			if(pDynImgTchCon[i]->ObjID==ObjID)
@@ -682,7 +660,7 @@ void SameOidTchDisplay(u8 ObjID,INPUT_EVT_TYPE InType)
 }
 
 //ÓÐ´¥ÃþÊäÈëÊ±£¬´¦Àí´¥ÃþÇøÓòÊÂ¼þ
-CO_MSG TchCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
+CO_MSG ButtonCtrlObjTchHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
 {
 	CO_MSG CoMsg=CO_State_OK;
 	u8 TchEvtMsk=GetTouchInfoByIdx(Idx)->OptionsMask;//ÊÂ¼þÑÚÂë
@@ -694,23 +672,23 @@ CO_MSG TchCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
 			//°´ÏÂÊ±Í¼±ê±ä»¯
 			SameOidTchDisplay(ObjID,InType);
 			if(TchEvtMsk&PrsMsk)//ÐèÒª´¦Àí
-				CoMsg=gpCurrentPage->TchEvtHandler(ObjID,Tch_Press,pTouchInfo);
+				CoMsg=gpCurrentPage->ButtonHandler(ObjID,Tch_Press,pTouchInfo);
 			break;
 		case Input_TchContinue:
 			//²»ÐèÒª¼ì²éÊÇ·ñ´¥·¢£¬ÒòÎªÔÚTouchÏß³ÌÀïÃæÒÑ¾­¼ì²éÁË
-			CoMsg=gpCurrentPage->TchEvtHandler(ObjID,Tch_Continue,pTouchInfo);
+			CoMsg=gpCurrentPage->ButtonHandler(ObjID,Tch_Continue,pTouchInfo);
 			break;
 		case Input_TchRelease:
 			//°´¼üÊÍ·Å¸Ä±ä°´Å¥Í¼±ê²¢·¢³öÊÂ¼þ
 			SameOidTchDisplay(ObjID,InType);
 			if(TchEvtMsk&RelMsk)//ÐèÒª´¦Àí
-				CoMsg=gpCurrentPage->TchEvtHandler(ObjID,Tch_Release,pTouchInfo);
+				CoMsg=gpCurrentPage->ButtonHandler(ObjID,Tch_Release,pTouchInfo);
 			Allow_Touch_Input();
 			break;
 		case Input_TchReleaseVain:	
 			SameOidTchDisplay(ObjID,InType);
 			if(TchEvtMsk&ReVMsk)//ÐèÒª´¦Àí
-				CoMsg=gpCurrentPage->TchEvtHandler(ObjID,Tch_ReleaseVain,pTouchInfo);
+				CoMsg=gpCurrentPage->ButtonHandler(ObjID,Tch_ReleaseVain,pTouchInfo);
 			Allow_Touch_Input();
 			break;
 	}
@@ -718,12 +696,11 @@ CO_MSG TchCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
 	return CoMsg;
 }
 
-#ifdef QSYS_FRAME_FULL	
 //ÓÐ´¥ÃþÊäÈëÊ±£¬´¦ÀíyesnoÑ¡¿òÊÂ¼þ
-//IdxÎªËùÓÐ´¥ÃþÇøÓò¼¯ºÏµÄË÷Òý
-CO_MSG YesNoCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx)
+//IdxÎªËùÓÐ´¥ÃþÇøÓò¼¯ºÏµÄË÷Òý£¬°üÀ¨¾²Ì¬¿Ø¼þ²¿·Ö
+CO_MSG YesNoCtrlObjTchHandler(INPUT_EVT_TYPE InType,u8 Idx)
 {
-	YES_NO_OBJ *pYesNo=(void *)gCtrlObjPtrBuf[Idx-gpCtrlObjNum->ImgTchNum-gpCtrlObjNum->CharTchNum];
+	YES_NO_OBJ *pYesNo=(void *)gCtrlObjPtrBuf[Idx-CO_STATIC_TCH_NUM];
 	GUI_REGION DrawRegion;
 	CO_MSG CoMsg=CO_State_OK;
 	u8 ObjID=GetTouchInfoByIdx(Idx)->ObjID;//¼üÖµ
@@ -760,16 +737,16 @@ CO_MSG YesNoCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx)
 
 //ÓÐ´¥ÃþÊäÈëÊ±£¬´¦ÀíNumBoxÊÂ¼þ
 //IdxÎªËùÓÐ´¥ÃþÇøÓò¼¯ºÏµÄË÷Òý
-CO_MSG NumBoxCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
+CO_MSG NumCtrlObjTchHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
 {
-	NUM_CTRL_OBJ *pNumCtrlObj=(void *)gCtrlObjPtrBuf[Idx-gpCtrlObjNum->ImgTchNum-gpCtrlObjNum->CharTchNum];
+	NUM_CTRL_OBJ *pNumCtrlObj=(void *)gCtrlObjPtrBuf[Idx-CO_STATIC_TCH_NUM];
 
 	switch(InType)
 	{
 		case Input_TchPress:
 			break;
 		case Input_TchRelease:
-			Q_GotoPage(GotoSubPage,"NumCtrlObjPage",PRID_NumCtrlObjPage,pNumCtrlObj);//½»¸øNumBoxPage´¦Àí
+			Q_GotoPage(GotoSubPage,"NumCtrlObjPage",PRID_NumCtrlObjPage,pNumCtrlObj);//½»¸øNumCtrlObjPage´¦Àí
 			Allow_Touch_Input();
 			break;
 		case Input_TchReleaseVain:
@@ -781,17 +758,26 @@ CO_MSG NumBoxCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
 	return 0;
 }
 
-//ÓÐ´¥ÃþÊäÈëÊ±£¬´¦ÀíStrOptÊÂ¼þ
-CO_MSG StrOptCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
+//ÓÐ´¥ÃþÊäÈëÊ±£¬´¦ÀíStrÊÂ¼þ
+CO_MSG StrCtrlObjTchHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
 {
-	return 0;
-}
+	STR_CTRL_OBJ *pStrCtrlObj=(void *)gCtrlObjPtrBuf[Idx-CO_STATIC_TCH_NUM];
 
-CO_MSG StrInputCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo)
-{
+	switch(InType)
+	{
+		case Input_TchPress:
+			break;
+		case Input_TchRelease:
+			Q_GotoPage(GotoSubPage,"StrCtrlObjPage",PRID_StrCtrlObjPage,pStrCtrlObj);//½»¸øStrCtrlObjPage´¦Àí
+			Allow_Touch_Input();
+			break;
+		case Input_TchReleaseVain:
+			Allow_Touch_Input();
+			break;
+	}
+	
 	return 0;
 }
-#endif
 
 //½øÈë×ÓÒ³ÃæÇ°£¬±£´æÒ³ÃæµÄÁãÊ±Êý¾Ý
 //Òª±£´æµÄÊý¾ÝÓÐ:
@@ -804,8 +790,8 @@ void PushPageCtrlObjData(void)
 
 	Debug("PushPageCtrlObjData:%d\n\r",GetCurLayerNum());
 
-	//Debug("%d\n\r",sizeof(IMG_TCH_OBJ*)*MAX_DYNAMIC_IMG_KEY_NUM);
-	//Debug("%d\n\r",sizeof(CHAR_TCH_OBJ*)*MAX_DYNAMIC_CHAR_KEY_NUM);
+	//Debug("%d\n\r",sizeof(IMG_BUTTON_OBJ*)*MAX_DYNAMIC_IMG_KEY_NUM);
+	//Debug("%d\n\r",sizeof(CHAR_BUTTON_OBJ*)*MAX_DYNAMIC_CHAR_KEY_NUM);
 	//Debug("%d\n\r",sizeof(REP_IMG_SUFX)*MAX_IMG_KEY_NUM);
 	//Debug("%d\n\r",sizeof(u8 *)*MAX_CHAR_KEY_NUM);
 	
@@ -868,38 +854,40 @@ void CleanPageCtrlObjData(void)
 //¼¤»îµ±Ç°Ò³ÃæÏÂµÄ´¥ÃþÇøÓò¼¯
 SYS_MSG CurrPageCtrlObjInit(INPUT_EVT_TYPE EventType,int IntParam,void *pInfoParam)
 {
-	IMG_TCH_OBJ **pDynImgTchCon=(void *)gCtrlObjPtrBuf; //¶¯Ì¬Í¼Æ¬°´¼ü¼¯ºÏ
-	CHAR_TCH_OBJ **pDynCharTchCon=(void *)&pDynImgTchCon[gpCtrlObjNum->DynImgTchNum];//¶¯Ì¬ÎÄ×Ö°´¼ü¼¯ºÏ
+	IMG_BUTTON_OBJ **pDynImgTchCon=(void *)&gCtrlObjPtrBuf[CO_DYN_IMG_IDX_START]; //¶¯Ì¬Í¼Æ¬°´¼ü¼¯ºÏ
+	CHAR_BUTTON_OBJ **pDynCharTchCon=(void *)&gCtrlObjPtrBuf[CO_DYN_CHAR_IDX_START];//¶¯Ì¬ÎÄ×Ö°´¼ü¼¯ºÏ
 	SYS_MSG SysMsg=SM_State_Faile;
 	u8 Index;
 	
 	CO_Debug("%s : %s\n\r",__FUNCTION__,gpCurrentPage->Name);
 
 	//4 	»æÖÆÎÄ×Ö´¥ÃþÇøÓò
-	for(Index=0;Index<gpCtrlObjNum->CharTchNum;Index++)
+	for(Index=0;Index<gpCtrlObjNum->CharBtnNum;Index++)
 	{
 		CharTchDisplay(Index,Input_TchNormal,FALSE);
 	}
 
 	//4 	»æÖÆ¶¯Ì¬ÎÄ×Ö´¥ÃþÇøÓò
-	for(Index=0;Index<gpCtrlObjNum->DynCharTchNum;Index++)
+	for(Index=0;Index<gpCtrlObjNum->DynCharBtnNum;Index++)
 	{//ÏÔÊ¾Í¼±ê
 		if(pDynCharTchCon[Index]!=NULL)
 			CharTchDisplay(Index,Input_TchNormal,TRUE);
 	}
 
 	//4 	»æÖÆÍ¼Æ¬´¥ÃþÇøÓò
-	for(Index=0;Index<gpCtrlObjNum->ImgTchNum;Index++)
+	for(Index=0;Index<gpCtrlObjNum->ImgBtnNum;Index++)
 	{//ÏÔÊ¾Í¼±ê
 		ImgTchDisplay(Index,Input_TchNormal,FALSE);
 	}
 
 	//4 	»æÖÆ¶¯Ì¬Í¼Æ¬´¥ÃþÇøÓò
-	for(Index=0;Index<gpCtrlObjNum->DynImgTchNum;Index++)
+	for(Index=0;Index<gpCtrlObjNum->DynImgBtnNum;Index++)
 	{//ÏÔÊ¾Í¼±ê
 		if(pDynImgTchCon[Index]!=NULL)
 			ImgTchDisplay(Index,Input_TchNormal,TRUE);
 	}
+
+	//4	 ´Ë´¦ÊÇ·ñÒª¼ÓÆäËû¿Ø¼þ»æÖÆ¿
 
 	//´¥·¢ÊÂ¼þ
 	switch(EventType)
@@ -924,118 +912,118 @@ SYS_MSG CurrPageCtrlObjInit(INPUT_EVT_TYPE EventType,int IntParam,void *pInfoPar
 // 2.Ö»ÄÜÖ¸¶¨ºó×º£¬±ÈÈçÔ­À´µÄ×ÊÔ´Í¼±êÊÇ"MusicN.bmp"
 //    Ö¸¶¨Suffix='T'£¬ÔòÍ¼±ê×ÊÔ´±ä³É"MusicT.bmp"
 //Èç¹ûSuffix=0£¬Ôò»Ö¸´Ô­Ê¼Í¼±ê
-void Q_ChangeImgTchImg(u8 ObjID,u8 Suffix)
+void Q_ChangeImgTchImg(u8 OID,u8 Suffix)
 {
 	OS_DeclareCritical();
 	
-	if((ObjID=FindImgTchIdx(ObjID))==0xff) return;
+	if((OID=FindImgTchIdx(OID))==0xff) return;
 	
-	if(ObjID>=MAX_IMG_KEY_NUM)
+	if(OID>=MAX_IMG_KEY_NUM)
 	{
-		Debug("%s:ObjID is error!\n\r",__FUNCTION__);
+		Debug("%s:OID is error!\n\r",__FUNCTION__);
 		return;
 	}
 	
 	OS_EnterCritical();
-	gRepImgSufx[ObjID]=Suffix;
+	gRepImgSufx[OID]=Suffix;
 	OS_ExitCritical();
 }
 
 //ºÍQ_ChangeImgTchImgÏà¶Ô£¬¶ÁÈ¡µ±Ç°µÄÍ¼±êÌæ»»ºó×ºÖµ
 //·µ»Ø0±íÊ¾ÊÇÄ¬ÈÏÖµ
 //·ñÔò·µ»ØÌæ»»µÄºó×º
-u8 Q_ReadImgTchImg(u8 ObjID)
+u8 Q_ReadImgTchImg(u8 OID)
 {
-	if((ObjID=FindImgTchIdx(ObjID))==0xff) return 0;
+	if((OID=FindImgTchIdx(OID))==0xff) return 0;
 	
-	if(ObjID>=MAX_IMG_KEY_NUM)
+	if(OID>=MAX_IMG_KEY_NUM)
 	{
-		Debug("%s:ObjID is error!\n\r",__FUNCTION__);
+		Debug("%s:OID is error!\n\r",__FUNCTION__);
 		return 0;
 	}
 
-	return gRepImgSufx[ObjID];
+	return gRepImgSufx[OID];
 }
 
 //¸ü¸Äµ±Ç°´¥ÃþÓòÄ³¸öÎÄ×Ö°´¼üµÄÏÔÊ¾ÎÄ×Ö
 // 1.Ö»¶Ôµ±Ç°Ò³ÃæÓÐÐ§,×ª»»Ò³Ãæ»ò×ÓÒ³ÃæºóÊ§Ð§
 //Èç¹ûNewName=NULL£¬Ôò»Ö¸´Ô­Ê¼ÎÄ×Ö
-void Q_ChangeCharTchName(u8 ObjID,u8 *NewName)
+void Q_ChangeCharTchName(u8 OID,u8 *NewName)
 {
 	OS_DeclareCritical();
 	
-	if((ObjID=FindCharTchIdx(ObjID))==0xff) return;
+	if((OID=FindCharTchIdx(OID))==0xff) return;
 	
-	if(ObjID>=MAX_CHAR_KEY_NUM)
+	if(OID>=MAX_CHAR_KEY_NUM)
 	{
-		Debug("%s:ObjID is error!\n\r",__FUNCTION__);
+		Debug("%s:OID is error!\n\r",__FUNCTION__);
 		return;
 	}
 	
 	OS_EnterCritical();
-	gRepKeyNameCon[ObjID]=NewName;
+	gRepKeyNameCon[OID]=NewName;
 	OS_ExitCritical();
 }
 
 //ºÍQ_ChangeCharTchNameÏà¶Ô£¬¶ÁÈ¡µ±Ç°µÄÍ¼±êÌæ»»ºó×ºÖµ
 //·µ»ØNULL±íÊ¾ÊÇÄ¬ÈÏÖµ»òÕßkey³¬³ö·¶Î§
-u8 *Q_ReadCharTchName(u8 ObjID)
+u8 *Q_ReadCharTchName(u8 OID)
 {
-	if((ObjID=FindCharTchIdx(ObjID))==0xff) return NULL;
+	if((OID=FindCharTchIdx(OID))==0xff) return NULL;
 	
-	if(ObjID>=MAX_CHAR_KEY_NUM)
+	if(OID>=MAX_CHAR_KEY_NUM)
 	{
-		Debug("%s:ObjID is error!\n\r",__FUNCTION__);
+		Debug("%s:OID is error!\n\r",__FUNCTION__);
 		return NULL;
 	}
 	
-	return gRepKeyNameCon[ObjID];
+	return gRepKeyNameCon[OID];
 }
 
 //Á¢¿Ì³ÊÏÖÖ¸¶¨°´¼ü¼üÖµµÄÍ¼±ê»òÎÄ×Ö£¬¶ÔËùÓÐ´Ë¼üÖµµÄ°´¼ü¾ùÓÐÐ§
-void Q_PresentTch(u8 ObjID,TCH_EVT Type)
+void Q_PresentTch(u8 OID,TCH_EVT Type)
 {
 	switch(Type)
 	{
 		case Tch_Normal:
-			SameOidTchDisplay(ObjID,Input_TchNormal);
+			SameOidTchDisplay(OID,Input_TchNormal);
 			break;
 		case Tch_Press:		
-			SameOidTchDisplay(ObjID,Input_TchPress);
+			SameOidTchDisplay(OID,Input_TchPress);
 			break;
 		case Tch_Release:
-			SameOidTchDisplay(ObjID,Input_TchRelease);
+			SameOidTchDisplay(OID,Input_TchRelease);
 			break;
 	}	
 }
 
 //ÓÃÓÚÉèÖÃÐÂµÄ¶¯Ì¬Í¼±ê°´¼ü
 //IdxÖ¸¶¨Ë÷ÒýºÅ£¬´Ó1¿ªÊ¼£¬²»µÃ´óÓÚpageµÄDynImgTchNumÊôÐÔÖµ
-bool Q_SetDynamicImgTch(u8 Idx,IMG_TCH_OBJ *pTchReg)
+bool Q_SetDynamicImgTch(u8 Idx,IMG_BUTTON_OBJ *pBtnObj)
 {
-	IMG_TCH_OBJ **pDynImgTchCon=(void *)gCtrlObjPtrBuf; //¶¯Ì¬Í¼Æ¬°´¼ü¼¯ºÏ
+	IMG_BUTTON_OBJ **pDynImgTchCon=(void *)&gCtrlObjPtrBuf[CO_DYN_IMG_IDX_START]; //¶¯Ì¬Í¼Æ¬°´¼ü¼¯ºÏ
 
-	if((Idx==0)||(Idx>gpCtrlObjNum->DynImgTchNum)) return FALSE;
+	if((Idx==0)||(Idx>gpCtrlObjNum->DynImgBtnNum)) return FALSE;
 	Idx--;
 
-	pDynImgTchCon[Idx]=pTchReg;
+	pDynImgTchCon[Idx]=pBtnObj;
 
-	if(pTchReg!=NULL)
+	if(pBtnObj!=NULL)
 	{
-		u8 Num=gpCtrlObjNum->ImgTchNum+gpCtrlObjNum->CharTchNum+Idx;
+		u8 Num=CO_STATIC_TCH_NUM+CO_DYN_IMG_IDX_START+Idx;
 		gpTouchRegions[Num].x=pDynImgTchCon[Idx]->x;
 		gpTouchRegions[Num].y=pDynImgTchCon[Idx]->y;
 		gpTouchRegions[Num].w=pDynImgTchCon[Idx]->w;
 		gpTouchRegions[Num].h=pDynImgTchCon[Idx]->h;
 		gpTouchRegions[Num].ObjID=pDynImgTchCon[Idx]->ObjID;
-		gpTouchRegions[Num].Type=COT_DynImg;
+		gpTouchRegions[Num].Type=COT_DynImgBtn;
 		gpTouchRegions[Num].Index=Idx;
 		gpTouchRegions[Num].OptionsMask=(u8)(pDynImgTchCon[Idx]->OptionsMask&0xff);
 		ImgTchDisplay(Idx,Input_TchNormal,TRUE);
 	}
 	else
 	{
-		MemSet(&gpTouchRegions[gpCtrlObjNum->ImgTchNum+gpCtrlObjNum->CharTchNum+Idx],0,sizeof(TOUCH_REGION));
+		MemSet(&gpTouchRegions[CO_STATIC_TCH_NUM+CO_DYN_IMG_IDX_START+Idx],0,sizeof(TOUCH_REGION));
 	}
 
 	return FALSE;
@@ -1043,44 +1031,43 @@ bool Q_SetDynamicImgTch(u8 Idx,IMG_TCH_OBJ *pTchReg)
 
 //ÓÃÓÚÉèÖÃÐÂµÄ¶¯Ì¬ÎÄ×Ö°´¼ü
 //IdxÖ¸¶¨Ë÷ÒýºÅ£¬´Ó1¿ªÊ¼£¬²»µÃ´óÓÚpageµÄDynCharTchNumÊôÐÔÖµ
-bool Q_SetDynamicCharTch(u8 Idx,CHAR_TCH_OBJ *pTchReg)
+bool Q_SetDynamicCharTch(u8 Idx,CHAR_BUTTON_OBJ *pBtnObj)
 {
-	CHAR_TCH_OBJ **pDynCharTchCon=(void *)&gCtrlObjPtrBuf[gpCtrlObjNum->DynImgTchNum];//¶¯Ì¬ÎÄ×Ö°´¼ü¼¯ºÏ
+	CHAR_BUTTON_OBJ **pDynCharTchCon=(void *)&gCtrlObjPtrBuf[CO_DYN_CHAR_IDX_START];//¶¯Ì¬ÎÄ×Ö°´¼ü¼¯ºÏ
 		
-	if((Idx==0)||(Idx>gpCtrlObjNum->DynCharTchNum)) return FALSE;
+	if((Idx==0)||(Idx>gpCtrlObjNum->DynCharBtnNum)) return FALSE;
 	Idx--;
 
-	pDynCharTchCon[Idx]=pTchReg;
+	pDynCharTchCon[Idx]=pBtnObj;
 
-	if(pTchReg!=NULL)
+	if(pBtnObj!=NULL)
 	{
-		u8 Num=gpCtrlObjNum->ImgTchNum+gpCtrlObjNum->CharTchNum+gpCtrlObjNum->DynImgTchNum+Idx;
+		u8 Num=CO_STATIC_TCH_NUM+CO_DYN_CHAR_IDX_START+Idx;
 		gpTouchRegions[Num].x=pDynCharTchCon[Idx]->x;
 		gpTouchRegions[Num].y=pDynCharTchCon[Idx]->y;
 		gpTouchRegions[Num].w=pDynCharTchCon[Idx]->w;
 		gpTouchRegions[Num].h=pDynCharTchCon[Idx]->h;
 		gpTouchRegions[Num].ObjID=pDynCharTchCon[Idx]->ObjID;
-		gpTouchRegions[Num].Type=COT_DynChar;
+		gpTouchRegions[Num].Type=COT_DynCharBtn;
 		gpTouchRegions[Num].Index=Idx;
 		gpTouchRegions[Num].OptionsMask=(u8)(pDynCharTchCon[Idx]->OptionsMask&0xff);
 		CharTchDisplay(Idx,Input_TchNormal,TRUE);
 	}
 	else
 	{
-		MemSet(&gpTouchRegions[gpCtrlObjNum->ImgTchNum+gpCtrlObjNum->CharTchNum+gpCtrlObjNum->DynImgTchNum+Idx],0,sizeof(TOUCH_REGION));
+		MemSet(&gpTouchRegions[CO_STATIC_TCH_NUM+CO_DYN_CHAR_IDX_START+Idx],0,sizeof(TOUCH_REGION));
 	}
 	
 	return FALSE;
 }
 
-#ifdef QSYS_FRAME_FULL
 //ÉèÖÃyes noÑ¡Ïî£¬pYesNoÖ¸ÏòµÄÄÚ´æÔÚµ÷ÓÃÍêº¯Êýºó²»¿É×¢Ïú
 //Ò»µ©ÉèÖÃ£¬µ±½øÈëÒ³ÃæÊ±£¬»áÓÃµ½´ËÄÚ´æ
 //ËùÒÔµ±Ò³Ãæ»¹´æÔÚÊ±£¬±ØÐë±£Ö¤´ËÄÚ´æ´æÔÚ
 //Idx´Ó1¿ªÊ¼
 bool Q_SetYesNo(u8 Idx,YES_NO_OBJ *pYesNo)
 {
-	YES_NO_OBJ **pYesNoCon=(void *)&gCtrlObjPtrBuf[gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum];
+	YES_NO_OBJ **pYesNoCon=(void *)&gCtrlObjPtrBuf[CO_YES_NO_IDX_START];
 
 	if(Idx>gpCtrlObjNum->YesNoNum) return FALSE;
 	Idx--;
@@ -1090,8 +1077,7 @@ bool Q_SetYesNo(u8 Idx,YES_NO_OBJ *pYesNo)
 	if(pYesNo!=NULL)
 	{
 		GUI_REGION DrawRegion;
-		u8 Num=gpCtrlObjNum->ImgTchNum+gpCtrlObjNum->CharTchNum
-			+gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum+Idx;
+		u8 Num=CO_STATIC_TCH_NUM+CO_YES_NO_IDX_START+Idx;
 		gpTouchRegions[Num].x=pYesNo->x;
 		gpTouchRegions[Num].y=pYesNo->y;
 		gpTouchRegions[Num].w=CO_YES_NO_W;
@@ -1114,8 +1100,7 @@ bool Q_SetYesNo(u8 Idx,YES_NO_OBJ *pYesNo)
 	}
 	else
 	{//Çå¿Õ´¥ÃþÇøÓò¼ÇÂ¼
-		MemSet(&gpTouchRegions[gpCtrlObjNum->ImgTchNum+gpCtrlObjNum->CharTchNum
-			+gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum+Idx],0,sizeof(TOUCH_REGION));
+		MemSet(&gpTouchRegions[CO_STATIC_TCH_NUM+CO_YES_NO_IDX_START+Idx],0,sizeof(TOUCH_REGION));
 	}
 	
 	return FALSE;
@@ -1127,9 +1112,8 @@ bool Q_SetYesNo(u8 Idx,YES_NO_OBJ *pYesNo)
 //Idx´Ó1¿ªÊ¼
 bool Q_SetNumCtrlObj(u8 Idx,NUM_CTRL_OBJ *pNumCtrlObj)
 {
-	NUM_CTRL_OBJ **pNumCtrlObjCon=(void *)&gCtrlObjPtrBuf[gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum
-																								+gpCtrlObjNum->YesNoNum];
-	if(Idx>gpCtrlObjNum->NumBoxNum) return FALSE;
+	NUM_CTRL_OBJ **pNumCtrlObjCon=(void *)&gCtrlObjPtrBuf[CO_NUM_IDX_START];
+	if(Idx>gpCtrlObjNum->NumCtrlObjNum) return FALSE;
 	Idx--;
 	
 	pNumCtrlObjCon[Idx]=pNumCtrlObj;
@@ -1137,9 +1121,7 @@ bool Q_SetNumCtrlObj(u8 Idx,NUM_CTRL_OBJ *pNumCtrlObj)
 	if(pNumCtrlObj!=NULL)
 	{
 		GUI_REGION DrawRegion;
-		u8 Num=gpCtrlObjNum->ImgTchNum+gpCtrlObjNum->CharTchNum
-			+gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum
-			+gpCtrlObjNum->YesNoNum+Idx;
+		u8 Num=CO_STATIC_TCH_NUM+CO_NUM_IDX_START+Idx;
 		gpTouchRegions[Num].x=pNumCtrlObj->x;
 		gpTouchRegions[Num].y=pNumCtrlObj->y;
 		gpTouchRegions[Num].w=pNumCtrlObj->w;
@@ -1172,8 +1154,11 @@ bool Q_SetNumCtrlObj(u8 Idx,NUM_CTRL_OBJ *pNumCtrlObj)
 			DrawRegion.Color=CO_NUM_TRAN_COLOR;
 			Gui_DrawImgArray(gCtrlObj_NumRight,&DrawRegion);//ÓÒ±ß¿ò
 			
-			sprintf((void *)NumStr,"%d",pNumCtrlObj->Value);
-			DrawRegion.x=pNumCtrlObj->x+((pNumCtrlObj->w-strlen((void *)NumStr)*CO_NUM_FONT_W)>>1);
+			sprintf((void *)NumStr,"%d",pNumCtrlObj->Value);//Êý×Ö
+			if(strlen((void *)NumStr)*CO_NUM_FONT_W < (pNumCtrlObj->w-(CO_NUM_ARROW_W<<1)))
+				DrawRegion.x=pNumCtrlObj->x+((pNumCtrlObj->w-strlen((void *)NumStr)*CO_NUM_FONT_W)>>1);
+			else //ÏÔÊ¾³¤¶È³¬³ö·½¿ò
+				DrawRegion.x=pNumCtrlObj->x+CO_NUM_ARROW_W;
 			DrawRegion.y=pNumCtrlObj->y+3;
 			DrawRegion.w=pNumCtrlObj->w-(CO_NUM_ARROW_W<<1);
 			DrawRegion.h=CO_NUM_H;
@@ -1184,16 +1169,111 @@ bool Q_SetNumCtrlObj(u8 Idx,NUM_CTRL_OBJ *pNumCtrlObj)
 	}
 	else
 	{//Çå¿Õ´¥ÃþÇøÓò¼ÇÂ¼
-		MemSet(&gpTouchRegions[gpCtrlObjNum->ImgTchNum+gpCtrlObjNum->CharTchNum
-			+gpCtrlObjNum->DynImgTchNum+gpCtrlObjNum->DynCharTchNum
-			+gpCtrlObjNum->YesNoNum+Idx],0,sizeof(TOUCH_REGION));
+		MemSet(&gpTouchRegions[CO_STATIC_TCH_NUM+CO_NUM_IDX_START+Idx],0,sizeof(TOUCH_REGION));
 	}
 	
 	return FALSE;
 }
 
+//ÉèÖÃstr¿Ø¼þÑ¡Ïî
+bool Q_SetStrCtrlObj(u8 Idx,STR_CTRL_OBJ *pStrCtrlObj)
+{
+	STR_CTRL_OBJ **pStrCtrlObjCon=(void *)&gCtrlObjPtrBuf[CO_STR_IDX_START];
 
-#endif
+	if(Idx>gpCtrlObjNum->StrCtrlObjNum) return FALSE;
+	Idx--;
+	
+	pStrCtrlObjCon[Idx]=pStrCtrlObj;
+
+	if(pStrCtrlObj!=NULL)
+	{
+		GUI_REGION DrawRegion;
+		u8 Num=CO_STATIC_TCH_NUM+CO_STR_IDX_START+Idx;
+		gpTouchRegions[Num].x=pStrCtrlObj->x;
+		gpTouchRegions[Num].y=pStrCtrlObj->y;
+		gpTouchRegions[Num].w=pStrCtrlObj->w;
+		if(pStrCtrlObj->Type==SCOT_StrBox)
+			gpTouchRegions[Num].h=pStrCtrlObj->h;
+		else if(pStrCtrlObj->Type==SCOT_StrEnum)
+			gpTouchRegions[Num].h=CO_STR_ENUM_H;
+		gpTouchRegions[Num].ObjID=pStrCtrlObj->ObjID;
+		gpTouchRegions[Num].Type=COT_Str;
+		gpTouchRegions[Num].Index=Idx;
+		gpTouchRegions[Num].OptionsMask=(u8)(PrsMsk|RelMsk|ReVMsk);
+
+		//draw
+		if(pStrCtrlObj->Type==SCOT_StrBox)
+		{
+			STR_BOX_OBJ *pStrBoxObj=(void *)pStrCtrlObj;
+		
+		}
+		else if(pStrCtrlObj->Type==SCOT_StrEnum)
+		{
+			STR_ENUM_OBJ *pStrEnumObj=(void *)pStrCtrlObj;
+			u8 StrBuf[32];
+			
+			DrawRegion.x=pStrEnumObj->x+CO_STR_ENUM_ARROW_W-CO_STR_ENUM_FRAME_W;
+			DrawRegion.y=pStrEnumObj->y;
+			DrawRegion.w=CO_STR_ENUM_FRAME_W;
+			DrawRegion.h=CO_STR_ENUM_H;
+			DrawRegion.Color=CO_STR_ENUM_TRAN_COLOR;
+			Gui_DrawImgArray(gCtrlObj_NumLeft,&DrawRegion);//×ó±ß¿ò
+
+			DrawRegion.x=pStrEnumObj->x+CO_STR_ENUM_ARROW_W;
+			DrawRegion.y=pStrEnumObj->y;
+			DrawRegion.w=CO_STR_ENUM_MIDDLE_W;
+			DrawRegion.h=CO_STR_ENUM_H;
+			DrawRegion.Color=CO_STR_ENUM_TRAN_COLOR;
+			Gui_FillImgArray_H(gCtrlObj_NumMiddle,pStrEnumObj->w-(CO_STR_ENUM_ARROW_W<<1),&DrawRegion);	
+
+			DrawRegion.x=pStrEnumObj->x+pStrEnumObj->w-CO_STR_ENUM_ARROW_W;
+			DrawRegion.y=pStrEnumObj->y;
+			DrawRegion.w=CO_STR_ENUM_FRAME_W;
+			DrawRegion.h=CO_STR_ENUM_H;
+			DrawRegion.Color=CO_STR_ENUM_TRAN_COLOR;
+			Gui_DrawImgArray(gCtrlObj_NumRight,&DrawRegion);//ÓÒ±ß¿ò
+			
+			sprintf((void *)StrBuf,"%s",&pStrEnumObj->pStrEnumBuf[pStrEnumObj->Idx]);//×Ö·û´®
+			if(strlen((void *)StrBuf)*CO_STR_ENUM_FONT_W < (pStrEnumObj->w-(CO_STR_ENUM_ARROW_W<<1)))
+				DrawRegion.x=pStrEnumObj->x+((pStrEnumObj->w-strlen((void *)StrBuf)*CO_STR_ENUM_FONT_W)>>1);
+			else //ÏÔÊ¾³¤¶È³¬³ö·½¿ò
+				DrawRegion.x=pStrEnumObj->x+CO_STR_ENUM_ARROW_W;
+			DrawRegion.y=pStrEnumObj->y+3;
+			DrawRegion.w=pStrEnumObj->w-(CO_STR_ENUM_ARROW_W<<1);
+			DrawRegion.h=CO_STR_ENUM_H;
+			DrawRegion.Color=CO_STR_ENUM_FONT_COLOR;
+			DrawRegion.Space=CO_STR_ENUM_FONT_SPACE;
+			Gui_DrawFont(CO_STR_ENUM_FONT_STYLE,StrBuf,&DrawRegion);
+		}
+	}
+	else
+	{//Çå¿Õ´¥ÃþÇøÓò¼ÇÂ¼
+		MemSet(&gpTouchRegions[CO_STATIC_TCH_NUM+CO_STR_IDX_START+Idx],0,sizeof(TOUCH_REGION));
+	}
+	
+	return FALSE;
+}
+
+bool Q_StrEnumAddOne(STR_ENUM_OBJ *pStrEnum,u8 *Str)
+{
+	u8 StrLen=strlen(Str);
+	
+	if((pStrEnum->Size+StrLen+2) > pStrEnum->TotalSize)//¿Õ¼ä²»¹»
+		return FALSE;
+	
+	//¸´ÖÆ×Ö·û´®²»ÓÃMemCpy£¬·ÀÖ¹¶ÔÆëÎÊÌâ
+	{
+		u8 i;
+		u8 *p=&pStrEnum->pStrEnumBuf[pStrEnum->Size?pStrEnum->Size+1:0];
+		for(i=0;i<=StrLen;i++)
+		{
+			p[i]=Str[i];
+		}
+	}
+
+	pStrEnum->Size+=(pStrEnum->Size?StrLen+1:StrLen);
+	return TRUE;
+}
 
 #endif
 

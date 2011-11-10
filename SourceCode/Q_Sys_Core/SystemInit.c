@@ -171,9 +171,6 @@ while(1);
 		Debug("\nATA mounrt Error!!!\n%d\n\r",res);	 
 	}
 
-
-
-	
 	res = f_open(&fsrc,"1.rar",FA_READ) ;	
 	Debug("Open %d\n\r",res);
 	while(1)
@@ -457,8 +454,8 @@ void QSYS_Init(void)
 
 	Debug("sizeof(INPUT_EVENT)=%d\n\r",sizeof(INPUT_EVENT));//for debug by karlno
 	Debug("sizeof(PAGE_ATTRIBUTE)=%d\n\r",sizeof(PAGE_ATTRIBUTE));//for debug by karlno
-	Debug("sizeof(IMG_TCH_OBJ)=%d\n\r",sizeof(IMG_TCH_OBJ));//for debug by karlno
-	Debug("sizeof(CHAR_TCH_OBJ)=%d\n\r",sizeof(CHAR_TCH_OBJ));//for debug by karlno
+	Debug("sizeof(IMG_BUTTON_OBJ)=%d\n\r",sizeof(IMG_BUTTON_OBJ));//for debug by karlno
+	Debug("sizeof(CHAR_BUTTON_OBJ)=%d\n\r",sizeof(CHAR_BUTTON_OBJ));//for debug by karlno
 	Debug("sizeof(MUSIC_EVENT)=%d\n\r",sizeof(MUSIC_EVENT));//for debug by karlno
 	//Debug("sizeof(QSYS_MSG_BOX)=%d\n\r",sizeof(QSYS_MSG_BOX));//for debug by karlno
 
@@ -518,7 +515,7 @@ void QSYS_Init(void)
 
 	if(GPIO_ReadInputDataBit(GPIOE,GPIO_Pin_2)==0) //如果没按下Key-PE2，就正常启动串口中断
 	{
-		//USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+		//USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);//release版本请关掉此句，免得不懂的用户说板卡老死机。
 		//USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
 	}
 }

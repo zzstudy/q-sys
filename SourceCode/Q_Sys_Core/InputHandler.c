@@ -47,13 +47,11 @@ extern TOUCH_REGION *GetTouchInfoByIdx(u8 Idx);
 #if 1 //control obj 
 extern void ControlObjInit(void);
 extern void PageSwithcCtrlObjDataHandler(const PAGE_ATTRIBUTE *pNewPage);
-CO_MSG TchCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo);
-#ifdef QSYS_FRAME_FULL	
-CO_MSG YesNoCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx);
-CO_MSG NumBoxCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo);
-CO_MSG StrOptCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo);
-CO_MSG StrInputCtrlObjHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo);
-#endif
+CO_MSG ButtonCtrlObjTchHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo);
+CO_MSG YesNoCtrlObjTchHandler(INPUT_EVT_TYPE InType,u8 Idx);
+CO_MSG NumCtrlObjTchHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo);
+CO_MSG StrCtrlObjTchHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchInfo);
+
 extern void PushPageCtrlObjData(void);
 extern void PopPageCtrlObjData(bool);
 extern void CleanPageCtrlObjData(void);
@@ -247,7 +245,6 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 		&&(Q_GetPageByTrack(1)->Type==POP_PAGE))//前一个页面是pop页面
 		gCurrSysMsg|=gpCurrentPage->SysEvtHandler(Sys_PopPageReturn,IntParam,pSysParam);
 	
-#ifdef QSYS_FRAME_FULL	
 	if(GetRegIdByIdx(GetPageIdxByTrack(1)) == PRID_NumCtrlObjPage)//从num控件页返回
 	{
 		NUM_CTRL_OBJ *pNumCtrlObj=pSysParam;
@@ -257,7 +254,6 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 			Debug("!!!Not Define Handler Function In Page Struct!!!\n\r");
 	}
 	else
-#endif
 		while((OS_GetCurrentSysMs()-TimeMsRecord)<300) OS_TaskDelayMs(50);//循环延时300ms，以避免触摸响应混乱
 	
 	Q_EnableInput();
@@ -280,26 +276,21 @@ static CO_MSG CtrlObjTypeHandler(INPUT_EVT_TYPE InType,u16 Idx,TOUCH_INFO *pTouc
 
 	switch(GetTouchInfoByIdx(Idx)->Type)
 	{
-		case COT_ImgTch:
-		case COT_CharTch:
-		case COT_DynImg:
-		case COT_DynChar:
-			CoMsg=TchCtrlObjHandler(InType,Idx,pTouchInfo);
+		case COT_ImgBtn:
+		case COT_CharBtn:
+		case COT_DynImgBtn:
+		case COT_DynCharBtn:
+			CoMsg=ButtonCtrlObjTchHandler(InType,Idx,pTouchInfo);
 			break;
-#ifdef QSYS_FRAME_FULL	
 		case COT_YesNo:
-			CoMsg=YesNoCtrlObjHandler(InType,Idx);
+			CoMsg=YesNoCtrlObjTchHandler(InType,Idx);
 			break;
 		case COT_Num:
-			CoMsg=NumBoxCtrlObjHandler(InType,Idx,pTouchInfo);
+			CoMsg=NumCtrlObjTchHandler(InType,Idx,pTouchInfo);
 			break;
-		case COT_StrOpt:
-			CoMsg=StrOptCtrlObjHandler(InType,Idx,pTouchInfo);
+		case COT_Str:
+			CoMsg=StrCtrlObjTchHandler(InType,Idx,pTouchInfo);
 			break;
-		case COT_StrInput:
-			CoMsg=StrInputCtrlObjHandler(InType,Idx,pTouchInfo);
-			break;
-#endif
 	}
 	return CoMsg;
 }
@@ -323,7 +314,7 @@ static void QSYS_DataInit(void)
 		gPagePeripEvtFlag[i]=AllPage[i].pPage->PeripEvtInitMask;
 
 		//顺便检查页面合法性
-		if((AllPage[i].pPage->SysEvtHandler==NULL)||(AllPage[i].pPage->TchEvtHandler==NULL)
+		if((AllPage[i].pPage->SysEvtHandler==NULL)||(AllPage[i].pPage->ButtonHandler==NULL)
 			||(AllPage[i].pPage->PeripEvtHandler==NULL))
 			Q_ErrorStopScreen("Page SysEvtHandler & TchEvtHandler no allow be NULL!");
 	}

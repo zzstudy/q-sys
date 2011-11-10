@@ -14,7 +14,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 static CO_MSG TouchEventHandlerPicturePage(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
 
 //-----------------------本页系统变量及声明-----------------------
-enum PicturePageKey
+enum PictureOID
 {
 	PicturePage_ExtiKey0=0,//系统默认将外部中断按键发送到第一个键值
 
@@ -25,7 +25,7 @@ enum PicturePageKey
 };
 
 //定义页面或应用的触摸区域集，相当于定义按键
-static const IMG_TCH_OBJ PicturePageTouchRegionSet[]={
+static const IMG_BUTTON_OBJ PicturePageTouchRegionSet[]={
 	//{key,gLandScapeMode,x,y,width,hight,image x,image y,normal bmp path,release bmp path,press bmp path,transparent color,key name}
 	{"Open",PicturePage_Open,RelMsk,0,0,240,60,0,0,"",0},
 	{"Return",PicturePage_Return,RelMsk,0,260,240,60,0,0,"",0},
@@ -42,7 +42,7 @@ const PAGE_ATTRIBUTE PicturePage={
 	0,
 
 	{
-		sizeof(PicturePageTouchRegionSet)/sizeof(IMG_TCH_OBJ),
+		sizeof(PicturePageTouchRegionSet)/sizeof(IMG_BUTTON_OBJ),
 		0,
 	},
 	PicturePageTouchRegionSet,

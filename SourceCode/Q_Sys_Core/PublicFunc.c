@@ -380,6 +380,7 @@ PrtEnd:
 
 //分析单个后缀名
 //suffix内容类似于".mp3"
+//对大小写不敏感
 bool CheckSuffix(u8 *Str,u8 *Suffix,u8 SuffixLen)
 {
 	u8 Len;
@@ -391,7 +392,11 @@ bool CheckSuffix(u8 *Str,u8 *Suffix,u8 SuffixLen)
 	if(Len<=SuffixLen) return FALSE;
 	for(i=SuffixLen;i;i--)
 	{
-		if(Str[Len-i]!=Suffix[SuffixLen-i]) return FALSE;
+		//大小写处理
+		if(Str[Len-i]>='A'&&Str[Len-i]<='Z') Str[Len-i]-=('A'-'a');
+		if(Suffix[SuffixLen-i]>='A'&&Suffix[SuffixLen-i]<='Z') Suffix[SuffixLen-i]-=('A'-'a');
+		
+		if(Str[Len-i]!=Suffix[SuffixLen-i]) return FALSE;//比较
 	}
 
 	return TRUE;
@@ -400,6 +405,7 @@ bool CheckSuffix(u8 *Str,u8 *Suffix,u8 SuffixLen)
 //分析多个后缀名
 //SuffixStr内容类似于".mp3|.wav|.txt"
 //如果SuffixStr为空，则表示不过滤
+//对大小写不敏感
 bool CheckMultiSuffix(u8 *Str,u8 *SuffixStr)
 {
 	u8 i,j,SuffixStrLen;
