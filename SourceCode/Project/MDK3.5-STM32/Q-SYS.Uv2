@@ -124,6 +124,7 @@ File 12,1,<..\..\Q_Sys_Core\Pages\TestPage.c><TestPage.c>
 File 12,1,<..\..\Q_Sys_Core\Pages\TouchCheckPage.c><TouchCheckPage.c>
 File 12,1,<..\..\Q_Sys_Core\Pages\NewsPage.c><NewsPage.c>
 File 12,1,<..\..\Q_Sys_Core\Pages\NumCtrlObjPage.c><NumCtrlObjPage.c>
+File 12,1,<..\..\Q_Sys_Core\Pages\StrCtrlObjPage.c><StrCtrlObjPage.c>
 
 
 Options 1,0,0  // Target 'Q-SYS'

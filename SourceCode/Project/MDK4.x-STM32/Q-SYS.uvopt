@@ -1750,6 +1750,20 @@
       <PathWithFileName>..\..\Q_Sys_Core\Pages\NumCtrlObjPage.c</PathWithFileName>
       <FilenameWithoutPath>NumCtrlObjPage.c</FilenameWithoutPath>
     </File>
+    <File>
+      <GroupNumber>12</GroupNumber>
+      <FileNumber>0</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <Focus>0</Focus>
+      <ColumnNumber>0</ColumnNumber>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <TopLine>246</TopLine>
+      <CurrentLine>266</CurrentLine>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\..\Q_Sys_Core\Pages\StrCtrlObjPage.c</PathWithFileName>
+      <FilenameWithoutPath>StrCtrlObjPage.c</FilenameWithoutPath>
+    </File>
   </Group>
 
   <AlienFiles>

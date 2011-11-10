@@ -981,6 +981,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\Q_Sys_Core\Pages\NumCtrlObjPage.c</FilePath>
             </File>
+            <File>
+              <FileName>StrCtrlObjPage.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Q_Sys_Core\Pages\StrCtrlObjPage.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
