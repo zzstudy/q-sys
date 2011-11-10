@@ -14,7 +14,7 @@
 //函数声明
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
 
 //-----------------------本页系统变量及声明-----------------------
 //定义页面按键需要用到的枚举，类似于有序唯一的宏定义
@@ -41,12 +41,12 @@ typedef enum
 	MessageKV,
 	MusicKV,
 	PepoleKV,
-}NEWS_PAGE_KEY_NAME;
+}NewsPage_OID;
 
 //定义页面或应用的触摸区域集，相当于定义按键
 //支持的最大触摸区域个数为MAX_TOUCH_REGION_NUM
 //系统显示和触摸的所有坐标系均以屏幕左上角为原点(x 0,y 0)，右下角为(x 320,y 240)
-static const IMG_TCH_OBJ ImgTchRegCon[]={
+static const IMG_BUTTON_OBJ ImgButtonCon[]={
 	//KeyName,ObjID,OptionMask,Tch_x,Tch_y,Tch_w,Tch_h,Img_x,Img_y,BmpPathPrefix,NormalSuf,PressSuf,ReleaseSuf,TransColor},
 	{"Back",	BackKV,RelMsk|PathMsk,3,287,54,31,0,0,"Common/Btn/Back",FatColor(NO_TRANS)},
 	{"<<",		LeftArrowKV,RelMsk|PathMsk,65,287,39,31,0,0,"Common/Btn/LeftArr",FatColor(NO_TRANS)},
@@ -61,7 +61,7 @@ static const IMG_TCH_OBJ ImgTchRegCon[]={
 	{"",PepoleKV,RelMsk,180,320,60,30,0,0,"",FatColor(NO_TRANS)},
 };
 
-static const CHAR_TCH_OBJ CharTchRegCon[]={
+static const CHAR_BUTTON_OBJ CharButtonCon[]={
 	//KeyName,ObjID,OptionMask,Tch_x,Tch_y,Tch_w,Tch_h,
 		//Char_x,Char_y,MarginXY,SpaceXY,NormalColor,NormalBG,PressColor,PressBG,ReleaseColor,ReleaseBG},
 	{"酷享",Q_ShareweKv,F16Msk|RoueMsk|RelMsk,4,30,53,25,
@@ -83,17 +83,17 @@ const PAGE_ATTRIBUTE NewsPage={
 	0,//
 
 	{
-		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
-		sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
+		sizeof(ImgButtonCon)/sizeof(IMG_BUTTON_OBJ), //size of touch region array
+		sizeof(CharButtonCon)/sizeof(CHAR_BUTTON_OBJ), //size of touch region array,
 	},
-	ImgTchRegCon, //touch region array
-	CharTchRegCon,
+	ImgButtonCon, //touch region array
+	CharButtonCon,
 	
 	SystemEventHandler,
 	PeripheralsHandler,
 	Bit(Perip_KeyPress)|Bit(Perip_KeyRelease)|Bit(Perip_UartInput)|
 	Bit(Perip_QWebRecv)|Bit(Perip_QWebSendFailed)|Bit(Perip_QWebSendOk),
-	TouchEventHandler,
+	ButtonHandler,
 };
 
 //-----------------------本页自定义变量声明-----------------------
@@ -109,7 +109,7 @@ const PAGE_ATTRIBUTE NewsPage={
 typedef struct{
 	u8 ViewAddr;//view服务器地址
 	u8 HostOnlineFlag;//web服务器在线标志
-	NEWS_PAGE_KEY_NAME NowTab;//当前标签
+	NewsPage_OID NowTab;//当前标签
 	GUI_REGION TxtRegion;
 }NEWS_PAGE_VARS;
 static NEWS_PAGE_VARS *gNspVars=NULL;
@@ -144,7 +144,7 @@ static void TipState(u8 Act)//画状态灯
 }
 
 //高亮标签
-static void HighLightTable(NEWS_PAGE_KEY_NAME Key)
+static void HighLightTable(NewsPage_OID Key)
 {
 	switch(Key)
 	{
@@ -362,7 +362,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 }
 
 //当使用者按下本页TouchRegionSet里定义的按键时，会触发这个函数里的对应事件
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 {		
 	switch(Key)
 	{
@@ -374,19 +374,19 @@ static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 			break;	
 
 		case Q_ShareweKv:
-			gNspVars->NowTab=(NEWS_PAGE_KEY_NAME)Key;
+			gNspVars->NowTab=(NewsPage_OID)Key;
 			SendViewCmd(VC_HGET,"/View/Q_ShareWe.html");
 			break;
 		case InfomationKv:
-			gNspVars->NowTab=(NEWS_PAGE_KEY_NAME)Key;
+			gNspVars->NowTab=(NewsPage_OID)Key;
 			SendViewCmd(VC_HGET,"/View/Infomation.html");
 			break;
 		case EntertainmentKv:
-			gNspVars->NowTab=(NEWS_PAGE_KEY_NAME)Key;
+			gNspVars->NowTab=(NewsPage_OID)Key;
 			SendViewCmd(VC_HGET,"/View/Entertainment.html");
 			break;
 		case FinanceKv:
-			gNspVars->NowTab=(NEWS_PAGE_KEY_NAME)Key;
+			gNspVars->NowTab=(NewsPage_OID)Key;
 			SendViewCmd(VC_HGET,"/View/Finance.html");
 			break;
 		
@@ -403,7 +403,7 @@ static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 			break;
 		default:
 			//需要响应的事件未定义
-			Debug("%s TouchEventHandler:This Touch Event Handler case unfinish! Key:%d\n\r",Q_GetCurrPageName(),Key);
+			Debug("%s ButtonHandler:This Touch Event Handler case unfinish! Key:%d\n\r",Q_GetCurrPageName(),Key);
 			///while(1);
 	}
 	

@@ -15,7 +15,7 @@
 //函数声明
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
 
 //-----------------------本页系统变量及声明-----------------------
 //定义页面按键需要用到的枚举，类似于有序唯一的宏定义
@@ -39,7 +39,7 @@ typedef enum
 	MessageKV,
 	MusicKV,
 	PepoleKV,
-}ChatPage_KEY_NAME;
+}ChatPage_OID;
 
 #define CHAT_FRAME_X 6
 #define CHAT_FRAME_Y 43+6
@@ -66,7 +66,7 @@ typedef enum
 //定义页面或应用的触摸区域集，相当于定义按键
 //支持的最大触摸区域个数为MAX_TOUCH_REGION_NUM
 //系统显示和触摸的所有坐标系均以屏幕左上角为原点(x 0,y 0)，右下角为(x 320,y 240)
-static const IMG_TCH_OBJ ImgTchRegCon[]={
+static const IMG_BUTTON_OBJ ImgButtonCon[]={
 	//KeyName,ObjID,OptionMask,Tch_x,Tch_y,Tch_w,Tch_h,Img_x,Img_y,BmpPathPrefix,NormalSuf,PressSuf,ReleaseSuf,TransColor},	
 	{"", ChatKV,RelMsk,CHAT_FRAME_X,CHAT_FRAME_Y,CHAT_FRAME_W,CHAT_FRAME_H,0,0,"",FatColor(NO_TRANS)},
 	{"", SendKV,RelMsk,SEND_FRAME_X,SEND_FRAME_Y,SEND_FRAME_W,SEND_FRAME_H,0,0,"",FatColor(NO_TRANS)},
@@ -87,10 +87,10 @@ const PAGE_ATTRIBUTE ChatPage={
 	0,//
 
 	{
-		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
-		0,//sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
+		sizeof(ImgButtonCon)/sizeof(IMG_BUTTON_OBJ), //size of touch region array
+		0,//sizeof(CharButtonCon)/sizeof(CHAR_BUTTON_OBJ), //size of touch region array,
 	},
-	ImgTchRegCon, //touch region array
+	ImgButtonCon, //touch region array
 	NULL,
 	
 	SystemEventHandler,
@@ -98,7 +98,7 @@ const PAGE_ATTRIBUTE ChatPage={
 	Bit(Perip_KeyPress)|Bit(Perip_KeyRelease)|
 	Bit(Perip_QWebRecv)|Bit(Perip_QWebSendFailed)|Bit(Perip_QWebSendOk)|
 	Bit(Perip_UartInput),
-	TouchEventHandler,
+	ButtonHandler,
 };
 
 //-----------------------本页自定义变量声明-----------------------
@@ -432,7 +432,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 }
 
 //当使用者按下本页TouchRegionSet里定义的按键时，会触发这个函数里的对应事件
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 {		
 	switch(Key)
 	{
@@ -469,7 +469,7 @@ static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 			break;
 		default:
 			//需要响应的事件未定义
-			Debug("%s TouchEventHandler:This Touch Event Handler case unfinish! Key:%d\n\r",Q_GetCurrPageName(),Key);
+			Debug("%s ButtonHandler:This Touch Event Handler case unfinish! Key:%d\n\r",Q_GetCurrPageName(),Key);
 			///while(1);
 	}
 	

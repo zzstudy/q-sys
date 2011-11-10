@@ -14,7 +14,7 @@
 //函数声明
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
 
 //-----------------------本页自定义变量声明-----------------------
 #define SETTINGS_PAGE_BGCOLOR 0xe0e0e0
@@ -66,12 +66,12 @@ typedef enum
 	Option11KV,
 	Option12KV,
 	
-}SettingsPage_KEY_NAME;
+}SettingsPage_OID;
 
 //定义页面或应用的触摸区域集，相当于定义按键
 //支持的最大触摸区域个数为MAX_TOUCH_REGION_NUM
 //系统显示和触摸的所有坐标系均以屏幕左上角为原点(x 0,y 0)，右下角为(x 320,y 240)
-static const IMG_TCH_OBJ ImgTchRegCon[]={
+static const IMG_BUTTON_OBJ ImgButtonCon[]={
 	//KeyName,ObjID,OptionMask,Tch_x,Tch_y,Tch_w,Tch_h,Img_x,Img_y,BmpPathPrefix,NormalSuf,PressSuf,ReleaseSuf,TransColor},
 	{"Back",	BackKV,RelMsk|PathMsk,3,287,54,31,0,0,"Common/Btn/Back",FatColor(NO_TRANS)},
 	{"<<",		LeftArrowKV,RelMsk|PathMsk,65,287,39,31,0,0,"Common/Btn/LeftArr",FatColor(NO_TRANS)},
@@ -81,7 +81,7 @@ static const IMG_TCH_OBJ ImgTchRegCon[]={
 };
 
 //用于动态按键的默认值
-static const IMG_TCH_OBJ DefaultTch={"",Option1KV,RelMsk,0,0,0,0,0,0,"",FatColor(NO_TRANS)};
+static const IMG_BUTTON_OBJ DefaultTch={"",Option1KV,RelMsk,0,0,0,0,0,0,"",FatColor(NO_TRANS)};
 
 //定义页面或者应用的属性集
 const PAGE_ATTRIBUTE SettingsPage={
@@ -92,18 +92,18 @@ const PAGE_ATTRIBUTE SettingsPage={
 	0,//
 
 	{
-		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
-		0,//sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
+		sizeof(ImgButtonCon)/sizeof(IMG_BUTTON_OBJ), //size of touch region array
+		0,//sizeof(CharButtonCon)/sizeof(CHAR_BUTTON_OBJ), //size of touch region array,
 		SETTINGS_PAGE_MAX_PAGE_OPTION_NUM,
 		0
 	},
-	ImgTchRegCon, //touch region array
+	ImgButtonCon, //touch region array
 	NULL,
 	
 	SystemEventHandler,
 	PeripheralsHandler,
 	Bit(Perip_KeyPress)|Bit(Perip_KeyRelease),
-	TouchEventHandler,
+	ButtonHandler,
 };
 
 //-----------------------本页自定义类型-----------------------
@@ -210,7 +210,7 @@ typedef struct {
 	u8 CurrPage;//记录当前页，从1开始
 
 	u8 DynImgTchIdx;
-	IMG_TCH_OBJ OptionsTch[SETTINGS_PAGE_MAX_PAGE_OPTION_NUM];
+	IMG_BUTTON_OBJ OptionsTch[SETTINGS_PAGE_MAX_PAGE_OPTION_NUM];
 }SETTINGS_PAGE_VARS;//将本页要用到的全局变量全部放入此结构体
 static SETTINGS_PAGE_VARS *gOpsVars;//只需要定义一个指针，减少全局变量的使用
 #endif
@@ -710,7 +710,7 @@ static OP_HEADER *GetPagesOption(u8 PageItemIdx)
 
 //用于绘制yes or no 选项
 //返回下一个选项区域的Y地址
-static u16 DrawYesOrNoOption(OP_UPDATA_FLAG Flag,void *pOptionBuf,bool NewVal,u16 StartY,IMG_TCH_OBJ *Reg)
+static u16 DrawYesOrNoOption(OP_UPDATA_FLAG Flag,void *pOptionBuf,bool NewVal,u16 StartY,IMG_BUTTON_OBJ *Reg)
 {
 	OP_YESORNO *pYesNo=pOptionBuf;
 	GUI_REGION DrawRegion;
@@ -821,7 +821,7 @@ static u16 DrawYesOrNoOption(OP_UPDATA_FLAG Flag,void *pOptionBuf,bool NewVal,u1
 
 //负责NumOption的处理
 //返回末尾处y值
-static u16 DrawNumOption(OP_UPDATA_FLAG Flag,void *pOptionBuf,s32 NewVal,u16 StartY,IMG_TCH_OBJ *Reg)
+static u16 DrawNumOption(OP_UPDATA_FLAG Flag,void *pOptionBuf,s32 NewVal,u16 StartY,IMG_BUTTON_OBJ *Reg)
 {
 	OP_NUM *pNum=pOptionBuf;
 	OP_NUMLIST *pNumList=pOptionBuf;
@@ -1029,7 +1029,7 @@ static u16 DrawNumOption(OP_UPDATA_FLAG Flag,void *pOptionBuf,s32 NewVal,u16 Sta
 	return StartY+SETTINGS_PAGE_OPTION_NAME_H+SETTINGS_PAGE_OPTION_NOTE_H*NoteLineNum+SETTINGS_PAGE_OPTION_LINE_H;
 }
 
-static u16 DrawStrOption(OP_UPDATA_FLAG Flag,void *pOptionBuf,u8 *pNewVal,u16 StartY,IMG_TCH_OBJ *Reg)
+static u16 DrawStrOption(OP_UPDATA_FLAG Flag,void *pOptionBuf,u8 *pNewVal,u16 StartY,IMG_BUTTON_OBJ *Reg)
 {
 	return StartY;
 }
@@ -1265,7 +1265,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 				for(i=0;i<SETTINGS_PAGE_MAX_PAGE_OPTION_NUM;i++)//初始化动态按键数组
 				{
 					gOpsVars->DynImgTchIdx=1;
-					memcpy(&gOpsVars->OptionsTch[i],&DefaultTch,sizeof(IMG_TCH_OBJ));
+					memcpy(&gOpsVars->OptionsTch[i],&DefaultTch,sizeof(IMG_BUTTON_OBJ));
 					gOpsVars->OptionsTch[i].ObjID=Option1KV+i;
 				}
 				
@@ -1345,7 +1345,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 	return 0;
 }
 //当使用者按下本页TouchRegionSet里定义的按键时，会触发这个函数里的对应事件
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 {		
 	//GUI_REGION DrawRegion;
 	OP_HEADER *pHeader;
@@ -1437,7 +1437,7 @@ static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 			break;
 		default:
 			//需要响应的事件未定义
-			Debug("%s TouchEventHandler:This Touch Event Handler case unfinish! Key:%d\n\r",Q_GetCurrPageName(),Key);
+			Debug("%s ButtonHandler:This Touch Event Handler case unfinish! Key:%d\n\r",Q_GetCurrPageName(),Key);
 			///while(1);
 	}
 	

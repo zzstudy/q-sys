@@ -15,7 +15,7 @@
 //函数声明
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
 
 //-----------------------本页系统变量及声明-----------------------
 //定义页面按键需要用到的枚举，类似于有序唯一的宏定义
@@ -45,9 +45,9 @@ typedef enum
 	KeyDotKV,//.
 	KeyCancleKV,//X
 	KeyOkKV,//O
-}NumCtrlObjPage_KEY_NAME;
+}NumCtrlObjPage_OID;
 
-static const CHAR_TCH_OBJ NumTchRegCon[]={
+static const CHAR_BUTTON_OBJ NumButtonCon[]={
 	//KeyName,ObjID,OptionMask,Tch_x,Tch_y,Tch_w,Tch_h,
 		//Char_x,Char_y,MarginXY,SpaceXY,NormalColor,NormalBG,PressColor,PressBG,ReleaseColor,ReleaseBG},
 	{"1",Key1KV,B14Msk|RelMsk,4,4,24,24,
@@ -84,8 +84,8 @@ static const CHAR_TCH_OBJ NumTchRegCon[]={
 //定义页面或者应用的属性集
 const PAGE_ATTRIBUTE NumCtrlObjPage={
 	"NumCtrlObjPage",
-	"Author",
-	"Page Description",
+	"Karlno",
+	"Ctrl Obj Page",
 	POP_PAGE,
 	0,//
 
@@ -93,7 +93,7 @@ const PAGE_ATTRIBUTE NumCtrlObjPage={
 		0,//size of touch region array
 		0,//size of touch region array,
 		3,
-		sizeof(NumTchRegCon)/sizeof(CHAR_TCH_OBJ),//小键盘上的动态按键个数
+		sizeof(NumButtonCon)/sizeof(CHAR_BUTTON_OBJ),//小键盘上的动态按键个数
 	},
 	NULL, 
 	NULL,
@@ -101,7 +101,7 @@ const PAGE_ATTRIBUTE NumCtrlObjPage={
 	SystemEventHandler,
 	PeripheralsHandler,
 	Bit(Perip_KeyPress)|Bit(Perip_KeyRelease)|Bit(Perip_UartInput),
-	TouchEventHandler,
+	ButtonHandler,
 };
 
 //-----------------------本页自定义变量声明-----------------------
@@ -111,9 +111,9 @@ const PAGE_ATTRIBUTE NumCtrlObjPage={
 #define KEY_BOARD_LCD_BUF_PATH "/Temp/NumBoxPS.buf"
 
 //动态按键模板
-const IMG_TCH_OBJ ArrowTchTmp={"",0,PrsMsk|RelMsk|ReVMsk,0,0,CO_NUM_ARROW_W,CO_NUM_H,0,0,"",FatColor(NO_TRANS)};
-const IMG_TCH_OBJ NumTchTmp={"",0,RelMsk,0,0,0,CO_NUM_H,0,0,"",FatColor(NO_TRANS)};
-const GUI_REGION KeyBoardRegionTmp={0,0,176,56,0,FatColor(NO_TRANS)};
+static const IMG_BUTTON_OBJ ArrowTchTmp={"",0,PrsMsk|RelMsk|ReVMsk,0,0,CO_NUM_ARROW_W,CO_NUM_H,0,0,"",FatColor(NO_TRANS)};
+static const IMG_BUTTON_OBJ NumBtnTmp={"",0,RelMsk,0,0,0,CO_NUM_H,0,0,"",FatColor(NO_TRANS)};
+static const GUI_REGION KeyBoardRegionTmp={0,0,176,56,0,FatColor(NO_TRANS)};
 
 typedef struct{
 	NUM_CTRL_OBJ_TYPE HandlerType;//控件类型
@@ -121,13 +121,13 @@ typedef struct{
 	s32 DefValue;//控件默认值
 	u16 LeftDispBuf[CO_NUM_ARROW_W*CO_NUM_H];//控件左箭头缓存
 	u16 RightDispBuf[CO_NUM_ARROW_W*CO_NUM_H];//控件右箭头缓存
-	IMG_TCH_OBJ LeftArrowTch;//左箭头动态按键实体
-	IMG_TCH_OBJ RightArrowTch;//右箭头动态按键实体
-	IMG_TCH_OBJ NumTch;//中间数字框动态按键实体
-	CHAR_TCH_OBJ KeyBoard[sizeof(NumTchRegCon)/sizeof(CHAR_TCH_OBJ)];//小键盘实体
+	IMG_BUTTON_OBJ LeftArrowBtn;//左箭头动态按键实体
+	IMG_BUTTON_OBJ RightArrowBtn;//右箭头动态按键实体
+	IMG_BUTTON_OBJ NumBtn;//中间数字框动态按键实体
+	CHAR_BUTTON_OBJ KeyBoard[sizeof(NumButtonCon)/sizeof(CHAR_BUTTON_OBJ)];//小键盘实体
 	GUI_REGION NumKeySaveReg;//小键盘范围
 }NUM_CTRL_OBJ_PAGE_VARS;
-static NUM_CTRL_OBJ_PAGE_VARS *gpNbpVars;//只需要定义一个指针，减少全局变量的使用
+static NUM_CTRL_OBJ_PAGE_VARS *gpNcopVars;//只需要定义一个指针，减少全局变量的使用
 
 //-----------------------本页自定义函数-----------------------
 typedef enum{
@@ -262,7 +262,7 @@ void CalculateKeyBoardPosition(NUM_CTRL_OBJ *pNumCtrlObj, GUI_REGION *pDrawReg)
 		pDrawReg->x=pNumCtrlObj->x+pNumCtrlObj->w-pDrawReg->w;
 	}
 
-	if(y<(LCD_HIGHT>>1))//画到下方
+	if(y<(LCD_HIGHT-KeyBoardRegionTmp.h-TOUCH_REGION_MARGIN))//画到下方
 	{
 		pDrawReg->y=pNumCtrlObj->y+CO_NUM_H+TOUCH_REGION_MARGIN;
 	}
@@ -280,12 +280,12 @@ void DrawAndRegKeyBoard(GUI_REGION *pDrawRegion)
 	pDrawRegion->Color=KEY_BOARD_BG_COLOR;
 	Gui_FillBlock(pDrawRegion);
 
-	for(i=0;i<sizeof(NumTchRegCon)/sizeof(CHAR_TCH_OBJ);i++)
+	for(i=0;i<sizeof(NumButtonCon)/sizeof(CHAR_BUTTON_OBJ);i++)
 	{
-		MemCpy(&gpNbpVars->KeyBoard[i],&NumTchRegCon[i],sizeof(CHAR_TCH_OBJ));
-		gpNbpVars->KeyBoard[i].x+=pDrawRegion->x;
-		gpNbpVars->KeyBoard[i].y+=pDrawRegion->y;
-		Q_SetDynamicCharTch(i+1,&gpNbpVars->KeyBoard[i]);//建立动态按键区域
+		MemCpy(&gpNcopVars->KeyBoard[i],&NumButtonCon[i],sizeof(CHAR_BUTTON_OBJ));
+		gpNcopVars->KeyBoard[i].x+=pDrawRegion->x;
+		gpNcopVars->KeyBoard[i].y+=pDrawRegion->y;
+		Q_SetDynamicCharTch(i+1,&gpNcopVars->KeyBoard[i]);//建立动态按键区域
 	}
 }
 //-----------------------本页系统函数----------------------
@@ -306,8 +306,8 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 			}			
 			return SM_State_OK;
 		case Sys_PageInit:		//系统每次打开这个页面，会处理这个事件		
-			gpNbpVars=Q_PageMallco(sizeof(NUM_CTRL_OBJ_PAGE_VARS));
-			gpNbpVars->HandlerType=pNumCtrlObj->Type;
+			gpNcopVars=Q_PageMallco(sizeof(NUM_CTRL_OBJ_PAGE_VARS));
+			gpNcopVars->HandlerType=pNumCtrlObj->Type;
 
 			if((pNumCtrlObj->Type == NCOT_NumList)||(pNumCtrlObj->Type == NCOT_NumEnum)||(pNumCtrlObj->Type == NCOT_NumBox))
 			{
@@ -322,41 +322,41 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 				DrawRegion.y=pNumCtrlObj->y;
 				DrawRegion.w=CO_NUM_ARROW_W;
 				DrawRegion.h=CO_NUM_H;
-				Gui_ReadRegion16Bit(gpNbpVars->LeftDispBuf,&DrawRegion);//保存旧图
+				Gui_ReadRegion16Bit(gpNcopVars->LeftDispBuf,&DrawRegion);//保存旧图
 
 				DrawRegion.x=pNumCtrlObj->x+pNumCtrlObj->w-CO_NUM_ARROW_W;
 				DrawRegion.y=pNumCtrlObj->y;
 				DrawRegion.w=CO_NUM_ARROW_W;
 				DrawRegion.h=CO_NUM_H;
-				Gui_ReadRegion16Bit(gpNbpVars->RightDispBuf,&DrawRegion);//保存旧图
+				Gui_ReadRegion16Bit(gpNcopVars->RightDispBuf,&DrawRegion);//保存旧图
 
 				DrawNumCtrlObj((void *)pNumCtrlObj,DNA_NormalArrow,DNA_HiLight,DNA_NormalArrow);//画新图
 
-				MemCpy(&gpNbpVars->LeftArrowTch,&ArrowTchTmp,sizeof(IMG_TCH_OBJ));//左箭头
-				gpNbpVars->LeftArrowTch.ObjID=LeftArrowKV;
-				gpNbpVars->LeftArrowTch.x=pNumCtrlObj->x-TOUCH_REGION_MARGIN;
-				gpNbpVars->LeftArrowTch.y=pNumCtrlObj->y-TOUCH_REGION_MARGIN;
-				gpNbpVars->LeftArrowTch.w+=(TOUCH_REGION_MARGIN<<1);
-				gpNbpVars->LeftArrowTch.h+=(TOUCH_REGION_MARGIN<<1);
-				Q_SetDynamicImgTch(1,&gpNbpVars->LeftArrowTch);//建立动态按键区域
+				MemCpy(&gpNcopVars->LeftArrowBtn,&ArrowTchTmp,sizeof(IMG_BUTTON_OBJ));//左箭头
+				gpNcopVars->LeftArrowBtn.ObjID=LeftArrowKV;
+				gpNcopVars->LeftArrowBtn.x=pNumCtrlObj->x-TOUCH_REGION_MARGIN;
+				gpNcopVars->LeftArrowBtn.y=pNumCtrlObj->y-TOUCH_REGION_MARGIN;
+				gpNcopVars->LeftArrowBtn.w+=(TOUCH_REGION_MARGIN<<1);
+				gpNcopVars->LeftArrowBtn.h+=(TOUCH_REGION_MARGIN<<1);
+				Q_SetDynamicImgTch(1,&gpNcopVars->LeftArrowBtn);//建立动态按键区域
 
-				MemCpy(&gpNbpVars->RightArrowTch,&ArrowTchTmp,sizeof(IMG_TCH_OBJ));//右箭头
-				gpNbpVars->RightArrowTch.ObjID=RightArrowKV;
-				gpNbpVars->RightArrowTch.x=pNumCtrlObj->x+pNumCtrlObj->w-CO_NUM_ARROW_W-TOUCH_REGION_MARGIN;
-				gpNbpVars->RightArrowTch.y=pNumCtrlObj->y-TOUCH_REGION_MARGIN;
-				gpNbpVars->RightArrowTch.w+=(TOUCH_REGION_MARGIN<<1);
-				gpNbpVars->RightArrowTch.h+=(TOUCH_REGION_MARGIN<<1);
-				Q_SetDynamicImgTch(2,&gpNbpVars->RightArrowTch);//建立动态按键区域
+				MemCpy(&gpNcopVars->RightArrowBtn,&ArrowTchTmp,sizeof(IMG_BUTTON_OBJ));//右箭头
+				gpNcopVars->RightArrowBtn.ObjID=RightArrowKV;
+				gpNcopVars->RightArrowBtn.x=pNumCtrlObj->x+pNumCtrlObj->w-CO_NUM_ARROW_W-TOUCH_REGION_MARGIN;
+				gpNcopVars->RightArrowBtn.y=pNumCtrlObj->y-TOUCH_REGION_MARGIN;
+				gpNcopVars->RightArrowBtn.w+=(TOUCH_REGION_MARGIN<<1);
+				gpNcopVars->RightArrowBtn.h+=(TOUCH_REGION_MARGIN<<1);
+				Q_SetDynamicImgTch(2,&gpNcopVars->RightArrowBtn);//建立动态按键区域
 
-				MemCpy(&gpNbpVars->NumTch,&NumTchTmp,sizeof(IMG_TCH_OBJ));//数字框模板
-				gpNbpVars->NumTch.ObjID=NumFrameKV;
-				gpNbpVars->NumTch.x=pNumCtrlObj->x+CO_NUM_ARROW_W+TOUCH_REGION_MARGIN;
-				gpNbpVars->NumTch.y=DrawRegion.y;
-				gpNbpVars->NumTch.w=pNumCtrlObj->w-(CO_NUM_ARROW_W<<1)-(TOUCH_REGION_MARGIN<<1);
-				Q_SetDynamicImgTch(3,&gpNbpVars->NumTch);//建立动态按键区域
+				MemCpy(&gpNcopVars->NumBtn,&NumBtnTmp,sizeof(IMG_BUTTON_OBJ));//数字框模板
+				gpNcopVars->NumBtn.ObjID=NumFrameKV;
+				gpNcopVars->NumBtn.x=pNumCtrlObj->x+CO_NUM_ARROW_W+TOUCH_REGION_MARGIN;
+				gpNcopVars->NumBtn.y=DrawRegion.y;
+				gpNcopVars->NumBtn.w=pNumCtrlObj->w-(CO_NUM_ARROW_W<<1)-(TOUCH_REGION_MARGIN<<1);
+				Q_SetDynamicImgTch(3,&gpNcopVars->NumBtn);//建立动态按键区域
 
-				gpNbpVars->ObjHandler=pNumCtrlObj;//记录控件指针			
-				gpNbpVars->DefValue=pNumCtrlObj->Value;
+				gpNcopVars->ObjHandler=pNumCtrlObj;//记录控件指针			
+				gpNcopVars->DefValue=pNumCtrlObj->Value;
 			}
 			else
 			{
@@ -367,38 +367,38 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 
 			break;
 		case Sys_PageClean:
-			if(gpNbpVars!=NULL)
+			if(gpNcopVars!=NULL)
 			{
-				if((gpNbpVars->HandlerType==NCOT_NumList)||(gpNbpVars->HandlerType==NCOT_NumEnum)||(gpNbpVars->HandlerType==NCOT_NumBox))
+				if((gpNcopVars->HandlerType==NCOT_NumList)||(gpNcopVars->HandlerType==NCOT_NumEnum)||(gpNcopVars->HandlerType==NCOT_NumBox))
 				{
-					pNumCtrlObj=(void *)gpNbpVars->ObjHandler;
+					pNumCtrlObj=(void *)gpNcopVars->ObjHandler;
 					
 					DrawRegion.x=pNumCtrlObj->x;
 					DrawRegion.y=pNumCtrlObj->y;
 					DrawRegion.w=CO_NUM_ARROW_W;
 					DrawRegion.h=CO_NUM_H;
 					DrawRegion.Color=FatColor(NO_TRANS);
-					Gui_DrawImgArray((void *)gpNbpVars->LeftDispBuf,&DrawRegion);//还原
+					Gui_DrawImgArray((void *)gpNcopVars->LeftDispBuf,&DrawRegion);//还原
 
 					DrawRegion.x=pNumCtrlObj->x+pNumCtrlObj->w-CO_NUM_ARROW_W;
 					DrawRegion.y=pNumCtrlObj->y;
 					DrawRegion.w=CO_NUM_ARROW_W;
 					DrawRegion.h=CO_NUM_H;
 					DrawRegion.Color=FatColor(NO_TRANS);
-					Gui_DrawImgArray((void *)gpNbpVars->RightDispBuf,&DrawRegion);//还原
+					Gui_DrawImgArray((void *)gpNcopVars->RightDispBuf,&DrawRegion);//还原
 
-					if((gpNbpVars->HandlerType==NCOT_NumBox)//num box要检查值的范围
+					if((gpNcopVars->HandlerType==NCOT_NumBox)//num box要检查值的范围
 						&&((pNumCtrlObj->Value<pNumCtrlObj->Min)||(pNumCtrlObj->Value>pNumCtrlObj->Max)) )
-						pNumCtrlObj->Value=gpNbpVars->DefValue;//不符合范围则返回原值
+						pNumCtrlObj->Value=gpNcopVars->DefValue;//不符合范围则返回原值
 
-					if(gpNbpVars->DefValue == pNumCtrlObj->Value)
+					if(gpNcopVars->DefValue == pNumCtrlObj->Value)
 						DrawNumCtrlObj((void *)pNumCtrlObj,DNA_Normal,DNA_Normal,DNA_Normal);//未改变原有值
 					else
 						DrawNumCtrlObj((void *)pNumCtrlObj,DNA_HiLight,DNA_HiLight,DNA_HiLight);//改变了原有值
 
-					if(gpNbpVars->HandlerType==NCOT_NumBox)//num box要恢复小键盘区域
+					if(gpNcopVars->HandlerType==NCOT_NumBox)//num box要恢复小键盘区域
 					{
-						pNumCtrlObj=(void *)gpNbpVars->ObjHandler;
+						pNumCtrlObj=(void *)gpNcopVars->ObjHandler;
 						CalculateKeyBoardPosition(pNumCtrlObj,&DrawRegion);//计算小键盘区域
 						Gui_DrawImgBin(KEY_BOARD_LCD_BUF_PATH,&DrawRegion);
 					}
@@ -407,7 +407,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 				{
 				}
 
-				Q_PageFree(gpNbpVars);
+				Q_PageFree(gpNcopVars);
 			}
 			return SM_NoPopReturn|SM_State_OK;//不允许主页面pop page return事件
 		default:
@@ -457,7 +457,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 }
 
 //当使用者按下本页TouchRegionSet里定义的按键时，会触发这个函数里的对应事件
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 {		
 	//GUI_REGION DrawRegion;
 	
@@ -466,14 +466,14 @@ static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 		case LeftArrowKV://-
 			if(InEvent == Tch_Press)
 			{
-				NUM_CTRL_OBJ *pNumBox=(void *)gpNbpVars->ObjHandler;
-				DrawNumCtrlObj(pNumBox,DNA_HiLightArrow,DNA_Null,DNA_Null);//画新图
+				NUM_CTRL_OBJ *pNumCtrlObj=(void *)gpNcopVars->ObjHandler;
+				DrawNumCtrlObj(pNumCtrlObj,DNA_HiLightArrow,DNA_Null,DNA_Null);//画新图
 			}
 			else
 			{
-				NUM_CTRL_OBJ *pNumBox=(void *)gpNbpVars->ObjHandler;
-				NUM_LIST_OBJ *pNumList=(void *)gpNbpVars->ObjHandler;
-				NUM_ENUM_OBJ *pNumEnum=(void *)gpNbpVars->ObjHandler;
+				NUM_BOX_OBJ *pNumBox=(void *)gpNcopVars->ObjHandler;
+				NUM_LIST_OBJ *pNumList=(void *)gpNcopVars->ObjHandler;
+				NUM_ENUM_OBJ *pNumEnum=(void *)gpNcopVars->ObjHandler;
 				if(InEvent == Tch_Release)
 				{
 					if(pNumBox->Type == NCOT_NumBox)
@@ -496,20 +496,20 @@ static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 						pNumEnum->Value=pNumEnum->pEnumList[pNumEnum->Idx];			
 					}
 				}
-				DrawNumCtrlObj(pNumBox,DNA_NormalArrow,DNA_HiLight,DNA_Null);//画新图
+				DrawNumCtrlObj((void *)gpNcopVars->ObjHandler,DNA_NormalArrow,DNA_HiLight,DNA_Null);//画新图
 			}
 			break;
 		case RightArrowKV://+
 			if(InEvent == Tch_Press)
 			{
-				NUM_CTRL_OBJ *pNumBox=(void *)gpNbpVars->ObjHandler;
-				DrawNumCtrlObj(pNumBox,DNA_Null,DNA_Null,DNA_HiLightArrow);//画新图
+				NUM_CTRL_OBJ *pNumCtrlObj=(void *)gpNcopVars->ObjHandler;
+				DrawNumCtrlObj(pNumCtrlObj,DNA_Null,DNA_Null,DNA_HiLightArrow);//画新图
 			}
 			else
 			{					
-				NUM_CTRL_OBJ *pNumBox=(void *)gpNbpVars->ObjHandler;
-				NUM_LIST_OBJ *pNumList=(void *)gpNbpVars->ObjHandler;
-				NUM_ENUM_OBJ *pNumEnum=(void *)gpNbpVars->ObjHandler;
+				NUM_BOX_OBJ *pNumBox=(void *)gpNcopVars->ObjHandler;
+				NUM_LIST_OBJ *pNumList=(void *)gpNcopVars->ObjHandler;
+				NUM_ENUM_OBJ *pNumEnum=(void *)gpNcopVars->ObjHandler;
 				if(InEvent == Tch_Release)
 				{
 					if(pNumBox->Type == NCOT_NumBox)
@@ -532,42 +532,42 @@ static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 						pNumEnum->Value=pNumEnum->pEnumList[pNumEnum->Idx];		
 					}
 				}
-				DrawNumCtrlObj(pNumBox,DNA_Null,DNA_HiLight,DNA_NormalArrow);//画新图
+				DrawNumCtrlObj((void *)gpNcopVars->ObjHandler,DNA_Null,DNA_HiLight,DNA_NormalArrow);//画新图
 			}
 			break;
 		case Key0KV:case Key1KV:case Key2KV:case Key3KV:case Key4KV:
 		case Key5KV:case Key6KV:case Key7KV:case Key8KV:case Key9KV:
 			{
-				NUM_CTRL_OBJ *pNumBox=(void *)gpNbpVars->ObjHandler;
+				NUM_CTRL_OBJ *pNumCtrlObj=(void *)gpNcopVars->ObjHandler;
 				Key-=Key0KV;
-				pNumBox->Value=pNumBox->Value*10+Key;
-				DrawNumCtrlObj(pNumBox,DNA_Null,DNA_HiLight,DNA_Null);//画新图
+				pNumCtrlObj->Value=pNumCtrlObj->Value*10+Key;
+				DrawNumCtrlObj(pNumCtrlObj,DNA_Null,DNA_HiLight,DNA_Null);//画新图
 			}
 			break;
 		case KeyMinusKv://+-
 			{
-				NUM_CTRL_OBJ *pNumBox=(void *)gpNbpVars->ObjHandler;
-				pNumBox->Value=0-pNumBox->Value;
-				DrawNumCtrlObj(pNumBox,DNA_Null,DNA_HiLight,DNA_Null);//画新图
+				NUM_CTRL_OBJ *pNumCtrlObj=(void *)gpNcopVars->ObjHandler;
+				pNumCtrlObj->Value=0-pNumCtrlObj->Value;
+				DrawNumCtrlObj(pNumCtrlObj,DNA_Null,DNA_HiLight,DNA_Null);//画新图
 			}
 			break;
 		case KeyDotKV://.
 			break;
 		case KeyCancleKV://X
 			{
-				NUM_CTRL_OBJ *pNumBox=(void *)gpNbpVars->ObjHandler;
-				pNumBox->Value/=10;
-				DrawNumCtrlObj(pNumBox,DNA_Null,DNA_HiLight,DNA_Null);//画新图
+				NUM_CTRL_OBJ *pNumCtrlObj=(void *)gpNcopVars->ObjHandler;
+				pNumCtrlObj->Value/=10;
+				DrawNumCtrlObj(pNumCtrlObj,DNA_Null,DNA_HiLight,DNA_Null);//画新图
 			}
 			break;
 		case KeyOkKV://O
 		case NumFrameKV://点击窗体本身表示返回
-			Q_GotoPage(SubPageReturn,"",0,gpNbpVars->ObjHandler);//返回前一个页面
+			Q_GotoPage(SubPageReturn,"",0,gpNcopVars->ObjHandler);//返回前一个页面
 			break;
 			
 		default:
 			//需要响应的事件未定义
-			Debug("%s TouchEventHandler:This Touch Event Handler case unfinish! Key:%d\n\r",Q_GetCurrPageName(),Key);
+			Debug("%s ButtonHandler:This Touch Event Handler case unfinish! Key:%d\n\r",Q_GetCurrPageName(),Key);
 			///while(1);
 	}
 	

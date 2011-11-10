@@ -624,7 +624,7 @@ static void ModifySnakeSettings(void *OptionsBuf){
 //-----------------------本页系统函数声明-------------------------
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
 //-----------------------本页系统变量定义及声明-----------------------
 //定义页面按键需要用到的枚举，类似于有序唯一的宏定义
 typedef enum{
@@ -642,11 +642,11 @@ typedef enum{
 	MessageKV,
 	MusicKV,
 	PepoleKV,
-}SnakePage_KEY_NAME;
+}SnakePage_OID;
 //定义页面或应用的触摸区域集，相当于定义按键
 //支持的最大触摸区域个数为MAX_TOUCH_REGION_NUM
 //系统显示和触摸的所有坐标系均以屏幕左上角为原点(x 0,y 0)，右下角为(x 320,y 240)
-static const IMG_TCH_OBJ ImgTchRegCon[]={
+static const IMG_BUTTON_OBJ ImgButtonCon[]={
 	//KeyName,ObjID,OptionMask,Tch_x,Tch_y,Tch_w,Tch_h,Img_x,Img_y,BmpPathPrefix,NormalSuf,PressSuf,ReleaseSuf,TransColor},
 	{"Back",	BackKV,RelMsk|PathMsk,3,287,54,31,0,0,"Common/Btn/Back",FatColor(NO_TRANS)},
 	{"<<",		LeftArrowKV,RelMsk|PathMsk,65,287,39,31,0,0,"Common/Btn/LeftArr",FatColor(NO_TRANS)},
@@ -668,15 +668,15 @@ const PAGE_ATTRIBUTE SnakePage={
 	NORMAL_PAGE,
 	0,//
 	{
-		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
-		0,//sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
+		sizeof(ImgButtonCon)/sizeof(IMG_BUTTON_OBJ), //size of touch region array
+		0,//sizeof(CharButtonCon)/sizeof(CHAR_BUTTON_OBJ), //size of touch region array,
 	},
-	ImgTchRegCon, //touch region array
+	ImgButtonCon, //touch region array
 	0,	
 	SystemEventHandler,
 	PeripheralsHandler,
 	Bit(Perip_Timer),
-	TouchEventHandler,
+	ButtonHandler,
 };
 //-----------------------本页系统函数定义--------------------------
 //发生某些事件时，会触发的函数
@@ -857,7 +857,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 	return 0;
 }
 //当使用者按下本页TouchRegionSet里定义的按键时，会触发这个函数里的对应事件
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo){		
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo){		
 	switch(Key){	
 		case BackKV:
 			Q_GotoPage(GotoNewPage,"AppListPage",0,NULL);			
@@ -899,7 +899,7 @@ static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 			break;
 		default:
 			//需要响应的事件未定义
-			Debug("%s TouchEventHandler:This Touch Event Handler case unfinish! Key:%d\n\r",Q_GetCurrPageName(),Key);
+			Debug("%s ButtonHandler:This Touch Event Handler case unfinish! Key:%d\n\r",Q_GetCurrPageName(),Key);
 	}	
 	return 0;
 }

@@ -12,6 +12,10 @@
 #include "Spi.h"
 #include "SpiFlash.h"         
 
+//Ƭѡ
+#define Select_Flash()     GPIO_ResetBits(GPIOC, GPIO_Pin_3)
+#define NotSelect_Flash()    GPIO_SetBits(GPIOC, GPIO_Pin_3)
+
 #if(QXW_PRODUCT_ID==114)
 #define SPI_Flash_Read() SPI_ReadByte(SPI1)
 #define	SPI_Flash_Write(x) SPI_WriteByte(SPI1,x)

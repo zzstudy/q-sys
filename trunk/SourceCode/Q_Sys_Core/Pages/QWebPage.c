@@ -14,7 +14,7 @@
 //函数声明
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
 static CO_MSG YesNoHandler(u8 ObjID,bool NowValue);
 
 //-----------------------本页系统变量及声明-----------------------
@@ -38,7 +38,7 @@ typedef enum
 	MessageKV,
 	MusicKV,
 	PepoleKV,
-}QWebPage_KEY_NAME;
+}QWebPage_OID;
 
 //本页宏定义
 #define QWEB_PAGE_BG_COLOR FatColor(0xe0e0e0)//页面背景色
@@ -63,7 +63,7 @@ typedef enum
 //定义页面或应用的触摸区域集，相当于定义按键
 //支持的最大触摸区域个数为MAX_TOUCH_REGION_NUM
 //系统显示和触摸的所有坐标系均以屏幕左上角为原点(x 0,y 0)，右下角为(x 320,y 240)
-static const IMG_TCH_OBJ ImgTchRegCon[]={
+static const IMG_BUTTON_OBJ ImgButtonCon[]={
 	//KeyName,ObjID,OptionMask,Tch_x,Tch_y,Tch_w,Tch_h,Img_x,Img_y,BmpPathPrefix,NormalSuf,PressSuf,ReleaseSuf,TransColor},
 	{"Back",	BackKV,RelMsk|PathMsk,3,287,54,31,0,0,"Common/Btn/Back",FatColor(NO_TRANS)},
 	{"<<",		LeftArrowKV,RelMsk|PathMsk,65,287,39,31,0,0,"Common/Btn/LeftArr",FatColor(NO_TRANS)},
@@ -91,13 +91,13 @@ const PAGE_ATTRIBUTE QWebPage={
 	0,//
 
 	{
-		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
-		0,//sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
+		sizeof(ImgButtonCon)/sizeof(IMG_BUTTON_OBJ), //size of touch region array
+		0,//sizeof(CharButtonCon)/sizeof(CHAR_BUTTON_OBJ), //size of touch region array,
 		0,
 		0,
 		1,
 	},
-	ImgTchRegCon, //touch region array
+	ImgButtonCon, //touch region array
 	NULL,
 	
 	SystemEventHandler,
@@ -105,7 +105,7 @@ const PAGE_ATTRIBUTE QWebPage={
 	Bit(Perip_KeyPress)|Bit(Perip_KeyRelease)|Bit(Perip_QWebJoin)|Bit(Perip_QWebQueryName)|
 	Bit(Perip_QWebRecv)|Bit(Perip_QWebSendFailed)|Bit(Perip_QWebSendOk)|Bit(Perip_Timer)|
 	Bit(Perip_UartInput),
-	TouchEventHandler,
+	ButtonHandler,
 	YesNoHandler,
 };
 
@@ -599,7 +599,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 
 
 //当使用者按下本页TouchRegionSet里定义的按键时，会触发这个函数里的对应事件
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 {		
 	//GUI_REGION DrawRegion;
 	u8 i;
@@ -690,7 +690,7 @@ static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 			break;
 		default:
 			//需要响应的事件未定义
-			Debug("%s TouchEventHandler:This Touch Event Handler case unfinish! Key:%d\n\r",Q_GetCurrPageName(),Key);
+			Debug("%s ButtonHandler:This Touch Event Handler case unfinish! Key:%d\n\r",Q_GetCurrPageName(),Key);
 			///while(1);
 	}
 	

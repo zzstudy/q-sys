@@ -19,10 +19,6 @@
 #define DEEP_POWER_DOWN 0XB9
 #define WAKE_UP 0XAB
 
-//Ƭѡ
-#define Select_Flash()     GPIO_ResetBits(GPIOC, GPIO_Pin_3)
-#define NotSelect_Flash()    GPIO_SetBits(GPIOC, GPIO_Pin_3)
-
 void M25P16_Write_Enable(void);
 void M25P16_Write_Disable(void);
 void M25P16_Read_Id(u8 * id);

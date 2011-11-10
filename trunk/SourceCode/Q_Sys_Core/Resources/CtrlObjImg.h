@@ -32,5 +32,30 @@ extern const unsigned char gCtrlObj_NumMiddleH[]; //num控件中间填充高亮
 extern const unsigned char gCtrlObj_NumRightH[]; //num控件右边框高亮
 extern const unsigned char gCtrlObj_NumRightArrowH[]; //num控件右箭头高亮
 
+//str Enum控件(资源同Num控件)
+#define CO_STR_ENUM_H 18
+#define CO_STR_ENUM_FRAME_W 4 //str opt控件左右边框宽度
+#define CO_STR_ENUM_ARROW_W 18 //str opt控件箭头宽度
+#define CO_STR_ENUM_MIDDLE_W	1 //str opt控件中间填充部分的单位宽度
+#define CO_STR_ENUM_TRAN_COLOR FatColor(0xff0000) //str opt控件透明色
+#define CO_STR_ENUM_FONT_STYLE GBK12_FONT //str opt控件显示字体
+#define CO_STR_ENUM_FONT_W	6 //str opt控件ascii字体宽度
+#define CO_STR_ENUM_FONT_SPACE 0 //str opt控件字体间距设置
+#define CO_STR_ENUM_FONT_COLOR FatColor(0x333333) //str opt控件字体颜色
+#define CO_STR_ENUM_FONT_COLOR_H FatColor(0xf1aa00) //str opt控件高亮字体色
+#define gCtrlObj_StrEnumLeft gCtrlObj_NumLeft //str opt控件左边框
+#define gCtrlObj_StrEnumLeftArrow gCtrlObj_NumLeftArrow //str opt控件左箭头
+#define gCtrlObj_StrEnumMiddle gCtrlObj_NumMiddle //str opt控件中间填充
+#define gCtrlObj_StrEnumRight gCtrlObj_NumRight //str opt控件右边框
+#define gCtrlObj_StrEnumRightArrow gCtrlObj_NumRightArrow //str opt控件右箭头
+#define gCtrlObj_StrEnumLeftH gCtrlObj_NumLeftH //str opt控件左边框高亮
+#define gCtrlObj_StrEnumLeftArrowH gCtrlObj_NumLeftArrowH //str opt控件左箭头高亮
+#define gCtrlObj_StrEnumMiddleH gCtrlObj_NumMiddleH//str opt控件中间填充高亮
+#define gCtrlObj_StrEnumRightH gCtrlObj_NumRightH //str opt控件右边框高亮
+#define gCtrlObj_StrEnumRightArrowH gCtrlObj_NumRightArrowH //str opt控件右箭头高亮
+
+//str box控件
+
+
 #endif
 

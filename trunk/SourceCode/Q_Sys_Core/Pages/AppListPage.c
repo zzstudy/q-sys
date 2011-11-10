@@ -17,7 +17,7 @@
 //函数声明
 static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam);
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
 
 bool UseUsbOutputInfoFlag=FALSE;
 
@@ -55,12 +55,12 @@ typedef enum
 	MessageKV,
 	MusicKV,
 	PepoleKV,
-}AppListPage_KEY_NAME;
+}AppListPage_OID;
 
 //定义页面或应用的触摸区域集，相当于定义按键
 //支持的最大触摸区域个数为MAX_TOUCH_REGION_NUM
 //系统显示和触摸的所有坐标系均以屏幕左上角为原点(x 0,y 0)，右下角为(x 320,y 240)
-static const IMG_TCH_OBJ ImgTchRegCon[]={
+static const IMG_BUTTON_OBJ ImgButtonCon[]={
 	//KeyName,ObjID,OptionMask,Tch_x,Tch_y,Tch_w,Tch_h,Img_x,Img_y,BmpPathPrefix,NormalSuf,PressSuf,ReleaseSuf,TransColor},
 	{"Ret",		RetMainKV,RelMsk|BinMsk,4,35,55,50,0,0,"RetMain",FatColor(NO_TRANS)},
 	{"Settings",	SysSettingsKV,RelMsk|BinMsk,63,35,55,50,0,0,"Setting",FatColor(NO_TRANS)},
@@ -89,7 +89,7 @@ static const IMG_TCH_OBJ ImgTchRegCon[]={
 	{"",PepoleKV,RelMsk,180,320,60,30,0,0,"",FatColor(NO_TRANS)},
 };
 
-static const CHAR_TCH_OBJ CharTchRegCon[]={
+static const CHAR_BUTTON_OBJ CharButtonCon[]={
 	//KeyName,ObjID,OptionMask,Tch_x,Tch_y,Tch_w,Tch_h,Img_x,Img_y,
 		//Char_x,Char_y,MarginXY,SpaceXY,NormalColor,NormalBG,PressColor,PressBG,ReleaseColor,ReleaseBG},
 	{"返回桌面",RetMainKV,RoueMsk|RelMsk,4,85,55,15,
@@ -138,16 +138,16 @@ const PAGE_ATTRIBUTE AppListPage={
 	NORMAL_PAGE,
 	0,//
 	{
-		sizeof(ImgTchRegCon)/sizeof(IMG_TCH_OBJ), //size of touch region array
-		sizeof(CharTchRegCon)/sizeof(CHAR_TCH_OBJ), //size of touch region array,
+		sizeof(ImgButtonCon)/sizeof(IMG_BUTTON_OBJ), //size of touch region array
+		sizeof(CharButtonCon)/sizeof(CHAR_BUTTON_OBJ), //size of touch region array,
 	},
-	ImgTchRegCon, //touch region array
-	CharTchRegCon,
+	ImgButtonCon, //touch region array
+	CharButtonCon,
 	
 	SystemEventHandler,
 	PeripheralsHandler,
 	Bit(Perip_KeyPress)|Bit(Perip_KeyRelease)|Bit(Perip_UartInput),
-	TouchEventHandler,
+	ButtonHandler,
 	
 };
 
@@ -457,7 +457,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 }
 
 //当使用者按下本页TouchRegionSet里定义的按键时，会触发这个函数里的对应事件
-static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
+static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 {		
 	switch(Key)
 	{
@@ -566,6 +566,9 @@ static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 		case CommandKV:
 			Q_GotoPage(GotoNewPage,"CtrlObjDemoPage",0,NULL);
 			break;
+		case DrawKV:
+			Q_GotoPage(GotoNewPage,"WaveDispPage",0,NULL);
+			break;
 		case HomeKV:
 			break;
 		case MessageKV:
@@ -574,7 +577,7 @@ static CO_MSG TouchEventHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 			break;
 		default:
 			//需要响应的事件未定义
-			Debug("%s TouchEventHandler:This Touch Event Handler case unfinish! Key:%d\n\r",Q_GetCurrPageName(),Key);
+			Debug("%s ButtonHandler:This Touch Event Handler case unfinish! Key:%d\n\r",Q_GetCurrPageName(),Key);
 			///while(1);
 	}
 	
