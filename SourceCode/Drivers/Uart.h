@@ -6,9 +6,6 @@
 void COM1_Init(void);
 void COM3_Init(void);
 void PrintUart3(const u8 *Str);
-void Clear_Usart_Queue(void);
-void Usart_Dma_Init(void);
-void DMA_USART_Handler(void);
 
 #endif
 
