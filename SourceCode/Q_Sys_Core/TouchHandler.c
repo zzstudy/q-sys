@@ -84,7 +84,7 @@ static int Get_Touch_Coordinate(u16 *x,u16 *y)
 				*y=345-8*x_sum/91;
 #endif
 
-				Debug("Touch %4d , %4d\n\r",(int)*x,(int)*y);
+				//Debug("Touch %4d , %4d\n\r",(int)*x,(int)*y);
 								
 				*x=(u16)((float)(*x)*X_RATIO)+X_OFFSET;
 				*y=(u16)((float)(*y)*Y_RATIO)+Y_OFFSET;	 
