@@ -1254,6 +1254,7 @@ bool Q_SetStrCtrlObj(u8 Idx,STR_CTRL_OBJ *pStrCtrlObj)
 	return FALSE;
 }
 
+//往enum buf里加一个字符串，用0间隔
 bool Q_StrEnumAddOne(STR_ENUM_OBJ *pStrEnum,u8 *Str)
 {
 	u8 StrLen=strlen(Str);
