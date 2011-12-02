@@ -31,7 +31,11 @@
 //211:LCM V1.1 2.2'
 //212:LCM V1.2 2.2'
 //220:LCM V2.0 2.8'
-#define QXW_LCM_ID 212
+//221:LCM V2.1 2.8'
+#define QXW_LCM_ID 221
+
+//If this is a debug version,pls set to 0.
+#define QXW_RELEASE_VER 1
 
 #endif
 

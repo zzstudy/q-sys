@@ -8,7 +8,7 @@
 #define CC2500_WriteByte(x) SPI_WriteByte(SPI2,x)
 #define CC2500_ReadByte()	SPI_ReadByte(SPI2)
 
-#if QXW_LCM_ID == 210 || QXW_LCM_ID == 211 || QXW_LCM_ID == 220
+#if QXW_LCM_ID == 210 || QXW_LCM_ID == 211 || QXW_LCM_ID == 220 || QXW_LCM_ID == 221
 #define CC_GDO0_IO_GROUP GPIOD
 #define CC_GDO0_IO_PIN GPIO_Pin_3
 #define CC_CS_IO_GROUP GPIOD

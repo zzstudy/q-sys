@@ -16,7 +16,7 @@
 #endif
 #include "Debug.h"
 
-#if QXW_LCM_ID == 220
+#if QXW_LCM_ID == 220 || QXW_LCM_ID == 221
 
 #define LCD_ILI9320_On() GPIO_SetBits(GPIOC,GPIO_Pin_7)
 #define LCD_ILI9320_Off() GPIO_ResetBits(GPIOC,GPIO_Pin_7)
@@ -304,6 +304,9 @@ u16 LCD_BulkReadData(void)
   register u16 Data;
   LCD_ReadData();//¶ªµôÎŞÓÃ×Ö½Ú
   Data=LCD_ReadData();
+#if QXW_LCM_ID == 221
+  Data=((((Data>>11)&0x001f)|(Data&0x07e0)|((Data<<11)&0xf800)));//RGB»»Ğò
+#endif 
   LCD_WriteData(Data);
   return Data;
 }
@@ -419,6 +422,9 @@ u16 LCD_ReadPoint(u16 x,u16 y)
   LCD_WriteIndex(GRAMWR);
   LCD_ReadData();//¶ªµôÎŞÓÃ×Ö½Ú
   Data=LCD_ReadData();
+#if QXW_LCM_ID == 221
+  Data=((((Data>>11)&0x001f)|(Data&0x07e0)|((Data<<11)&0xf800)));//RGB»»Ğò
+#endif 
   LCD_WriteData(Data);
   return Data;
 }

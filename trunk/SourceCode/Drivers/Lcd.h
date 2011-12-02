@@ -15,7 +15,7 @@ typedef enum{
 	xDec_yDec
 }LCD_INC_MODE;//LCD 坐标自增模式，需根据不同LCD调节四种情况的定义位置
 
-#elif QXW_LCM_ID == 220
+#elif QXW_LCM_ID == 220 || QXW_LCM_ID == 221
 
 typedef enum{
 	xDec_yDec=0,

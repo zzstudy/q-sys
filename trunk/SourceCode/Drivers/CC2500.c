@@ -283,7 +283,7 @@ bool CC2500_Init(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_Init(CC_GDO0_IO_GROUP, &GPIO_InitStructure);
 
-#if QXW_LCM_ID == 210 || QXW_LCM_ID == 211 || QXW_LCM_ID == 220
+#if QXW_LCM_ID == 210 || QXW_LCM_ID == 211 || QXW_LCM_ID == 220 || QXW_LCM_ID == 221
 	NVIC_InitStructure.NVIC_IRQChannel = EXTI3_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = EXTI3_IRQn_Priority;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
@@ -321,7 +321,7 @@ bool CC2500_Init(void)
 
 void CC2500_InterruptEnable(bool Enable)
 {
-#if QXW_LCM_ID == 210 || QXW_LCM_ID == 211 || QXW_LCM_ID == 220
+#if QXW_LCM_ID == 210 || QXW_LCM_ID == 211 || QXW_LCM_ID == 220 || QXW_LCM_ID == 221
 	if(Enable)
 		EXTI->IMR |= EXTI_Line3;//¿ªÆôÖĞ¶Ï
 	else
