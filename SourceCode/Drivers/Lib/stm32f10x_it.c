@@ -365,7 +365,7 @@ void EXTI2_IRQHandler(void)
 *******************************************************************************/
 void EXTI3_IRQHandler(void)
 {
-#if QXW_LCM_ID == 210 || QXW_LCM_ID == 211 || QXW_LCM_ID == 220
+#if QXW_LCM_ID == 210 || QXW_LCM_ID == 211 || QXW_LCM_ID == 220 || QXW_LCM_ID == 221
 	OS_IntEnter();
 	It_Debug("--E3--\n\r");
 	

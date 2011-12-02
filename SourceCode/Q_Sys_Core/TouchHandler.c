@@ -72,14 +72,19 @@ static int Get_Touch_Coordinate(u16 *x,u16 *y)
 				x_sum=(x_sum-(x_min+x_max))>>4;//!!!divide TOUCH_SAMPLE_NUM optimize
 				y_sum=(y_sum-(y_min+y_max))>>4;//!!!divide TOUCH_SAMPLE_NUM optimize
 
-				//Touch_Debug("Touch %4d , %4d\n\r",(4*x_sum-1760)/55,(15200-4*y_sum)/43);
+				//Debug("Touch %4d , %4d\n\r",x_sum,y_sum);
 #if QXW_LCM_ID == 212 || QXW_LCM_ID == 211 || QXW_LCM_ID == 210
 				*x=(4*x_sum-1760)/55;
 				*y=(15200-4*y_sum)/43;
 #elif QXW_LCM_ID == 220
 				*x=(x_sum-295)*5/74;
 				*y=(y_sum-170)*4/43;
+#elif QXW_LCM_ID == 221
+				*x=(y_sum-230)*24/367;
+				*y=345-8*x_sum/91;
 #endif
+
+				Debug("Touch %4d , %4d\n\r",(int)*x,(int)*y);
 								
 				*x=(u16)((float)(*x)*X_RATIO)+X_OFFSET;
 				*y=(u16)((float)(*y)*Y_RATIO)+Y_OFFSET;	 
