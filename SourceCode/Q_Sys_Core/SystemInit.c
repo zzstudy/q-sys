@@ -515,7 +515,9 @@ void QSYS_Init(void)
 
 	if(GPIO_ReadInputDataBit(GPIOE,GPIO_Pin_2)==0) //如果没按下Key-PE2，就正常启动串口中断
 	{
-		//USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);//release版本请关掉此句，免得不懂的用户说板卡老死机。
-		//USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+#if !QXW_RELEASE_VER//for debug
+		USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);//release版本请关掉此句，免得不懂的用户说板卡老死机。
+		USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+#endif
 	}
 }

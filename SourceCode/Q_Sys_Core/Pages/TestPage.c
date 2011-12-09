@@ -17,7 +17,7 @@ static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pPar
 static CO_MSG ButtonHandler(u8 OID,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);//°´Å¥¿Ø¼ş´¦Àíº¯Êı
 static CO_MSG YesNoHandler(u8 OID,bool NowValue);//yes no¿Ø¼ş´¦Àíº¯Êı
 static CO_MSG NumCtrlObjHandler(u8 OID,s32 Value,void *pNumCtrlObj);//num¿Ø¼ş´¦Àíº¯Êı
-static CO_MSG StrCtrlObjHandler(u8 OID,u32 Len,u8 *Str);//str¿Ø¼ş´¦Àíº¯Êı
+static CO_MSG StrCtrlObjHandler(u8 OID,u8 StrID,u8 *Str,void *pStrCtrlObj);//str¿Ø¼ş´¦Àíº¯Êı
 
 //-----------------------±¾Ò³ÏµÍ³±äÁ¿¼°ÉùÃ÷-----------------------
 //¶¨ÒåÒ³Ãæ°´¼üĞèÒªÓÃµ½µÄÃ¶¾Ù£¬ÀàËÆÓÚÓĞĞòÎ¨Ò»µÄºê¶¨Òå
@@ -114,7 +114,7 @@ static TestPage_VARS *gpTestPageVars;
 
 //-----------------------±¾Ò³ÏµÍ³º¯Êı----------------------
 
-//·¢ÉúÄ³Ğ©ÊÂ¼şÊ±£¬»á´¥·¢µÄº¯Êı
+//·¢ÉúÏµÍ³ÊÂ¼şÊ±£¬»á´¥·¢µÄº¯Êı
 static SYS_MSG SystemHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam)//ÏµÍ³ÊÂ¼ş´¦Àíº¯Êı
 {
 	GUI_REGION DrawRegion;
@@ -177,6 +177,7 @@ static SYS_MSG SystemHandler(SYS_EVT SysEvent ,int IntParam, void *pSysParam)//Ï
 	return 0;
 }
 
+//µ±ÊµÌå°´¼ü¡¢´®¿Ú¡¢rtcµÈÍâÉèÓĞ¶¯×÷Ê±£¬»á´¥·¢´Ëº¯Êı
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam)//ÍâÉèÊÂ¼ş´¦Àíº¯Êı
 {
 	switch(PeripEvent)
@@ -266,19 +267,22 @@ static CO_MSG ButtonHandler(u8 OID,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)//°´
 	return 0;
 }
 
+//yes no¿Ø¼ş´¥·¢µÄº¯Êı
 static CO_MSG YesNoHandler(u8 OID,bool NowValue)//yes no¿Ø¼ş´¦Àíº¯Êı
 {
 
 	return 0;
 }
 
+//num¿Ø¼ş´¥·¢µÄº¯Êı
 static CO_MSG NumCtrlObjHandler(u8 OID,s32 Value,void *pNumCtrlObj)//num¿Ø¼ş´¦Àíº¯Êı
 {
 
 	return 0;
 }
 
-static CO_MSG StrCtrlObjHandler(u8 OID,u32 Len,u8 *Str)//str¿Ø¼ş´¦Àíº¯Êı
+//str¿Ø¼ş´¥·¢µÄº¯Êı
+static CO_MSG StrCtrlObjHandler(u8 OID,u8 StrID,u8 *Str,void *pStrCtrlObj)//str¿Ø¼ş´¦Àíº¯Êı
 {
 
 	return 0;

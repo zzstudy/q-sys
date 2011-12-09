@@ -60,8 +60,8 @@ typedef CO_MSG (*ButtonHandlerFunc)(u8 ,TCH_EVT , TOUCH_INFO *);
 typedef CO_MSG (*YesNoHandlerFunc)(u8 ,bool );
 //第一个参数为键值(标识符)，第二个参数为当前值，第三个值为控件本体指针，当控件返回时触发
 typedef CO_MSG (*NumCtrlObjHanderFunc)(u8 ,s32,void *);
-//第一个参数为键值(标识符)，第二个参数
-typedef CO_MSG (*StrCtrlObjHandlerFunc)(u8 ,u32 ,u8 *);
+//第一个参数为键值(标识符)，第二个参数为id，第三个参数为当前字符串，第四个参数为控件本体指针
+typedef CO_MSG (*StrCtrlObjHandlerFunc)(u8 ,u8 ,u8 *,void *);
 
 //4	按键区域的OptionMask掩码值(最大支持16个掩码)
 //注:因为Touch线程和Input线程资源交换有限的缘故，按键事件掩码必须放在低8位
@@ -315,7 +315,9 @@ bool Q_SetStrCtrlObj(u8 Idx,STR_CTRL_OBJ *pStrCtrlObj);
 #define Q_SetStrBox(Idx,pStrBox) Q_SetStrCtrlObj(Idx,(STR_CTRL_OBJ *)pStrBox)
 #define Q_SetStrEnum(Idx,pStrEnum) Q_SetStrCtrlObj(Idx,(STR_CTRL_OBJ *)pStrEnum)
 
-bool Q_StrEnumAddOne(STR_ENUM_OBJ *pStrEnum,u8 *Str);
+bool Q_StrEnumDisplayOne(STR_ENUM_OBJ *pStrEnumObj,u8 StrID);
+bool Q_StrEnumAddOne(STR_ENUM_OBJ *pStrEnumObj,u8 StrID,u8 *Str);
+bool Q_StrEnumDeleteOne(STR_ENUM_OBJ *pStrEnumObj,u8 StrID);
 
 #endif
 

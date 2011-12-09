@@ -244,17 +244,35 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 	if(!(gCurrSysMsg&SM_NoPopReturn)//从前面的函数返回掩码
 		&&(Q_GetPageByTrack(1)->Type==POP_PAGE))//前一个页面是pop页面
 		gCurrSysMsg|=gpCurrentPage->SysEvtHandler(Sys_PopPageReturn,IntParam,pSysParam);
-	
-	if(GetRegIdByIdx(GetPageIdxByTrack(1)) == PRID_NumCtrlObjPage)//从num控件页返回
+
+	switch(GetRegIdByIdx(GetPageIdxByTrack(1)))//判断从哪个页面返回
 	{
-		NUM_CTRL_OBJ *pNumCtrlObj=pSysParam;
-		if(gpCurrentPage->NumCtrlObjHander)
-			gpCurrentPage->NumCtrlObjHander(pNumCtrlObj->ObjID,pNumCtrlObj->Value,pSysParam);
-		else 
-			Debug("!!!Not Define Handler Function In Page Struct!!!\n\r");
+		case PRID_NumCtrlObjPage: //从num控件页返回
+			{
+				NUM_CTRL_OBJ *pNumCtrlObj=pSysParam;
+				if(gpCurrentPage->NumCtrlObjHander)
+					gpCurrentPage->NumCtrlObjHander(pNumCtrlObj->ObjID,pNumCtrlObj->Value,pSysParam);
+				else 
+					Debug("!!!Not Define Handler Function In Page Struct!!!\n\r");
+			}break;
+		case PRID_StrCtrlObjPage: //从Str控件页返回
+			{
+				STR_CTRL_OBJ *pStrCtrlObj=pSysParam;
+				STR_BOX_OBJ *pStrBoxObj=pSysParam;
+				STR_ENUM_OBJ *pStrEnumObj=pSysParam;
+				if(gpCurrentPage->StrCtrlObjHandler)
+				{
+					if(pStrCtrlObj->Type == SCOT_StrBox)
+						gpCurrentPage->StrCtrlObjHandler(pStrBoxObj->ObjID,0,pStrBoxObj->pStrBuf,pSysParam);
+					else if(pStrCtrlObj->Type == SCOT_StrEnum)
+						gpCurrentPage->StrCtrlObjHandler(pStrEnumObj->ObjID,pStrEnumObj->pStrEnumBuf[pStrEnumObj->Idx],&pStrEnumObj->pStrEnumBuf[pStrEnumObj->Idx+1],pSysParam);
+				}
+				else 
+					Debug("!!!Not Define Handler Function In Page Struct!!!\n\r");
+			}break;
+		defalut:
+			while((OS_GetCurrentSysMs()-TimeMsRecord)<300) OS_TaskDelayMs(50);//循环延时300ms，以避免触摸响应混乱
 	}
-	else
-		while((OS_GetCurrentSysMs()-TimeMsRecord)<300) OS_TaskDelayMs(50);//循环延时300ms，以避免触摸响应混乱
 	
 	Q_EnableInput();
 	

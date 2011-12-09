@@ -391,10 +391,10 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 						&&((pNumCtrlObj->Value<pNumCtrlObj->Min)||(pNumCtrlObj->Value>pNumCtrlObj->Max)) )
 						pNumCtrlObj->Value=gpNcopVars->DefValue;//不符合范围则返回原值
 
-					if(gpNcopVars->DefValue == pNumCtrlObj->Value)
+					//if(gpNcopVars->DefValue == pNumCtrlObj->Value)
 						DrawNumCtrlObj((void *)pNumCtrlObj,DNA_Normal,DNA_Normal,DNA_Normal);//未改变原有值
-					else
-						DrawNumCtrlObj((void *)pNumCtrlObj,DNA_HiLight,DNA_HiLight,DNA_HiLight);//改变了原有值
+					//else
+					//	DrawNumCtrlObj((void *)pNumCtrlObj,DNA_HiLight,DNA_HiLight,DNA_HiLight);//改变了原有值
 
 					if(gpNcopVars->HandlerType==NCOT_NumBox)//num box要恢复小键盘区域
 					{
