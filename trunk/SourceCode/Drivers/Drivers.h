@@ -31,8 +31,8 @@
 //211:LCM V1.1 2.2'
 //212:LCM V1.2 2.2'
 //220:LCM V2.0 2.8'
-//221:LCM V2.1 2.8'
-#define QXW_LCM_ID 221
+//221:LCM V2.1 2.8'	//注：2011.12.1后出货的2.8寸屏均为此版本，丝印依然为220
+#define QXW_LCM_ID 212
 
 //If this is a debug version,pls set to 0.
 #define QXW_RELEASE_VER 1

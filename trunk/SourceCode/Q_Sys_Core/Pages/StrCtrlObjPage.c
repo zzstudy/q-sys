@@ -132,14 +132,14 @@ static void DrawStrCtrlObj(STR_CTRL_OBJ *pStrCtrlObj,DRAW_SE_ACT Left,DRAW_SE_AC
 			DrawRegion.Color=CO_STR_ENUM_TRAN_COLOR;
 		}
 		if(Middle == DSA_Normal)
-			Gui_FillImgArray_H(gCtrlObj_StrEnumMiddle,pStrCtrlObj->w-(CO_STR_ENUM_ARROW_W<<1),&DrawRegion);	//高亮框
+			Gui_FillImgArray_H(gCtrlObj_StrEnumMiddle,pStrCtrlObj->w-(CO_STR_ENUM_ARROW_W<<1),&DrawRegion);	//框
 		else if(Middle == DSA_HiLight)
-			Gui_FillImgArray_H(gCtrlObj_StrEnumMiddleH,pStrCtrlObj->w-(CO_STR_ENUM_ARROW_W<<1),&DrawRegion);	//框
+			Gui_FillImgArray_H(gCtrlObj_StrEnumMiddleH,pStrCtrlObj->w-(CO_STR_ENUM_ARROW_W<<1),&DrawRegion);	//高亮框
 
 		if(Middle != DSA_Null)//中间文字部分
 		{
 			STR_ENUM_OBJ *pStrEnum=(STR_ENUM_OBJ *)pStrCtrlObj;
-			sprintf((void *)StrBuf,"%s",&pStrEnum->pStrEnumBuf[pStrEnum->Idx]);//字符串
+			sprintf((void *)StrBuf,"%s",&pStrEnum->pStrEnumBuf[pStrEnum->Idx+1]);//字符串
 			if(strlen((void *)StrBuf)*CO_STR_ENUM_FONT_W < (pStrEnum->w-(CO_STR_ENUM_ARROW_W<<1)))
 				DrawRegion.x=pStrEnum->x+((pStrEnum->w-strlen((void *)StrBuf)*CO_STR_ENUM_FONT_W)>>1);
 			else //显示长度超出方框
@@ -378,7 +378,7 @@ static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 					{
 
 					}
-					else if(pStrEnum->Type == SCOT_StrEnum)
+					else if(pStrEnum->Type == SCOT_StrEnum && pStrEnum->Size)
 					{
 						if(pStrEnum->Idx == 0)//如果当前是第一个，跳到最后一个的末尾
 							pStrEnum->Idx=pStrEnum->Size-1;
@@ -415,7 +415,7 @@ static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 					{
 
 					}
-					else if(pStrEnum->Type == SCOT_StrEnum)
+					else if(pStrEnum->Type == SCOT_StrEnum && pStrEnum->Size)
 					{
 						while(pStrEnum->pStrEnumBuf[++pStrEnum->Idx]);//找到当前字符串的末尾结束符
 

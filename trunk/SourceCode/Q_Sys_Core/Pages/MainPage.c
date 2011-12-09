@@ -16,7 +16,7 @@ static SYS_MSG SystemEventHandler(SYS_EVT SysEvent ,int IntParam, void *pSysPara
 static SYS_MSG PeripheralsHandler(PERIP_EVT PeripEvent, int IntParam, void *pParam);
 static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo);
 static CO_MSG NumCtrlObjHandler(u8 OID,s32 Value,void *pNumCtrlObj);
-static CO_MSG StrCtrlObjHandler(u8 OID,u32 Len,u8 *Str);
+static CO_MSG StrCtrlObjHandler(u8 OID,u8 StrID,u8 *Str,void *pStrCtrlObj);
 
 //定义互斥信号量，为系统和页面或应用之间协调
 typedef enum
@@ -337,30 +337,14 @@ static CO_MSG ButtonHandler(u8 Key,TCH_EVT InEvent , TOUCH_INFO *pTouchInfo)
 			StrEnumObj.Size=0;
 			StrEnumObj.TotalSize=100;
 			StrEnumObj.pStrEnumBuf=gStrEnumBuf;
-			Q_StrEnumAddOne(&StrEnumObj,"Test1");
-			{
-				u8 i;Debug("\n\r#");
-				for(i=0;i<StrEnumObj.TotalSize;i++) 
-					if(StrEnumObj.pStrEnumBuf[i] == 0) Debug(" ");
-					else Debug("%c",StrEnumObj.pStrEnumBuf[i]);
-			}
-			Q_StrEnumAddOne(&StrEnumObj,"12345678901234567890");
-			{
-				u8 i;Debug("\n\r#");
-				for(i=0;i<StrEnumObj.TotalSize;i++)
-					if(StrEnumObj.pStrEnumBuf[i] == 0) Debug(" ");
-					else Debug("%c",StrEnumObj.pStrEnumBuf[i]);
-			}
-			Q_StrEnumAddOne(&StrEnumObj,"Test222");
-			{
-				u8 i;Debug("\n\r#");
-				for(i=0;i<StrEnumObj.TotalSize;i++) 					
-					if(StrEnumObj.pStrEnumBuf[i] == 0) Debug(" ");
-					else Debug("%c",StrEnumObj.pStrEnumBuf[i]);
-			}
-			Q_StrEnumAddOne(&StrEnumObj,"Test333");
+
 			Q_SetStrEnum(2,&StrEnumObj);
- 			
+			Q_StrEnumAddOne(&StrEnumObj,'a',"Test1");
+			Q_StrEnumAddOne(&StrEnumObj,'b',"12345678901234567890");
+			Q_StrEnumAddOne(&StrEnumObj,'c',"Test222");
+			Q_StrEnumAddOne(&StrEnumObj,'d',"Test333");
+			Q_StrEnumDeleteOne(&StrEnumObj,'a');
+
  			break;
 		case MailKV:
 			Gui_SetBgLight(50);
@@ -396,9 +380,9 @@ static CO_MSG NumCtrlObjHandler(u8 OID,s32 Value,void *pNumCtrlObj)
 	return 0;
 }
 
-static CO_MSG StrCtrlObjHandler(u8 OID,u32 Len,u8 *Str)
+static CO_MSG StrCtrlObjHandler(u8 OID,u8 StrID,u8 *Str,void *pStrCtrlObj)
 {
-	Debug("StrCtrlObj:%d,%d,%s\n\r",OID,Len,Str);
+	Debug("StrCtrlObj:%d,%c,%s\n\r",OID,StrID,Str);
 	return 0;
 }
 

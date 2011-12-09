@@ -71,7 +71,9 @@ int main(void)
 {   
 	RCC_Config();
 
+//#if !QXW_RELEASE_VER//for debug
 	COM1_Init(); //´®¿Ú
+//#endif
 //	COM3_Init();	
 	
 	OS_WrapInit();

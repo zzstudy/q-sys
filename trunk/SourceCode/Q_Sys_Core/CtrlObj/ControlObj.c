@@ -1175,7 +1175,10 @@ bool Q_SetNumCtrlObj(u8 Idx,NUM_CTRL_OBJ *pNumCtrlObj)
 	return FALSE;
 }
 
-//设置str控件选项
+//设置str控件选项，pStrCtrlObj指向的内存在调用完函数后不可注销
+//一旦设置，当进入页面时，会用到此内存
+//所以当页面还存在时，必须保证此内存存在
+//Idx从1开始
 bool Q_SetStrCtrlObj(u8 Idx,STR_CTRL_OBJ *pStrCtrlObj)
 {
 	STR_CTRL_OBJ **pStrCtrlObjCon=(void *)&gCtrlObjPtrBuf[CO_STR_IDX_START];
@@ -1224,7 +1227,7 @@ bool Q_SetStrCtrlObj(u8 Idx,STR_CTRL_OBJ *pStrCtrlObj)
 			DrawRegion.w=CO_STR_ENUM_MIDDLE_W;
 			DrawRegion.h=CO_STR_ENUM_H;
 			DrawRegion.Color=CO_STR_ENUM_TRAN_COLOR;
-			Gui_FillImgArray_H(gCtrlObj_NumMiddle,pStrEnumObj->w-(CO_STR_ENUM_ARROW_W<<1),&DrawRegion);	
+			Gui_FillImgArray_H(gCtrlObj_NumMiddle,pStrEnumObj->w-(CO_STR_ENUM_ARROW_W<<1),&DrawRegion);	//中框
 
 			DrawRegion.x=pStrEnumObj->x+pStrEnumObj->w-CO_STR_ENUM_ARROW_W;
 			DrawRegion.y=pStrEnumObj->y;
@@ -1232,18 +1235,21 @@ bool Q_SetStrCtrlObj(u8 Idx,STR_CTRL_OBJ *pStrCtrlObj)
 			DrawRegion.h=CO_STR_ENUM_H;
 			DrawRegion.Color=CO_STR_ENUM_TRAN_COLOR;
 			Gui_DrawImgArray(gCtrlObj_NumRight,&DrawRegion);//右边框
-			
-			sprintf((void *)StrBuf,"%s",&pStrEnumObj->pStrEnumBuf[pStrEnumObj->Idx]);//字符串
-			if(strlen((void *)StrBuf)*CO_STR_ENUM_FONT_W < (pStrEnumObj->w-(CO_STR_ENUM_ARROW_W<<1)))
-				DrawRegion.x=pStrEnumObj->x+((pStrEnumObj->w-strlen((void *)StrBuf)*CO_STR_ENUM_FONT_W)>>1);
-			else //显示长度超出方框
-				DrawRegion.x=pStrEnumObj->x+CO_STR_ENUM_ARROW_W;
-			DrawRegion.y=pStrEnumObj->y+3;
-			DrawRegion.w=pStrEnumObj->w-(CO_STR_ENUM_ARROW_W<<1);
-			DrawRegion.h=CO_STR_ENUM_H;
-			DrawRegion.Color=CO_STR_ENUM_FONT_COLOR;
-			DrawRegion.Space=CO_STR_ENUM_FONT_SPACE;
-			Gui_DrawFont(CO_STR_ENUM_FONT_STYLE,StrBuf,&DrawRegion);
+
+			if(pStrEnumObj->Size)//有内容
+			{
+				sprintf((void *)StrBuf,"%s",&pStrEnumObj->pStrEnumBuf[pStrEnumObj->Idx+1]);//字符串
+				if(strlen((void *)StrBuf)*CO_STR_ENUM_FONT_W < (pStrEnumObj->w-(CO_STR_ENUM_ARROW_W<<1)))
+					DrawRegion.x=pStrEnumObj->x+((pStrEnumObj->w-strlen((void *)StrBuf)*CO_STR_ENUM_FONT_W)>>1);
+				else //显示长度超出方框
+					DrawRegion.x=pStrEnumObj->x+CO_STR_ENUM_ARROW_W;
+				DrawRegion.y=pStrEnumObj->y+3;
+				DrawRegion.w=pStrEnumObj->w-(CO_STR_ENUM_ARROW_W<<1);
+				DrawRegion.h=CO_STR_ENUM_H;
+				DrawRegion.Color=CO_STR_ENUM_FONT_COLOR;
+				DrawRegion.Space=CO_STR_ENUM_FONT_SPACE;
+				Gui_DrawFont(CO_STR_ENUM_FONT_STYLE,StrBuf,&DrawRegion);
+			}
 		}
 	}
 	else
@@ -1254,27 +1260,128 @@ bool Q_SetStrCtrlObj(u8 Idx,STR_CTRL_OBJ *pStrCtrlObj)
 	return FALSE;
 }
 
-//往enum buf里加一个字符串，用0间隔
-bool Q_StrEnumAddOne(STR_ENUM_OBJ *pStrEnum,u8 *Str)
+//显示指定id的字符串项
+bool Q_StrEnumDisplayOne(STR_ENUM_OBJ *pStrEnumObj,u8 StrID)
 {
-	u8 StrLen=strlen(Str);
+	GUI_REGION DrawRegion;
+	u8 StrBuf[32];
+	u8 *p=pStrEnumObj->pStrEnumBuf;
+	u8 *pEnumBuf=pStrEnumObj->pStrEnumBuf;
+	u16 i=0;
 	
-	if((pStrEnum->Size+StrLen+2) > pStrEnum->TotalSize)//空间不够
+	//通过id找idx
+	while(p[0]!=StrID)//不是这个字符串
+	{
+		while(pEnumBuf[i++]); //找间隔符
+		if(i>=pStrEnumObj->Size) return FALSE;//找到底了，没得找了
+		p=&pEnumBuf[i];//指到下一个字符串首
+	}
+	pStrEnumObj->Idx=i;
+	
+	//中间框部分
+	DrawRegion.x=pStrEnumObj->x+CO_STR_ENUM_ARROW_W;
+	DrawRegion.y=pStrEnumObj->y;
+	DrawRegion.w=CO_STR_ENUM_MIDDLE_W;
+	DrawRegion.h=CO_STR_ENUM_H;
+	DrawRegion.Color=CO_STR_ENUM_TRAN_COLOR;
+	Gui_FillImgArray_H(gCtrlObj_StrEnumMiddle,pStrEnumObj->w-(CO_STR_ENUM_ARROW_W<<1),&DrawRegion);	//框
+
+	sprintf((void *)StrBuf,"%s",&pStrEnumObj->pStrEnumBuf[pStrEnumObj->Idx+1]);//字符串
+	if(strlen((void *)StrBuf)*CO_STR_ENUM_FONT_W < (pStrEnumObj->w-(CO_STR_ENUM_ARROW_W<<1)))
+		DrawRegion.x=pStrEnumObj->x+((pStrEnumObj->w-strlen((void *)StrBuf)*CO_STR_ENUM_FONT_W)>>1);
+	else //显示长度超出方框
+		DrawRegion.x=pStrEnumObj->x+CO_STR_ENUM_ARROW_W;
+	DrawRegion.y=pStrEnumObj->y+3;
+	DrawRegion.w=pStrEnumObj->w-(CO_STR_ENUM_ARROW_W<<1);
+	DrawRegion.h=CO_STR_ENUM_H;
+	DrawRegion.Color=CO_STR_ENUM_FONT_COLOR;
+	DrawRegion.Space=CO_STR_ENUM_FONT_SPACE;
+	Gui_DrawFont(CO_STR_ENUM_FONT_STYLE,StrBuf,&DrawRegion);
+
+	return TRUE;
+}
+
+//往enum buf里加一个字符串，用0间隔，第一个字符为id，后面紧跟着字符串内容
+//StrID:加入的字符串唯一的id
+//Str:加入的字符串
+bool Q_StrEnumAddOne(STR_ENUM_OBJ *pStrEnumObj,u8 StrID,u8 *Str)
+{
+	u8 StrLen=strlen((void *)Str);
+	
+	if((pStrEnumObj->Size+StrLen+3) > pStrEnumObj->TotalSize)//空间不够.3 = 前后间隔符+id符
 		return FALSE;
 	
 	//复制字符串不用MemCpy，防止对齐问题
 	{
 		u8 i;
-		u8 *p=&pStrEnum->pStrEnumBuf[pStrEnum->Size?pStrEnum->Size+1:0];
-		for(i=0;i<=StrLen;i++)
+		u8 *p=&pStrEnumObj->pStrEnumBuf[pStrEnumObj->Size?pStrEnumObj->Size+1:0];//找到枚举列表尾
+		*p++=StrID;
+		for(i=0;i<=StrLen;i++)//同时复制了0结束符
 		{
 			p[i]=Str[i];
 		}
 	}
 
-	pStrEnum->Size+=(pStrEnum->Size?StrLen+1:StrLen);
+	pStrEnumObj->Size+=((pStrEnumObj->Size?StrLen+1:StrLen)+1);//间隔符长度+字符串长度+ID长度
+	Q_StrEnumDisplayOne(pStrEnumObj,StrID);//修改显示
 	return TRUE;
 }
+
+//删除指定id的字符串枚举项
+bool Q_StrEnumDeleteOne(STR_ENUM_OBJ *pStrEnumObj,u8 StrID)
+{
+	if(pStrEnumObj->Size == 0) return FALSE;
+
+	{
+		u8 *p=pStrEnumObj->pStrEnumBuf;
+		u8 *pEnumBuf=pStrEnumObj->pStrEnumBuf;
+		u16 i=0;
+		
+		while(p[0]!=StrID)//不是这个字符串
+		{
+			while(pEnumBuf[i++]); //找间隔符
+			if(i>=pStrEnumObj->Size) return FALSE;//找到底了，没得找了
+			p=&pEnumBuf[i];//指到下一个字符串首
+		}
+		//跳出前面的循环表示找到了匹配的字符串
+		{
+			u8 DeleteIdx=i;//i是字符串首的序号
+			u8 NextIdx;
+			
+			while(pEnumBuf[i]) pEnumBuf[i++]=0; //找间隔符
+			NextIdx=++i;//下一个字符串首
+			
+			if(pStrEnumObj->Idx == DeleteIdx) pStrEnumObj->Idx=0;//本字符串索引归位
+			else if(pStrEnumObj->Idx >= NextIdx) pStrEnumObj->Idx-=(NextIdx-DeleteIdx);//后续字符串索引归位
+
+			if(NextIdx>=pStrEnumObj->Size)//找到底了，要删除的字符串就是最后一个字符串
+			{
+				if(DeleteIdx) pStrEnumObj->Size=DeleteIdx-1;
+				else pStrEnumObj->Size=0;
+				Q_StrEnumDisplayOne(pStrEnumObj,pEnumBuf[pStrEnumObj->Idx]);//修改显示
+				return TRUE;
+			}
+			else
+			{
+				u8 *pLastStr=&pEnumBuf[NextIdx];//剩下的字符串
+				u8 j,n;
+				n=pStrEnumObj->Size-NextIdx+1;//剩下要复制的部分，含最后一个结束符
+				for(j=0;j<n;j++)
+				{
+					p[j]=pLastStr[j];
+					pLastStr[j]=0;
+				}
+				pStrEnumObj->Size-=(NextIdx-DeleteIdx);
+				Q_StrEnumDisplayOne(pStrEnumObj,pEnumBuf[pStrEnumObj->Idx]);//修改显示
+				return TRUE;
+			}
+		}
+	}
+}
+
+
+
+
 
 #endif
 
