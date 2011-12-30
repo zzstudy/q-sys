@@ -216,7 +216,7 @@ GUI_RESULT Gui_PixelFill(const u8 *PixelBuf,const GUI_REGION *pRegion)
 	u8 LastNull=8-(pRegion->w-(RowByte<<3));//最后一个字节不需要显示的数据个数
 	u8 Row;
 	s8 Bit;
-	u8 i,Byte=0;
+	u32 i,Byte=0;
 	COLOR_TYPE Color;
 	
 	LCD_Lock();
