@@ -32,7 +32,7 @@ extern OS_SemaphoreHandle gRfRecvHandler_Sem;//射频接收数据的信号量
 #define It_Debug(x,y...)		//Debug
 
 /* Private variables ---------------------------------------------------------*/
-static u8 LCD_Light_Counter=0;
+u8 LCD_Light_Counter=0;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 

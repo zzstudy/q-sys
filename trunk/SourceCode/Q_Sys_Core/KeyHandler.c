@@ -18,7 +18,7 @@ const EXTI_KEY_DEFINE gExtiKeyDefine[EXTI_KEY_MAX_NUM]={
 };
 
 extern void ExtiKeyHandler(u8 KeyId,u8 KeyStaus);
-
+extern u8 LCD_Light_Counter;
 //用于查询外部按键状态
 void KeysHandler_Task(void *Task_Parameters )
 {
@@ -47,6 +47,7 @@ void KeysHandler_Task(void *Task_Parameters )
 					ExtiKeyHandler(i,GPIO_ReadInputDataBit(gExtiKeyDefine[i].GpioGroup,gExtiKeyDefine[i].GpioPin));
 				else if(gExtiKeyDefine[i].GpioMode == GPIO_Mode_IPU)//上拉输入
 					ExtiKeyHandler(i,!GPIO_ReadInputDataBit(gExtiKeyDefine[i].GpioGroup,gExtiKeyDefine[i].GpioPin));
+				LCD_Light_Counter=0;
 			}
 		}
 	
