@@ -44,7 +44,7 @@ RegID必须为非零值。
 #include "NewsPage.h"
 #include "NumCtrlObjPage.h"
 #include "StrCtrlObjPage.h"
-#include "WaveDispPage.h"
+//#include "WaveDispPage.h"
 
 const PAGE_CONGREGATION AllPage[]={//页面总数不得大于255，RID不能为零
 	{PRID_MainPage,&MainPage},
