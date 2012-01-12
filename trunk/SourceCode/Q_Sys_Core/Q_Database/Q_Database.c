@@ -116,7 +116,7 @@ bool Q_DB_BurnToSpiFlash(void)
 	}	
 	
 	//建立索引
-	if(i>(SPI_FLASH_PAGE_SIZE-DB_PAGE_NUM))//写到末尾了，擦除整个扇区，重头开始写
+	if(i>=(SPI_FLASH_PAGE_SIZE-DB_PAGE_NUM))//写到末尾了，擦除整个扇区，重头开始写
 	{
 		i=1;
 		Q_SpiFlashSync(FlashSectorEarse,DB_START_SECTOR<<16,0,NULL);//擦除整个db存放扇区
