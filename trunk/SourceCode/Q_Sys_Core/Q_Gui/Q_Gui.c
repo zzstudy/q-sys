@@ -1999,8 +1999,8 @@ GUI_RESULT Gui_FillImgArray(const u8 * pImageBuf,u16 width,u16 hight,const GUI_R
 				if(gLandScapeMode) Gui_SetRegion(V,H,LastOneH,hight);
 				else Gui_SetRegion(H,V,LastOneH,hight);
 				LCD_BlukWriteDataStart();
-				for(n=hight;n;n--)
-					for(m=LastOneH;m;m--,pColor16+=(width-LastOneH))
+				for(n=hight;n;n--,pColor16+=(width-LastOneH))
+					for(m=LastOneH;m;m--)
 						LCD_BulkWriteData(*pColor16++);
 			}
 
