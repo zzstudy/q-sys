@@ -32,6 +32,9 @@ static BMP_INFO gBmpInfo;
 static u8 * gBmpColorTableBuf;//画图缓存改用指针方式从heap里面拿内存
 static bool gLandScapeMode=FALSE;//true 横屏
 
+#define LandScapeAddrIncMode	 xDec_yInc	//横屏模式下的地址自增模式
+#define NormalAddrIncMode xInc_yInc//正常模式下的地址自增模式
+
 //将16位RGB(565)色彩换算成16位BGR(565)色彩
 #define RGB2BGR(Color16)	(((Color16>>11)&0x001f)|(Color16&0x07e0)|((Color16<<11)&0xf800))
 
@@ -112,12 +115,12 @@ GUI_RESULT Gui_SetLandScapeMode(bool LandScape)
 	if(LandScape)
 	{	//横屏
 		gLandScapeMode=TRUE;
-		LCD_SetAddrIncMode(xDec_yInc);
+		LCD_SetAddrIncMode(LandScapeAddrIncMode);
 	}
 	else
 	{	//正常
 		gLandScapeMode=FALSE;
-		LCD_SetAddrIncMode(xInc_yInc);
+		LCD_SetAddrIncMode(NormalAddrIncMode);
 	}
 	LCD_UnLock();
 	return Gui_True;
@@ -153,7 +156,7 @@ static GUI_RESULT Gui_SetRegion(u16 x_start,u16 y_start,u16 w,u16 h)
 		}	
 
 		LCD_SetRegion(x_start,y_start,x_end,y_end,gLandScapeMode);
-		LCD_SetAddrIncMode(xDec_yInc);
+		LCD_SetAddrIncMode(LandScapeAddrIncMode);
 		LCD_SetXY(x_end,y_start);
 	}
 	else
@@ -168,7 +171,7 @@ static GUI_RESULT Gui_SetRegion(u16 x_start,u16 y_start,u16 w,u16 h)
 		}	
 	
 		LCD_SetRegion(x_start,y_start,x_end,y_end,gLandScapeMode);
-		LCD_SetAddrIncMode(xInc_yInc);
+		LCD_SetAddrIncMode(NormalAddrIncMode);
 		LCD_SetXY(x_start,y_start);
 	}
 
@@ -1501,7 +1504,7 @@ GUI_RESULT Gui_Draw24Bmp(const u8 * pBmpPath,const GUI_REGION *pBmpRegion)
 	if(Gui_GetLandScapeMode())//横屏
 	{
 		LCD_SetXY(pBmpRegion->x,pBmpRegion->y);
-		LCD_SetAddrIncMode(xInc_yInc);
+		LCD_SetAddrIncMode(NormalAddrIncMode);
 	}
 	else//正常
 	{
@@ -1602,11 +1605,11 @@ GUI_RESULT Gui_Draw24Bmp(const u8 * pBmpPath,const GUI_REGION *pBmpRegion)
   	
 	if(Gui_GetLandScapeMode())//横屏
 	{
-		LCD_SetAddrIncMode(xDec_yInc);
+		LCD_SetAddrIncMode(LandScapeAddrIncMode);
 	}
 	else//正常
 	{
-		LCD_SetAddrIncMode(xInc_yInc);
+		LCD_SetAddrIncMode(NormalAddrIncMode);
 	}
 	LCD_BgrMode(FALSE);
 	LCD_UnLock();//释放屏幕资源
@@ -1928,8 +1931,8 @@ GUI_RESULT Gui_FillImgArray(const u8 * pImageBuf,u16 width,u16 hight,const GUI_R
 				if(gLandScapeMode) Gui_SetRegion(V,H,LastOneH,hight);
 				else Gui_SetRegion(H,V,LastOneH,hight);
 				LCD_BlukWriteDataStart();
-				for(n=hight;n;n--)
-					for(m=LastOneH;m;m--,pColor16+=(width-LastOneH))
+				for(n=hight;n;n--,pColor16+=(width-LastOneH))
+					for(m=LastOneH;m;m--)
 					{
 						if(*pColor16==TransColor){LCD_AddrInc();pColor16++;}
 						else LCD_BulkWriteData(*pColor16++);
@@ -2058,7 +2061,7 @@ GUI_RESULT Gui_FillImgArray_H(const u8 * pImageBuf,u16 width,const GUI_REGION *p
 	
 	LCD_SetRegion(pRegion->x,pRegion->y,
 		pRegion->x+width-1,pRegion->y+pRegion->h-1,TRUE);//设置描绘模式
-	LCD_SetAddrIncMode(xInc_yInc);
+	LCD_SetAddrIncMode(NormalAddrIncMode);
 
 	LCD_BlukWriteDataStart();
 	for(j=0;j<FillNum;j++)
@@ -2102,7 +2105,7 @@ GUI_RESULT Gui_FillImgArray_V(const u8 * pImageBuf,u16 hight,const GUI_REGION *p
 	
 	LCD_SetRegion(pRegion->x,pRegion->y,
 		pRegion->x+pRegion->w-1,pRegion->y+hight-1,FALSE);
-	LCD_SetAddrIncMode(xInc_yInc);
+	LCD_SetAddrIncMode(NormalAddrIncMode);
 
 	LCD_BlukWriteDataStart();
 	for(j=0;j<FillNum;j++)
