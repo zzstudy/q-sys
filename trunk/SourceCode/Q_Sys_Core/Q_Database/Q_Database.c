@@ -143,6 +143,7 @@ bool Q_DB_BurnToSpiFlash(void)
 	return TRUE;
 }
 
+//从存储体读出数据库到内存，通过指针返回当前存储页
 static bool DB_ReadFromSpiFlash(u8 *pPageIdx)
 {
 	int i;
