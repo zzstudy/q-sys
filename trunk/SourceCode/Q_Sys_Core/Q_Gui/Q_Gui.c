@@ -208,6 +208,19 @@ GUI_RESULT Gui_FillBlock(const GUI_REGION *pRegion)
 	return Gui_True;
 }
 
+//用指定颜色填充整屏，如Gui_FillScreen(FatColor(0x000000))
+GUI_RESULT Gui_FillScreen(COLOR_TYPE Color)
+{
+	GUI_REGION DrawRegion;
+	
+	DrawRegion.x=0;
+	DrawRegion.y=0;
+	DrawRegion.w=LCD_WIDTH;
+	DrawRegion.h=LCD_HIGHT;
+	DrawRegion.Color=Color;
+	return Gui_FillBlock(&DrawRegion);			 
+}
+
 //用单色填充PixelBuf中置1的位对应的像素点
 //PixelBuf每一个bit对应一个像素的填充
 //因此一个字节对应8个点，所以要注意字节对齐
