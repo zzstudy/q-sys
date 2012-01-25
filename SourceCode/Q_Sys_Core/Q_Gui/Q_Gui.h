@@ -200,6 +200,9 @@ bool Gui_GetLandScapeMode(void);
 //Color表示填充色彩,0xffffff表示白色
 GUI_RESULT Gui_FillBlock(const GUI_REGION *pRegion);
 
+//用指定颜色填充整屏，如Gui_FillScreen(FatColor(0x000000))
+GUI_RESULT Gui_FillScreen(COLOR_TYPE Color);
+
 //用指定数组的内容单色填充区域
 //数组每个元素的每个bit对应一个像素，8字节对齐
 //pRegion->x ,y指定图像起点
