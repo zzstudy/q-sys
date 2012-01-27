@@ -244,7 +244,7 @@ typedef enum{
 	Perip_RtcSec,		//除了整分，每秒都会触发此事件。可以屏蔽，默认关闭。ParamTable(PERIP_EVT,(u16)RTC_Counter,NULL)
 	Perip_RtcMin,	//每分都会发出此事件。可以屏蔽，默认关闭。ParamTable(PERIP_EVT,(u16)RTC_Counter,NULL)
 	Perip_RtcAlarm,//RTC到期报警。可以屏蔽，默认关闭。ParamTable(PERIP_EVT,(u16)RTC_Counter,NULL)
-	Perip_Timer,		//定时器到期，可以支持多个定时器，以IntParam区别不同定时器。在退出页面时，请关闭当前页的定时器!!!ParamTable(PERIP_EVT,TIM ID,NULL)
+	Perip_Timer,		//定时器到期，可以支持多个定时器，以IntParam区别不同定时器。在退出页面时，请关闭当前页的定时器!!!ParamTable(PERIP_EVT,(Q_TIM_ID)TIM ID,NULL)
 	
 	Perip_LcdOff,//lcd超时熄灭触发此事件。可以屏蔽，默认关闭。ParamTable(PERIP_EVT,(u16)RTC_Counter,NULL)
 	Perip_LcdOn,//lcd 熄灭后，被触碰重新点亮会触发此事件。可以屏蔽，默认关闭。ParamTable(PERIP_EVT,(u16)RTC_Counter,NULL)
