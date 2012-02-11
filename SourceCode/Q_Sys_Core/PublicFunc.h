@@ -8,7 +8,7 @@
 //StrOemByte指定了StrOem缓存长度，strlen(StrOem)必须不小于strlen(StrUtf8)
 u8 *UTF8_To_OEM(const u8 *StrUtf8,u8 *StrOem,u16 StrOemByte);
 
-u32 StrToUint(u8 *str);
+u32 StrToUint(u8 *pStr);
 
 #if 0
 void MemSet(void *Dst,u8 C,u16 Byte);
