@@ -8,7 +8,13 @@
 //StrOemByte指定了StrOem缓存长度，strlen(StrOem)必须不小于strlen(StrUtf8)
 u8 *UTF8_To_OEM(const u8 *StrUtf8,u8 *StrOem,u16 StrOemByte);
 
+//字符串转换为整形
+//pStr必须是十进制的数字，如果不符合要求，返回0
 u32 StrToUint(u8 *pStr);
+
+//浮点型转换为整型，四舍五入
+int FloatToInt(float f);
+
 
 #if 0
 void MemSet(void *Dst,u8 C,u16 Byte);
