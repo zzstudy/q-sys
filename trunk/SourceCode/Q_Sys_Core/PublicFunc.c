@@ -79,6 +79,19 @@ u32 StrToUint(u8 *pStr)
 	return(sum);
 } 
 
+//将浮点型转化为整形
+int FloatToInt(float f) 
+{     
+	bool minus=(f<0.0?TRUE:FALSE); 
+	int a;
+
+	if(minus) f*=-1; 
+	a=(int)f; 
+	if((f-a)>=0.5) ++a; 
+	if(minus)a*=-1; 
+	return a; 
+}
+
 #if 0
 void MemSet(void *Dst,u8 C,u16 Byte)
 {
