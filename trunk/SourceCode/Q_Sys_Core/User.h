@@ -164,6 +164,7 @@ typedef enum{
 	PRID_AppListPage,
 	PRID_SnakePage,
 	PRID_TouchCheckPage,
+	PRID_DataDispPage,
 	PRID_WaveDispPage,
 	//新页面的RID定义到这里
 	
