@@ -21,7 +21,7 @@
 #define DB_DATA_START_ADDR	DB_START_SECTOR*SPI_FLASH_SECTOR_SIZE*SPI_FLASH_PAGE_SIZE  //db扇区起始地址
 
 
-//4系统配置实体类型，请和User.h里的SETTING_NAME一一对应
+//4系统配置实体类型，请和Q_Database.h里的SETTING_NAME一一对应
 typedef __packed struct{	
 	u32 DB_Ver;
 

@@ -316,6 +316,8 @@ bool CC2500_Init(void)
 	
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource6); 
 #endif
+
+	Debug("CC2500 init ok!\n\r");
 	return TRUE;
 }
 

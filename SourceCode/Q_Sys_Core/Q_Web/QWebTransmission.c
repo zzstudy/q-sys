@@ -50,7 +50,7 @@ u8 QW_RecvPacket(QW_PACKET_HEADER *pPacket)
 		return 0;
 	}
 	else if(Len<=PACKET_LEN)
-	{	//还原字节
+	{	//还原q web里面的地址字节到对应的位置
 		DA=((u8 *)pPacket)[0];
 		((u8 *)pPacket)[0]=pPacket->DstAddr;
 		pPacket->DstAddr=DA;
