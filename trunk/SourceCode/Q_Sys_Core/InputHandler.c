@@ -270,7 +270,7 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 				else 
 					Debug("!!!Not Define Handler Function In Page Struct!!!\n\r");
 			}break;
-		defalut:
+		default:
 			while((OS_GetCurrentSysMs()-TimeMsRecord)<300) OS_TaskDelayMs(50);//Ñ­»·ÑÓÊ±300ms£¬ÒÔ±ÜÃâ´¥ÃþÏìÓ¦»ìÂÒ
 	}
 	
