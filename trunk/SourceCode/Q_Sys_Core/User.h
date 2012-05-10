@@ -23,10 +23,10 @@
 /* Ports Macro*/
 #define PACKED	__packed//编译器支持的按定义紧密排序结构体
 //#define NULL ((void *)0)
-#define Bit(bit)		(1<<bit)
-#define SetBit(reg,bit)  reg|=(1<<bit)
-#define ClrBit(reg,bit) reg&=~(1<<bit)
-#define ReadBit(reg,bit) ((reg>>bit)&1)
+#define Bit(bit)		(1<<(bit))
+#define SetBit(reg,bit) (reg|=(1<<(bit)))
+#define ClrBit(reg,bit) (reg&=~(1<<(bit)))
+#define ReadBit(reg,bit) ((reg>>(bit))&1)
 
 //1																宏定义                               
 //2												系统设定												
@@ -47,6 +47,7 @@
 //3								主题项									
 
 //3							杂项											
+#define DEFAULT_MAIN_PAGE_NAME "MainPage"//进入系统后的第一个页面的名字
 #define EXTI_KEY_MAX_NUM	3 	//外部按键个数
 #define MAX_PATH_LEN		512 //系统最长路径字节数为1024
 #define MAX_PAGE_TRACK_NUM 32//最大的页面痕迹记录数
