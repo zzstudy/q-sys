@@ -23,10 +23,10 @@ extern u8 LCD_Light_Counter;
 void KeysHandler_Task(void *Task_Parameters )
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
-	u32 KeyMap=0;
+	u32 KeyMap=0;//记录旧值
 	u8 i;
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);//初始化
 	for(i=0;i<EXTI_KEY_MAX_NUM;i++)
 	{
 		RCC_APB2PeriphClockCmd(gExtiKeyDefine[i].RccId,ENABLE);

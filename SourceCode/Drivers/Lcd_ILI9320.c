@@ -33,7 +33,8 @@ static u8 gLcdScale=100;
 #define WINDOW_YADDR_END		0x0053 // 垂直的结束地址组
 #define GRAM_XADDR		    		0x0020 // GRAM 水平的地址组
 #define GRAM_YADDR		    		0x0021 // GRAM 垂直的地址组
-#define GRAMWR 			    			0x0022 // GRAM
+#define GRAMWR 			    			0x0022 // Write GRAM
+#define GRAMRD								0x0022 // Read GRAM
 
 /**********************************************
 函数名：LCD_Delay
@@ -279,7 +280,7 @@ void LCD_BlukWriteDataStart(void)
 *************************************************/
 void LCD_BulkReadDataStart(void)
 {	
-    LCD_WriteIndex(GRAMWR);
+    LCD_WriteIndex(GRAMRD);
 }
 
 /*************************************************
@@ -419,7 +420,7 @@ u16 LCD_ReadPoint(u16 x,u16 y)
   register u16 Data;
   LCD_WriteReg(GRAM_XADDR,x);
   LCD_WriteReg(GRAM_YADDR,y);
-  LCD_WriteIndex(GRAMWR);
+  LCD_WriteIndex(GRAMRD);
   LCD_ReadData();//丢掉无用字节
   Data=LCD_ReadData();
 #if QXW_LCM_ID == 221

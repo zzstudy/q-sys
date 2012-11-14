@@ -66,6 +66,7 @@ void RCC_Config(void)
 		}
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);//打开GPIOD和AFIO时钟
 }
+
 void *InputHandler_Task_Handle=NULL;
 int main(void)
 {   

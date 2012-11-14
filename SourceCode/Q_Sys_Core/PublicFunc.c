@@ -537,7 +537,7 @@ u32 Rand(u32 Mask)
 {
 	u32 RandNum=(ADC_GetConversionValue(ADC1)*(*((volatile u32 *)0xE000E018)))&Mask;
 
-	return (RandNum?RandNum:0x01);
+	return (RandNum?RandNum:(0x12345678&Mask));
 }
 
 //获取硬件唯一ID

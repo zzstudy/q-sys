@@ -1140,7 +1140,7 @@ static u16 Gui_DrawFont_GBK21(const u8 *Str,const GUI_REGION *pRegion)
 }
 
 //返回实际区域需要的字符串byte数
-//返回值实际就是Gui_DrawFont_GBK16的返回值，只不过不显示实际内容
+//返回值实际就是Gui_DrawFont_GBK21的返回值，只不过不显示实际内容
 static u16 Gui_DrawFont_GBK21_Num(const u8 *Str,const GUI_REGION *pRegion)
 {
 	u8 *pStr=(u8 *)Str;
