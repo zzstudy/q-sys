@@ -24,9 +24,10 @@
 #define PACKED	__packed//编译器支持的按定义紧密排序结构体
 //#define NULL ((void *)0)
 #define Bit(bit)		(1<<(bit))
-#define SetBit(reg,bit) (reg|=(1<<(bit)))
-#define ClrBit(reg,bit) (reg&=~(1<<(bit)))
-#define ReadBit(reg,bit) ((reg>>(bit))&1)
+#define SetBit(reg,bit) ((reg)|=(1<<(bit)))
+#define ClrBit(reg,bit) ((reg)&=~(1<<(bit)))
+#define ToggleBit(reg,bit) ((reg) ^= (1<<(bit)))
+#define ReadBit(reg,bit) (((reg)>>(bit))&1)
 
 //1																宏定义                               
 //2												系统设定												
