@@ -23,12 +23,12 @@ u8 GetPageIdxByTrack(u8 Local)
 		Q_ErrorStopScreen("GetPageIdxByTrack error!");
 	}
 	
-	Local=sizeof(PageTracks)+gCurTrackIdx-Local;
-	while(Local>=sizeof(PageTracks))
+	Local=sizeof(gPageTracks)+gCurTrackIdx-Local;
+	while(Local>=sizeof(gPageTracks))
 	{
-		Local-=sizeof(PageTracks);
+		Local-=sizeof(gPageTracks);
 	}
-	return PageTracks[Local];
+	return gPageTracks[Local];
 }
 
 //插入一个页面索引到记录
@@ -37,9 +37,9 @@ static void InsertPageTrack(u8 PageIdx)
 	OS_DeclareCritical();
 	
 	OS_EnterCritical();
-	if(++gCurTrackIdx==sizeof(PageTracks)) gCurTrackIdx=0;
+	if(++gCurTrackIdx==sizeof(gPageTracks)) gCurTrackIdx=0;
 	
-	PageTracks[gCurTrackIdx]=PageIdx;
+	gPageTracks[gCurTrackIdx]=PageIdx;
 	OS_ExitCritical();
 }
 
@@ -61,7 +61,7 @@ u8 GetPageIdxByLayerOffset(u8 LayerOffset)
 		while(1);
 	}
 	
-	return PageLayers[gCurLayerNum-LayerOffset];
+	return gPageLayers[gCurLayerNum-LayerOffset];
 }
 
 //得到指定层的页面索引
@@ -75,7 +75,7 @@ u8 GetPageIdxByLayer(u8 LayerNum)
 		Q_ErrorStopScreen("GetPageIdxByLayer error! ");
 	}
 
-	return PageLayers[LayerNum];
+	return gPageLayers[LayerNum];
 }
 
 //新建一层
@@ -85,7 +85,7 @@ static void InsertPageLayer(u8 PageIdx)
 	
 	OS_EnterCritical();
 	if(++gCurLayerNum<=MAX_PAGE_LAYER_NUM)//判断存储空间够不够
-		PageLayers[gCurLayerNum]=PageIdx;
+		gPageLayers[gCurLayerNum]=PageIdx;
 	else
 	{
 		Q_ErrorStopScreen("Layer is overflow,pls set marco MAX_PAGE_LAYER_NUM\n\r");

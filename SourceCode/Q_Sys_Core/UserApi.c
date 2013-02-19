@@ -135,8 +135,8 @@ SYS_MSG Q_GotoPage(PAGE_ACTION PageAction, u8 *Name, int IntParam, void *pSysPar
 	u8 PageIdx;
 	u8 Result;
 	
-	if(gpCurrentPage)
-		UA_Debug("%s : %s->%s\n\r",__FUNCTION__,gpCurrentPage->Name,Name);
+	if(GetCurrPage())
+		UA_Debug("%s : %s->%s\n\r",__FUNCTION__,GetCurrPage()->Name,Name);
 	else
 		UA_Debug("%s : NULL->%s\n\r",__FUNCTION__,Name);
 	
@@ -386,8 +386,8 @@ void Q_ErrorStop(const char *FileName,const char *pFuncName,const u32 Line,const
 			Gui_WritePixel(x,y,Gray);
 		}	
 
-	if(gpCurrentPage)
-		sprintf((void *)ErrorMsg,"!!!--SYS ERROR STOP--!!!\n\rNow Page:%s\n\rFile:%s\n\rFunction:%s()\n\rLine:%d\nMsg:%s",gpCurrentPage->Name,FileName,pFuncName,Line,Msg);
+	if(GetCurrPage())
+		sprintf((void *)ErrorMsg,"!!!--SYS ERROR STOP--!!!\n\rNow Page:%s\n\rFile:%s\n\rFunction:%s()\n\rLine:%d\nMsg:%s",GetCurrPage()->Name,FileName,pFuncName,Line,Msg);
 	else
 		sprintf((void *)ErrorMsg,"!!!--SYS ERROR STOP--!!!\n\rFile:%s\n\rFunction:%s()\n\rLine:%d\n\rMsg:%s",FileName,pFuncName,Line,Msg);
 

@@ -435,6 +435,8 @@ Erase:
 		if(++CurSecItem==MaxSecItem) return;//下一个扇区项
 	}
 }
+
+
 void *MusicHandler_Task_Handle=NULL;
 void *TouchHandler_Task_Handle=NULL;
 void *KeysHandler_Task_Handle=NULL;

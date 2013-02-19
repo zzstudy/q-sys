@@ -23,12 +23,12 @@ SystemEventHandler函数生成了新的线程，新的线程要改变lcd显示，也必须通过
 #define Input_Debug Debug 
 
 #if 1 //系统内核全局变量
-const PAGE_ATTRIBUTE *gpCurrentPage=NULL;	//当前页面指针
+static const PAGE_ATTRIBUTE *gpCurrentPage=NULL;	//当前页面指针
 
-static u8 PageTracks[MAX_PAGE_TRACK_NUM];//用于记录页面跳转记录
+static u8 gPageTracks[MAX_PAGE_TRACK_NUM];//用于记录页面跳转记录
 static u8 gCurTrackIdx;//当前Track记录索引
 
-static u8 PageLayers[MAX_PAGE_LAYER_NUM+1];//用于记录页面层级。[0]不可用，所以要加一个元素
+static u8 gPageLayers[MAX_PAGE_LAYER_NUM+1];//用于记录页面层级。[0]不可用，所以要加一个元素
 static u8 gCurLayerNum;//用于记录页面层数
 
 u16 gEntriesOfPage[PAGE_TOTAL];//记录每个页面进入的次数
@@ -59,6 +59,11 @@ extern SYS_MSG CurrPageCtrlObjInit(INPUT_EVT_TYPE EventType,int IntParam,void *p
 #endif
 
 #include "PageDataHandler.c"
+
+const PAGE_ATTRIBUTE *GetCurrPage(void)
+{
+	return gpCurrentPage;
+}
 
 bool GetCurrPageOptionsMask(u32 Option)
 {
@@ -230,8 +235,8 @@ static SYS_MSG GotoPageHandler(INPUT_EVT_TYPE EventType,u16 PageIdx,int IntParam
 	Debug("##Description:%s\n\r",gpCurrentPage->Description);
 
 	Debug("##Page Layers:");
-	for(i=1;i<GetCurLayerNum();i++) Debug("%s->",GetPageByIdx(PageLayers[i])->Name); 
-	Debug("%s\n\r",GetPageByIdx(PageLayers[i])->Name); 
+	for(i=1;i<GetCurLayerNum();i++) Debug("%s->",GetPageByIdx(gPageLayers[i])->Name); 
+	Debug("%s\n\r",GetPageByIdx(gPageLayers[i])->Name); 
 
 	if((!(gCurrSysMsg&SM_NoPageInit)) //Q_GotoPage返回值告诉系统不要执行page init
 		&&(Q_GetPageByTrack(1)->Type!=POP_PAGE)) //从pop页面返回，也不需要page init
@@ -318,10 +323,10 @@ static void QSYS_DataInit(void)
 {
 	u16 i;
 	
-	MemSet(PageTracks,0,MAX_PAGE_TRACK_NUM);//清空页面跳转痕迹
+	MemSet(gPageTracks,0,MAX_PAGE_TRACK_NUM);//清空页面跳转痕迹
 	gCurTrackIdx=0;
 	
-	MemSet(PageLayers,0,MAX_PAGE_LAYER_NUM+1);//清空页面层级记录
+	MemSet(gPageLayers,0,MAX_PAGE_LAYER_NUM+1);//清空页面层级记录
 	gCurLayerNum=0;
 
 	MemSet(gEntriesOfPage,0,PAGE_TOTAL);//清空页面进入次数记录
