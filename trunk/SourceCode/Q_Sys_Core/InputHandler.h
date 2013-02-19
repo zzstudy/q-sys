@@ -69,6 +69,7 @@ extern OS_MsgBoxHandle gInputHandler_Queue;
 
 //--------------------------º¯ÊýÉùÃ÷------------------------
 extern void Allow_Touch_Input(void);
+const PAGE_ATTRIBUTE *GetCurrPage(void);
 void InputHandler_Task( void *Task_Parameters );
 
 #endif

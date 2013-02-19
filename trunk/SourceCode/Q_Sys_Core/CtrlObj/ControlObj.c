@@ -204,10 +204,10 @@ static void CopyCtrlObjTouchReg(TOUCH_REGION *TouchRegsBuf)
 //切换页面时执行的控件部分数据处理
 void PageSwithcCtrlObjDataHandler(const PAGE_ATTRIBUTE *pNewPage)
 {
-	gpCtrlObjNum=&gpCurrentPage->CtrlObjNum;//得到控件个数结构体
+	gpCtrlObjNum=&(GetCurrPage()->CtrlObjNum);//得到控件个数结构体
 
-	gpCurImgTchCon=gpCurrentPage->pImgButtonCon;//切换基本触摸区域集指针
-	gpCurCharTchCon=gpCurrentPage->pCharButtonCon;
+	gpCurImgTchCon=GetCurrPage()->pImgButtonCon;//切换基本触摸区域集指针
+	gpCurCharTchCon=GetCurrPage()->pCharButtonCon;
 	
 	if(gTouchRegionNum) Q_Free(gpTouchRegions);//收回上个页面的内存
 	
@@ -321,14 +321,14 @@ static bool ImgTchDisplay(u8 Index,INPUT_EVT_TYPE InType,bool IsDyn)
 		}
 		else //不使用自定义路径，则叠加主题路径及页面名文件夹
 		{
-			if((strlen((void *)Q_GetNowThemePath())+strlen((void *)gpCurrentPage->Name)
+			if((strlen((void *)Q_GetNowThemePath())+strlen((void *)GetCurrPage()->Name)
 				+strlen((void *)pTouchRegion->ImgPathPrefix))>=(MAX_BMP_PATH_LEN-7))
 			{
 				Debug("!!!Error:Path is too long!!!");
 				return FALSE;//路径太长
 			}
-			if(RepSuffix) sprintf((void *)PathBuf,"%s%s/Btn/%s%c%c",Q_GetNowThemePath(),gpCurrentPage->Name,pTouchRegion->ImgPathPrefix,RepSuffix,ImgSuffix);//得到路径
-			else sprintf((void *)PathBuf,"%s%s/Btn/%s%c",Q_GetNowThemePath(),gpCurrentPage->Name,pTouchRegion->ImgPathPrefix,ImgSuffix);//得到路径
+			if(RepSuffix) sprintf((void *)PathBuf,"%s%s/Btn/%s%c%c",Q_GetNowThemePath(),GetCurrPage()->Name,pTouchRegion->ImgPathPrefix,RepSuffix,ImgSuffix);//得到路径
+			else sprintf((void *)PathBuf,"%s%s/Btn/%s%c",Q_GetNowThemePath(),GetCurrPage()->Name,pTouchRegion->ImgPathPrefix,ImgSuffix);//得到路径
 		}
 		
 		if(pTouchRegion->OptionsMask&BinMsk)//是否采用bin文件做图标文件
@@ -672,23 +672,23 @@ CO_MSG ButtonCtrlObjTchHandler(INPUT_EVT_TYPE InType,u8 Idx,TOUCH_INFO *pTouchIn
 			//按下时图标变化
 			SameOidTchDisplay(ObjID,InType);
 			if(TchEvtMsk&PrsMsk)//需要处理
-				CoMsg=gpCurrentPage->ButtonHandler(ObjID,Tch_Press,pTouchInfo);
+				CoMsg=GetCurrPage()->ButtonHandler(ObjID,Tch_Press,pTouchInfo);
 			break;
 		case Input_TchContinue:
 			//不需要检查是否触发，因为在Touch线程里面已经检查了
-			CoMsg=gpCurrentPage->ButtonHandler(ObjID,Tch_Continue,pTouchInfo);
+			CoMsg=GetCurrPage()->ButtonHandler(ObjID,Tch_Continue,pTouchInfo);
 			break;
 		case Input_TchRelease:
 			//按键释放改变按钮图标并发出事件
 			SameOidTchDisplay(ObjID,InType);
 			if(TchEvtMsk&RelMsk)//需要处理
-				CoMsg=gpCurrentPage->ButtonHandler(ObjID,Tch_Release,pTouchInfo);
+				CoMsg=GetCurrPage()->ButtonHandler(ObjID,Tch_Release,pTouchInfo);
 			Allow_Touch_Input();
 			break;
 		case Input_TchReleaseVain:	
 			SameOidTchDisplay(ObjID,InType);
 			if(TchEvtMsk&ReVMsk)//需要处理
-				CoMsg=gpCurrentPage->ButtonHandler(ObjID,Tch_ReleaseVain,pTouchInfo);
+				CoMsg=GetCurrPage()->ButtonHandler(ObjID,Tch_ReleaseVain,pTouchInfo);
 			Allow_Touch_Input();
 			break;
 	}
@@ -721,7 +721,7 @@ CO_MSG YesNoCtrlObjTchHandler(INPUT_EVT_TYPE InType,u8 Idx)
 			if(pYesNo->DefVal==FALSE)	Gui_DrawImgArray(gCtrlObj_Off,&DrawRegion);
 			else 	Gui_DrawImgArray(gCtrlObj_On,&DrawRegion);
 			
-			CoMsg=gpCurrentPage->YesNoHandler(ObjID,pYesNo->DefVal);
+			CoMsg=GetCurrPage()->YesNoHandler(ObjID,pYesNo->DefVal);
 			Allow_Touch_Input();
 			break;
 		case Input_TchReleaseVain:	
@@ -859,7 +859,7 @@ SYS_MSG CurrPageCtrlObjInit(INPUT_EVT_TYPE EventType,int IntParam,void *pInfoPar
 	SYS_MSG SysMsg=SM_State_Faile;
 	u8 Index;
 	
-	CO_Debug("%s : %s\n\r",__FUNCTION__,gpCurrentPage->Name);
+	CO_Debug("%s : %s\n\r",__FUNCTION__,GetCurrPage()->Name);
 
 	//4 	绘制文字触摸区域
 	for(Index=0;Index<gpCtrlObjNum->CharBtnNum;Index++)
@@ -895,14 +895,14 @@ SYS_MSG CurrPageCtrlObjInit(INPUT_EVT_TYPE EventType,int IntParam,void *pInfoPar
 		case Input_GotoSubPage://进入子页面
 		case Input_SubPageTranslate://进入新的同级子页面
 		case Input_GotoNewPage://进入新页面
-				SysMsg=gpCurrentPage->SysEvtHandler(Sys_TouchSetOk,IntParam,pInfoParam);
+				SysMsg=GetCurrPage()->SysEvtHandler(Sys_TouchSetOk,IntParam,pInfoParam);
 			break;
 		case Input_SubPageReturn://从子页面返回
-				SysMsg=gpCurrentPage->SysEvtHandler(Sys_TouchSetOk_SR,IntParam,pInfoParam);
+				SysMsg=GetCurrPage()->SysEvtHandler(Sys_TouchSetOk_SR,IntParam,pInfoParam);
 			break;
 	}
 	
-	CO_Debug("%s end: %s\n\r",__FUNCTION__,gpCurrentPage->Name);
+	CO_Debug("%s end: %s\n\r",__FUNCTION__,GetCurrPage()->Name);
 	return SysMsg;
 }
 
